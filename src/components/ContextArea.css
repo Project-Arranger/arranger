@@ -6,7 +6,10 @@
   flex-direction: column;
   background: rgba(0, 0, 0, 0.3);
   border-top: 1px solid rgba(122, 236, 240, 0.06);
-  overflow: hidden;
+  min-height: 0; /* CRITICAL: Prevent flex item from infinite expansion, restoring scroll to matrices */
+  overflow: visible; /* CRITICAL: Do not lock dragged items inside */
+  position: relative;
+  z-index: 100;
 }
 
 /* Tab bar */

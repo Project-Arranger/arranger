@@ -5,7 +5,8 @@
   align-items: stretch;
   background: #1A1A1A;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible; /* Don't hide overflow, so drag box shows and borders aren't clipped */
+  flex-shrink: 0; /* CRITICAL: Prevent track from vertically squishing */
 }
 
 /* Track label */
@@ -37,8 +38,9 @@
 .chord-track-grid {
   flex: 1;
   display: flex;
-  padding: 6px 0;
+  padding: 4px 0;
   margin: 0 6px;
+  gap: 12px;
   min-width: var(--grid-min-width);
 }
 
@@ -47,6 +49,7 @@
   flex: 1;
   display: flex;
   border: 1px solid transparent;
+  min-width: 0; /* CRITICAL: Prevent content from stretching the flex grid */
 }
 
 .chord-bar.current-bar {
@@ -68,12 +71,12 @@
   }
 }
 
-/* Individual beat slot */
 .chord-slot {
   flex: 1;
-  min-height: 52px;
-  /* Similar to TrackRow's 1.5x upscaling */
-  border-radius: 4px;
+  min-width: 0; /* CRITICAL: Forces perfect alignment regardless of text length */
+  min-height: 42px; /* 42 + 4px margin + 2px border + 8px grid padding = exactly 56px */
+  border-radius: 6px; 
+  margin: 2px; /* Smaller physical margin to save vertical height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,11 +85,17 @@
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  transition: all 0.2s ease;
+  background: transparent; /* Changed from solid dark to transparent */
+}
+
+.chord-slot:hover {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .chord-slot.empty {
-  background: transparent;
-  border-right: 1px dashed rgba(255, 255, 255, 0.08);
+  background: rgba(37, 37, 40, 0.4); /* Subtle transparent distinct background */
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .chord-slot.empty:hover {
@@ -134,14 +143,17 @@
 
 /* Filled chord block */
 .chord-slot.filled {
-  background: rgba(255, 255, 255, 0.05);
-  /* Unified body */
+  background: linear-gradient(145deg,
+      color-mix(in srgb, var(--chord-color) 22%, #252528),
+      color-mix(in srgb, var(--chord-color) 10%, #151517));
   border: 1.5px solid color-mix(in srgb, var(--chord-color) 50%, transparent);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .chord-slot.filled:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg,
+      color-mix(in srgb, var(--chord-color) 28%, #252528),
+      color-mix(in srgb, var(--chord-color) 15%, #151517));
   border-color: var(--chord-color);
   box-shadow: 0 0 20px var(--chord-glow, rgba(122, 236, 240, 0.35));
   transform: translateY(-2px);

@@ -7,7 +7,8 @@
   border-radius: 12px;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  overflow: visible;
+  flex-shrink: 0;
 }
 
 .track-row[style*="cursor: pointer"]:hover {
@@ -27,6 +28,8 @@
   gap: 4px;
   width: var(--track-sidebar-width);
   min-width: var(--track-sidebar-width);
+  flex-shrink: 0;
+  padding: 8px 4px;
   background: rgba(255, 255, 255, 0.03);
   border-right: 1px solid rgba(122, 236, 240, 0.08);
 }
@@ -38,22 +41,26 @@
   }
 }
 
-.track-row-icon {
-  font-size: 1rem;
-  opacity: 0.5;
+.track-label-icon {
+  font-size: 1.2rem;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.track-row-text {
-  font-size: 0.5rem;
+.track-label-text {
+  font-size: 0.55rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #444;
+  letter-spacing: 0.15em;
+  color: #555;
+  text-transform: uppercase;
 }
 
 .track-row-grid {
   flex: 1;
   display: flex;
-  padding: 4px 0;
+  padding: 4px 0; /* Slim down to fit all tracks on screen */
   margin: 0 6px;
   gap: 12px;
   min-width: var(--grid-min-width);
@@ -62,8 +69,9 @@
 .track-row-bar {
   flex: 1;
   display: flex;
-  padding: 2px 0;
+  padding: 0; /* Removed padding to strictly control geometry */
   border: 1px solid transparent;
+  min-width: 0;
 }
 
 .track-row-bar.current {
@@ -72,8 +80,8 @@
 
 .track-row-step {
   flex: 1;
-  min-height: 48px;
-  /* 1.5x larger */
+  min-width: 0;
+  min-height: 46px; /* 46 + 2px border + 8px grid padding = 56px total */
   background: transparent;
   border-right: 1px dashed rgba(255, 255, 255, 0.08);
 }

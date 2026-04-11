@@ -17,15 +17,15 @@ export default function TrackRow({ trackId, Icon, label, onClick }) {
   const isActive = activeContextTrack === trackId;
 
   return (
-    <div 
-      className={`track-row track-row-${trackId} ${isActive ? 'active-track' : ''}`} 
+    <div
+      className={`track-row track-row-${trackId} ${isActive ? 'active-track' : ''}`}
       id={`track-${trackId}`}
       onClick={onClick}
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
-      <div className="track-row-label">
-        <span className="track-row-icon">{Icon && <Icon active={isActive} />}</span>
-        <span className="track-row-text">{label}</span>
+      <div className="track-label">
+        <span className="track-label-icon">{Icon && <Icon active={isActive} />}</span>
+        <span className="track-label-text">{label}</span>
       </div>
       <div className="track-row-grid">
         {Array.from({ length: totalBars }, (_, barIdx) => (
