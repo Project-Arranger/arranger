@@ -8,6 +8,18 @@
   box-sizing: border-box;
 }
 
+:root {
+  --track-sidebar-width: 60px;
+  --grid-min-width: 800px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --track-sidebar-width: 45px;
+    --grid-min-width: 750px;
+  }
+}
+
 html, body {
   width: 100%;
   height: 100%;
@@ -16,6 +28,7 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* Prevent body bounce */
 }
 
 *, *::before, *::after {

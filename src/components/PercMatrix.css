@@ -11,6 +11,8 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   overflow-y: auto;
+  overflow-x: auto; /* For mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ---- Bar Selector (reused aesthetics from Bass) ---- */
@@ -67,6 +69,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  min-width: var(--grid-min-width); /* Standardized min-width */
 }
 
 .perc-grid-header {

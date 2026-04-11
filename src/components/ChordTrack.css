@@ -15,8 +15,8 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 60px;
-  min-width: 60px;
+  width: var(--track-sidebar-width);
+  min-width: var(--track-sidebar-width);
   padding: 8px 4px;
   background: rgba(255, 255, 255, 0.03);
   border-right: 1px solid rgba(122, 236, 240, 0.08);
@@ -39,6 +39,7 @@
   display: flex;
   padding: 6px 0;
   margin: 0 6px;
+  min-width: var(--grid-min-width);
 }
 
 /* One bar = 4 beat slots */
