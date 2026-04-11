@@ -37,7 +37,7 @@
 }
 
 .context-tab.active {
-  color: #7aecf0;
-  border-bottom-color: rgba(122, 236, 240, 0.5);
-  text-shadow: 0 0 8px rgba(122, 236, 240, 0.2);
+  color: #A0D8EF;
+  border-bottom-color: rgba(160, 216, 239, 0.5);
+  text-shadow: 0 0 8px rgba(160, 216, 239, 0.3);
 }

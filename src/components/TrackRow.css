@@ -3,22 +3,21 @@
 .track-row {
   display: flex;
   align-items: stretch;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   transition: all 0.2s ease;
 }
 
 .track-row[style*="cursor: pointer"]:hover {
-  background: rgba(122, 236, 240, 0.03);
-  border-color: rgba(122, 236, 240, 0.15);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .track-row.active-track {
-  background: rgba(122, 236, 240, 0.06);
-  border-color: rgba(122, 236, 240, 0.3);
-  box-shadow: 0 0 15px rgba(122, 236, 240, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(160, 216, 239, 0.2);
 }
 
 .track-row-label {
@@ -80,10 +79,12 @@
 }
 
 .track-row-step.active {
-  background: rgba(122, 236, 240, 0.12);
-  box-shadow: 0 0 4px rgba(122, 236, 240, 0.2);
+  background: rgba(160, 216, 239, 0.15);
+  box-shadow: 0 0 6px rgba(160, 216, 239, 0.3);
 }
 
 .track-row-step.filled {
-  background: rgba(122, 236, 240, 0.2);
+  background: #A0D8EF;
+  box-shadow: 0 0 8px rgba(160, 216, 239, 0.5);
+  border: none;
 }
