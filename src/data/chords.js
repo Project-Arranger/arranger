@@ -10,26 +10,26 @@ const CHORD_LIBRARY = {
   C: {
     label: 'C',
     notes: ['C4', 'E4', 'G4'],
-    color: 'hsl(200, 85%, 58%)',    // 天蓝
-    glowColor: 'hsla(200, 85%, 58%, 0.5)',
+    color: '#3498DB',    // 亮蓝 (Cyber Blue)
+    glowColor: 'rgba(52, 152, 219, 0.3)',
   },
   Am: {
     label: 'Am',
     notes: ['A3', 'C4', 'E4'],
-    color: 'hsl(270, 70%, 60%)',    // 紫罗兰
-    glowColor: 'hsla(270, 70%, 60%, 0.5)',
+    color: '#9B86D4',    // 丁香紫 (Lilac)
+    glowColor: 'rgba(155, 134, 212, 0.3)',
   },
   F: {
     label: 'F',
     notes: ['F3', 'A3', 'C4'],
-    color: 'hsl(340, 75%, 58%)',    // 玫瑰粉
-    glowColor: 'hsla(340, 75%, 58%, 0.5)',
+    color: '#4FC1FF',    // 冰晶青 (Cyan Ice)
+    glowColor: 'rgba(79, 193, 255, 0.3)',
   },
   G: {
     label: 'G',
     notes: ['G3', 'B3', 'D4'],
-    color: 'hsl(45, 90%, 55%)',     // 琥珀金
-    glowColor: 'hsla(45, 90%, 55%, 0.5)',
+    color: '#5D6FC0',    // 深海蓝 (Deep Sea)
+    glowColor: 'rgba(93, 111, 192, 0.3)',
   },
 };
 
