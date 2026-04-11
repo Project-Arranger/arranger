@@ -1,6 +1,7 @@
 import useMusicStore from '../store/useMusicStore';
 import ChordPalette from './ChordPalette';
 import BassMatrix from './BassMatrix';
+import PercMatrix from './PercMatrix';
 import './ContextArea.css';
 
 /**
@@ -16,6 +17,8 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
 
   const renderContent = () => {
     switch (activeContextTrack) {
+      case 'perc':
+        return <PercMatrix />;
       case 'bass':
         return <BassMatrix />;
       case 'chord':
@@ -44,6 +47,12 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
           onClick={() => setActiveContextTrack('bass')}
         >
           🎸 Bass
+        </button>
+        <button
+          className={`context-tab ${activeContextTrack === 'perc' ? 'active' : ''}`}
+          onClick={() => setActiveContextTrack('perc')}
+        >
+          🥁 Perc
         </button>
       </div>
       {/* 动态内容 */}

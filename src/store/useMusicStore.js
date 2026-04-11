@@ -12,7 +12,7 @@ import { eighthToStep } from '../data/bassNotes';
  * cellData 格式:
  *   - chord track: { chordId: 'C', notes: ['C4','E4','G4'], isHead: true/false } | null
  *   - bass track:  { note: 'C2', velocity: 100 } | null
- *   - perc track:  { note: 'kick', velocity: 100 } | null
+ *   - perc track:  { instruments: ['kick', 'hihat'] } | null
  *   - lead track:  { note: 'C4', velocity: 100 } | null
  */
 
@@ -199,6 +199,45 @@ const useMusicStore = create((set, get) => ({
       matrix: {
         ...matrix,
         bass: newTrack,
+      },
+    });
+  },
+
+  // -------- Actions: Perc 轨道专用 --------
+
+  /**
+   * 切换打击乐矩阵中某个音色的开/关
+   * 允许多个音色在同一步进触发
+   */
+  togglePercNote: (barIndex, eighthIndex, instrumentId) => {
+    const { matrix } = get();
+    const stepIndex = eighthToStep(eighthIndex);
+    const newBar = [...matrix.perc[barIndex]];
+
+    const existingCell = newBar[stepIndex];
+    let instruments = existingCell ? [...existingCell.instruments] : [];
+
+    if (instruments.includes(instrumentId)) {
+      // 存在则移除
+      instruments = instruments.filter(id => id !== instrumentId);
+    } else {
+      // 不存在则添加
+      instruments.push(instrumentId);
+    }
+
+    if (instruments.length > 0) {
+      newBar[stepIndex] = { instruments };
+    } else {
+      newBar[stepIndex] = null;
+    }
+
+    const newTrack = [...matrix.perc];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        perc: newTrack,
       },
     });
   },

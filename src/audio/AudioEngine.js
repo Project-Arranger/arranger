@@ -25,6 +25,7 @@ class AudioEngine {
     this._bass = null;
     this._reverb = null;
     this._bassFilter = null;
+    this._drums = null;
   }
 
   /**
@@ -101,6 +102,39 @@ class AudioEngine {
     this._bass.volume.value = -4;
     this._bass.connect(this._bassFilter);
 
+    // ---- 创建 Percussion 音色 (Drum synths) ----
+    this._drums = {
+      kick: new Tone.MembraneSynth({
+        pitchDecay: 0.05, octaves: 4, oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
+      }).toDestination(),
+
+      snare: new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.2 }
+      }).toDestination(),
+
+      hihat: new Tone.MetalSynth({
+        frequency: 250, envelope: { attack: 0.001, decay: 0.05, release: 0.01 },
+        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
+      }).toDestination(),
+
+      tom: new Tone.MembraneSynth({
+        pitchDecay: 0.05, octaves: 3, oscillator: { type: 'sine' },
+        envelope: { attack: 0.01, decay: 0.4, sustain: 0.01, release: 0.4 }
+      }).toDestination(),
+
+      clap: new Tone.NoiseSynth({
+        noise: { type: 'pink' },
+        envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.2 }
+      }).toDestination()
+    };
+    this._drums.kick.volume.value = -1;
+    this._drums.snare.volume.value = -6;
+    this._drums.hihat.volume.value = -12;
+    this._drums.tom.volume.value = -3;
+    this._drums.clap.volume.value = -8;
+
     // ---- 创建 Sequence: 128 个 step, 每个 step 是 16n ----
     const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i);
 
@@ -149,6 +183,23 @@ class AudioEngine {
     if (bassCell && bassCell.note) {
       this._bass.triggerAttackRelease(bassCell.note, '16n', time, 0.9);
     }
+
+    // ---- 触发 perc 轨道 ----
+    const percCell = matrix.perc?.[bar]?.[step];
+    if (percCell && percCell.instruments) {
+      percCell.instruments.forEach(inst => this._triggerPercInstance(inst, time));
+    }
+  }
+
+  _triggerPercInstance(instrument, time) {
+    if (!this._drums || !this._drums[instrument]) return;
+    switch (instrument) {
+      case 'kick': this._drums.kick.triggerAttackRelease('C1', '8n', time); break;
+      case 'snare': this._drums.snare.triggerAttackRelease('8n', time); break;
+      case 'hihat': this._drums.hihat.triggerAttackRelease('32n', time); break;
+      case 'tom': this._drums.tom.triggerAttackRelease('A1', '8n', time); break;
+      case 'clap': this._drums.clap.triggerAttackRelease('8n', time); break;
+    }
   }
 
   /**
@@ -173,6 +224,17 @@ class AudioEngine {
     }
     this._bass.triggerAttackRelease(note, '16n', undefined, 0.9);
     console.log(`[AudioEngine] 🎸 Bass preview: ${note}`);
+  }
+
+  /**
+   * 即时播放鼓声（用于矩阵点击反馈）
+   */
+  async playPercPreview(instrument) {
+    if (!this._isInitialized) {
+      await this.init();
+    }
+    this._triggerPercInstance(instrument, undefined);
+    console.log(`[AudioEngine] 🥁 Perc preview: ${instrument}`);
   }
 
   /**
@@ -261,6 +323,10 @@ class AudioEngine {
     if (this._reverb) {
       this._reverb.dispose();
       this._reverb = null;
+    }
+    if (this._drums) {
+      Object.values(this._drums).forEach(synth => synth.dispose());
+      this._drums = null;
     }
     Tone.getTransport().stop();
     Tone.getTransport().cancel();

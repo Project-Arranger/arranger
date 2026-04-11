@@ -1,0 +1,200 @@
+/* ===== PercMatrix ===== */
+
+.perc-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 20px 20px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.65) 100%);
+  border-top: 1px solid rgba(122, 236, 240, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ---- Bar Selector (reused aesthetics from Bass) ---- */
+.perc-bar-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.perc-bar-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #444;
+  min-width: 32px;
+}
+
+.perc-bar-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.perc-bar-tab {
+  width: 30px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #555;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.perc-bar-tab.active {
+  color: #7aecf0;
+  background: rgba(122, 236, 240, 0.1);
+  border-color: rgba(122, 236, 240, 0.3);
+  box-shadow: 0 0 8px rgba(122, 236, 240, 0.15);
+}
+
+.perc-bar-tab.playing {
+  box-shadow: 0 0 10px rgba(122, 236, 240, 0.25);
+}
+
+/* ---- Grid ---- */
+.perc-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.perc-grid-header {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2px;
+}
+
+.perc-inst-label-spacer {
+  width: 48px;
+  min-width: 48px;
+}
+
+.perc-col-header {
+  flex: 1;
+  text-align: center;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #333;
+  padding: 2px 0;
+  transition: color 0.15s;
+}
+
+.perc-col-header.active {
+  color: #7aecf0;
+  text-shadow: 0 0 6px rgba(122, 236, 240, 0.4);
+}
+
+.perc-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Even rows slightly different to guide eyes */
+.perc-row:nth-child(even) {
+  background: rgba(122, 236, 240, 0.015);
+}
+
+.perc-inst-label {
+  width: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #666;
+}
+
+.perc-cell {
+  flex: 1;
+  height: 36px;
+  border-right: 1px solid rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.12s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.perc-cell:nth-child(2n+2) {
+  border-right-color: rgba(255, 255, 255, 0.02);
+}
+
+.perc-cell:nth-child(4n+2)::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.perc-cell:hover {
+  background: rgba(122, 236, 240, 0.04);
+}
+
+.perc-cell:active {
+  background: rgba(122, 236, 240, 0.08);
+}
+
+.perc-cell.lit {
+  background: rgba(122, 236, 240, 0.22);
+  box-shadow: inset 0 0 12px rgba(122, 236, 240, 0.2),
+              0 0 6px rgba(122, 236, 240, 0.15);
+}
+
+.perc-cell.lit::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 4px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(122, 236, 240, 0.4) 0%,
+    rgba(122, 236, 240, 0.15) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.perc-cell.cursor {
+  background: rgba(122, 236, 240, 0.05);
+}
+
+.perc-cell.cursor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-left: 1.5px solid rgba(122, 236, 240, 0.25);
+  pointer-events: none;
+}
+
+.perc-cell.lit-cursor {
+  background: rgba(122, 236, 240, 0.35);
+  box-shadow: inset 0 0 16px rgba(122, 236, 240, 0.3),
+              0 0 14px rgba(122, 236, 240, 0.3);
+}
+
+.perc-cell.lit-cursor::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(122, 236, 240, 0.6) 0%,
+    rgba(122, 236, 240, 0.2) 60%,
+    transparent 100%
+  );
+}

@@ -59,7 +59,12 @@ export default function MainComposerView() {
           label="BASS"
           onClick={() => handleTrackClick('bass')}
         />
-        <TrackRow trackId="perc" icon="🥁" label="PERC" />
+        <TrackRow 
+          trackId="perc" 
+          icon="🥁" 
+          label="PERC" 
+          onClick={() => handleTrackClick('perc')}
+        />
         <TrackRow trackId="lead" icon="🎵" label="LEAD" />
       </div>
 
