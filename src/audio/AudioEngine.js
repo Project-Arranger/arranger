@@ -102,38 +102,23 @@ class AudioEngine {
     this._bass.volume.value = -4;
     this._bass.connect(this._bassFilter);
 
-    // ---- 创建 Percussion 音色 (Drum synths) ----
-    this._drums = {
-      kick: new Tone.MembraneSynth({
-        pitchDecay: 0.05, octaves: 4, oscillator: { type: 'sine' },
-        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
-      }).toDestination(),
+    // ---- 创建 Percussion 音色 (808 Sampler) ----
+    await new Promise((resolve, reject) => {
+      this._sampler = new Tone.Sampler({
+        urls: {
+          'C1': 'kick.wav',
+          'D1': 'snare.wav',
+          'E1': 'hihat.wav',
+          'F1': 'tom.wav',
+          'G1': 'clap.wav',
+        },
+        baseUrl: '/samples/808/',
+        onload: resolve,
+        onerror: reject,
+      }).toDestination();
+    });
 
-      snare: new Tone.NoiseSynth({
-        noise: { type: 'white' },
-        envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.2 }
-      }).toDestination(),
-
-      hihat: new Tone.MetalSynth({
-        frequency: 250, envelope: { attack: 0.001, decay: 0.05, release: 0.01 },
-        harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
-      }).toDestination(),
-
-      tom: new Tone.MembraneSynth({
-        pitchDecay: 0.05, octaves: 3, oscillator: { type: 'sine' },
-        envelope: { attack: 0.01, decay: 0.4, sustain: 0.01, release: 0.4 }
-      }).toDestination(),
-
-      clap: new Tone.NoiseSynth({
-        noise: { type: 'pink' },
-        envelope: { attack: 0.01, decay: 0.3, sustain: 0, release: 0.2 }
-      }).toDestination()
-    };
-    this._drums.kick.volume.value = -1;
-    this._drums.snare.volume.value = -6;
-    this._drums.hihat.volume.value = -12;
-    this._drums.tom.volume.value = -3;
-    this._drums.clap.volume.value = -8;
+    this._sampler.volume.value = -2;
 
     // ---- 创建 Sequence: 128 个 step, 每个 step 是 16n ----
     const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i);
@@ -192,13 +177,17 @@ class AudioEngine {
   }
 
   _triggerPercInstance(instrument, time) {
-    if (!this._drums || !this._drums[instrument]) return;
-    switch (instrument) {
-      case 'kick': this._drums.kick.triggerAttackRelease('C1', '8n', time); break;
-      case 'snare': this._drums.snare.triggerAttackRelease('8n', time); break;
-      case 'hihat': this._drums.hihat.triggerAttackRelease('32n', time); break;
-      case 'tom': this._drums.tom.triggerAttackRelease('A1', '8n', time); break;
-      case 'clap': this._drums.clap.triggerAttackRelease('8n', time); break;
+    if (!this._sampler) return;
+    const INST_MAP = {
+      'kick': 'C1',
+      'snare': 'D1',
+      'hihat': 'E1',
+      'tom': 'F1',
+      'clap': 'G1'
+    };
+    const note = INST_MAP[instrument];
+    if (note) {
+      this._sampler.triggerAttack(note, time);
     }
   }
 
@@ -324,9 +313,9 @@ class AudioEngine {
       this._reverb.dispose();
       this._reverb = null;
     }
-    if (this._drums) {
-      Object.values(this._drums).forEach(synth => synth.dispose());
-      this._drums = null;
+    if (this._sampler) {
+      this._sampler.dispose();
+      this._sampler = null;
     }
     Tone.getTransport().stop();
     Tone.getTransport().cancel();
