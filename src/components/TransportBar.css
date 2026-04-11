@@ -1,0 +1,139 @@
+/* ===== TransportBar ===== */
+
+.transport-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(122, 236, 240, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  gap: 16px;
+}
+
+/* ---- Transport Buttons ---- */
+.transport-left {
+  display: flex;
+  gap: 10px;
+}
+
+.transport-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1px solid rgba(122, 236, 240, 0.25);
+  border-radius: 12px;
+  background: rgba(122, 236, 240, 0.06);
+  color: #7aecf0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.transport-btn:active {
+  transform: scale(0.94);
+}
+
+.transport-btn-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.transport-btn-play.active {
+  background: rgba(122, 236, 240, 0.18);
+  box-shadow: 0 0 24px rgba(122, 236, 240, 0.25);
+  border-color: rgba(122, 236, 240, 0.5);
+}
+
+.transport-btn-stop {
+  color: #ff6b8a;
+  border-color: rgba(255, 107, 138, 0.25);
+  background: rgba(255, 107, 138, 0.06);
+}
+
+.transport-btn-stop:active {
+  background: rgba(255, 107, 138, 0.15);
+}
+
+/* ---- Position Display ---- */
+.transport-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.transport-position {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.position-bar {
+  font-size: 2rem;
+  font-weight: 200;
+  color: #7aecf0;
+  text-shadow: 0 0 20px rgba(122, 236, 240, 0.4);
+  min-width: 1.2ch;
+  text-align: right;
+}
+
+.position-separator {
+  font-size: 1.4rem;
+  color: rgba(122, 236, 240, 0.4);
+  margin: 0 4px;
+}
+
+.position-step {
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: rgba(122, 236, 240, 0.7);
+  min-width: 2ch;
+}
+
+/* ---- BPM ---- */
+.transport-right {
+  display: flex;
+  align-items: center;
+}
+
+.bpm-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bpm-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.bpm-input {
+  width: 56px;
+  padding: 8px 6px;
+  font-size: 1rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(122, 236, 240, 0.15);
+  border-radius: 8px;
+  color: #7aecf0;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.2s;
+}
+
+.bpm-input:focus {
+  border-color: #7aecf0;
+  box-shadow: 0 0 10px rgba(122, 236, 240, 0.2);
+}

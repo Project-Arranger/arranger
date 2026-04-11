@@ -3,12 +3,13 @@ import useMusicStore from '../store/useMusicStore';
 
 /**
  * AudioEngine - 基于 Tone.js 的全局音频引擎
- * 
+ *
  * 职责:
  * 1. 管理 Tone.Transport 全局时钟
  * 2. 使用 Tone.Sequence 精确调度 step 回调
  * 3. 将当前 bar:step 同步到 Zustand store
  * 4. 控制台实时打印 Bar:Step（1-indexed，如 1:1, 1:2...）
+ * 5. 提供 EPiano 音色，支持即时播放和弦
  */
 
 const TOTAL_BARS = 8;
@@ -20,6 +21,8 @@ class AudioEngine {
     this._sequence = null;
     this._isInitialized = false;
     this._currentGlobalStep = 0;
+    this._epiano = null;
+    this._reverb = null;
   }
 
   /**
@@ -36,7 +39,39 @@ class AudioEngine {
     const { bpm } = useMusicStore.getState();
     Tone.getTransport().bpm.value = bpm;
 
-    // 创建 Sequence: 128 个 step, 每个 step 是 16n (十六分音符)
+    // ---- 创建 EPiano 音色（FM 合成 + Reverb）----
+    this._reverb = new Tone.Reverb({
+      decay: 2.5,
+      wet: 0.3,
+    }).toDestination();
+
+    this._epiano = new Tone.PolySynth(Tone.FMSynth, {
+      maxPolyphony: 8,
+      voice: Tone.FMSynth,
+      options: {
+        harmonicity: 3.01,
+        modulationIndex: 1.5,
+        oscillator: { type: 'sine' },
+        envelope: {
+          attack: 0.005,
+          decay: 0.6,
+          sustain: 0.15,
+          release: 1.2,
+        },
+        modulation: { type: 'square' },
+        modulationEnvelope: {
+          attack: 0.002,
+          decay: 0.3,
+          sustain: 0,
+          release: 0.5,
+        },
+      },
+    });
+
+    this._epiano.volume.value = -8;
+    this._epiano.connect(this._reverb);
+
+    // ---- 创建 Sequence: 128 个 step, 每个 step 是 16n ----
     const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i);
 
     this._sequence = new Tone.Sequence(
@@ -47,13 +82,12 @@ class AudioEngine {
       '16n'
     );
 
-    // 设置循环
     this._sequence.loop = true;
     this._sequence.loopStart = 0;
     this._sequence.loopEnd = TOTAL_STEPS;
 
     this._isInitialized = true;
-    console.log('[AudioEngine] Initialized. Ready to play.');
+    console.log('[AudioEngine] Initialized with EPiano. Ready to play.');
   }
 
   /**
@@ -73,12 +107,24 @@ class AudioEngine {
     // 控制台打印 Bar:Step（1-indexed）
     console.log(`[Clock] ${bar + 1}:${step + 1}`);
 
-    // ---- 未来在此触发各轨道音频 ----
-    // const { matrix } = useMusicStore.getState();
-    // TRACKS.forEach(trackId => {
-    //   const cellData = matrix[trackId]?.[bar]?.[step];
-    //   if (cellData) { ... trigger sound ... }
-    // });
+    // ---- 触发 chord 轨道 ----
+    const { matrix } = useMusicStore.getState();
+    const chordCell = matrix.chord?.[bar]?.[step];
+    if (chordCell && chordCell.notes) {
+      this._epiano.triggerAttackRelease(chordCell.notes, '8n', time, 0.7);
+    }
+  }
+
+  /**
+   * 即时播放一次和弦（用于拖拽放入时的声音反馈）
+   * @param {string[]} notes - 如 ['C4', 'E4', 'G4']
+   */
+  async playChordPreview(notes) {
+    if (!this._isInitialized) {
+      await this.init();
+    }
+    this._epiano.triggerAttackRelease(notes, '4n', undefined, 0.8);
+    console.log(`[AudioEngine] 🎹 Preview: ${notes.join(', ')}`);
   }
 
   /**
@@ -151,6 +197,14 @@ class AudioEngine {
     if (this._sequence) {
       this._sequence.dispose();
       this._sequence = null;
+    }
+    if (this._epiano) {
+      this._epiano.dispose();
+      this._epiano = null;
+    }
+    if (this._reverb) {
+      this._reverb.dispose();
+      this._reverb = null;
     }
     Tone.getTransport().stop();
     Tone.getTransport().cancel();

@@ -1,0 +1,154 @@
+/* ===== ChordTrack ===== */
+
+.chord-track {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(122, 236, 240, 0.08);
+  overflow: hidden;
+}
+
+/* Track label */
+.track-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 60px;
+  min-width: 60px;
+  padding: 8px 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border-right: 1px solid rgba(122, 236, 240, 0.08);
+}
+
+.track-label-icon {
+  font-size: 1.2rem;
+}
+
+.track-label-text {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #555;
+}
+
+/* Grid container */
+.chord-track-grid {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+}
+
+/* One bar = 4 beat slots */
+.chord-bar {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s;
+}
+
+.chord-bar.current-bar {
+  border-color: rgba(122, 236, 240, 0.15);
+}
+
+/* Individual beat slot */
+.chord-slot {
+  flex: 1;
+  min-height: 54px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.chord-slot.empty {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.chord-slot.empty:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Highlight when dragging over */
+.chord-slot.highlight {
+  background: rgba(122, 236, 240, 0.08);
+  border: 1px solid var(--chord-color, rgba(122, 236, 240, 0.3));
+  box-shadow: inset 0 0 20px var(--chord-glow, rgba(122, 236, 240, 0.15)),
+              0 0 12px var(--chord-glow, rgba(122, 236, 240, 0.1));
+  transform: scale(1.02);
+}
+
+/* Filled chord block */
+.chord-slot.filled {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--chord-color) 25%, transparent),
+    color-mix(in srgb, var(--chord-color) 12%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--chord-color) 40%, transparent);
+  box-shadow: 0 0 12px var(--chord-glow, rgba(122, 236, 240, 0.2));
+}
+
+.chord-slot.filled:hover {
+  box-shadow: 0 0 20px var(--chord-glow, rgba(122, 236, 240, 0.35));
+  transform: scale(1.03);
+}
+
+.chord-slot.filled:active {
+  transform: scale(0.95);
+}
+
+.chord-slot-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 0 8px var(--chord-glow);
+  z-index: 1;
+}
+
+/* Playing state → ripple glow */
+.chord-slot.playing.filled {
+  box-shadow: 0 0 30px var(--chord-glow, rgba(122, 236, 240, 0.5));
+  border-color: var(--chord-color);
+}
+
+.chord-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at center,
+    var(--chord-glow, rgba(122, 236, 240, 0.3)) 0%,
+    transparent 70%
+  );
+  animation: ripple-glow 0.4s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-glow {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}

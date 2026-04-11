@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { CHORD_LIBRARY } from '../data/chords';
 
 /**
  * 生成 8 小节的矩阵数据结构
@@ -8,7 +9,7 @@ import { create } from 'zustand';
  * matrix[trackId][barIndex][stepIndex] = cellData
  * 
  * cellData 格式:
- *   - chord track: { note: 'Cmaj7', velocity: 100 } | null
+ *   - chord track: { chordId: 'C', notes: ['C4','E4','G4'], isHead: true/false } | null
  *   - bass track:  { note: 'C2', velocity: 100 } | null
  *   - perc track:  { note: 'kick', velocity: 100 } | null
  *   - lead track:  { note: 'C4', velocity: 100 } | null
@@ -16,6 +17,8 @@ import { create } from 'zustand';
 
 const TOTAL_BARS = 8;
 const STEPS_PER_BAR = 16;
+/** 一个和弦块占据的 step 数（4 step = 1 拍） */
+const CHORD_SPAN = 4;
 
 const TRACKS = ['chord', 'bass', 'perc', 'lead'];
 
@@ -91,6 +94,71 @@ const useMusicStore = create((set, get) => ({
     });
   },
 
+  // -------- Actions: Chord 轨道专用 --------
+
+  /**
+   * 在 chord 轨道放入一个和弦积木块
+   * @param {number} barIndex - 0~7
+   * @param {number} beatIndex - 0~3（一个 bar 有 4 拍）
+   * @param {string} chordId - 'C' | 'Am' | 'F' | 'G' 等
+   */
+  setChordBlock: (barIndex, beatIndex, chordId) => {
+    const chord = CHORD_LIBRARY[chordId];
+    if (!chord) return;
+
+    const { matrix } = get();
+    const newBar = [...matrix.chord[barIndex]];
+    const startStep = beatIndex * CHORD_SPAN;
+
+    // 在 CHORD_SPAN 个 step 上写入和弦数据
+    for (let i = 0; i < CHORD_SPAN; i++) {
+      const stepIdx = startStep + i;
+      if (stepIdx < STEPS_PER_BAR) {
+        newBar[stepIdx] = {
+          chordId,
+          notes: chord.notes,
+          isHead: i === 0, // 只有第一个 step 标记为 head（渲染积木块用）
+        };
+      }
+    }
+
+    const newTrack = [...matrix.chord];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        chord: newTrack,
+      },
+    });
+  },
+
+  /**
+   * 移除 chord 轨道某个位置的和弦积木块
+   */
+  removeChordBlock: (barIndex, beatIndex) => {
+    const { matrix } = get();
+    const newBar = [...matrix.chord[barIndex]];
+    const startStep = beatIndex * CHORD_SPAN;
+
+    for (let i = 0; i < CHORD_SPAN; i++) {
+      const stepIdx = startStep + i;
+      if (stepIdx < STEPS_PER_BAR) {
+        newBar[stepIdx] = null;
+      }
+    }
+
+    const newTrack = [...matrix.chord];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        chord: newTrack,
+      },
+    });
+  },
+
   /**
    * 清空整个矩阵
    */
@@ -128,5 +196,5 @@ const useMusicStore = create((set, get) => ({
   },
 }));
 
-export { TOTAL_BARS, STEPS_PER_BAR, TRACKS };
+export { TOTAL_BARS, STEPS_PER_BAR, CHORD_SPAN, TRACKS };
 export default useMusicStore;

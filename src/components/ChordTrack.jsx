@@ -1,0 +1,165 @@
+import { useCallback, useRef, useEffect, useState } from 'react';
+import useMusicStore, { CHORD_SPAN } from '../store/useMusicStore';
+import { CHORD_LIBRARY } from '../data/chords';
+import audioEngine from '../audio/AudioEngine';
+import './ChordTrack.css';
+
+const BEATS_PER_BAR = 4; // 每小节 4 拍
+
+/**
+ * ChordTrack — 和弦轨道（接收拖拽放入的积木块）
+ * 
+ * 结构: 8 bars × 4 beats = 32 个 slot
+ * 每个 slot 可以容纳一个和弦积木块
+ */
+export default function ChordTrack({ dragChordId }) {
+  const matrix = useMusicStore((s) => s.matrix);
+  const currentBar = useMusicStore((s) => s.currentBar);
+  const currentStep = useMusicStore((s) => s.currentStep);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const totalBars = useMusicStore((s) => s.totalBars);
+  const setChordBlock = useMusicStore((s) => s.setChordBlock);
+  const removeChordBlock = useMusicStore((s) => s.removeChordBlock);
+  const trackRef = useRef(null);
+
+  // 跟踪当前高亮的 drop slot
+  const [highlightSlot, setHighlightSlot] = useState(null);
+
+  /**
+   * 根据触摸坐标计算对应的 { barIndex, beatIndex }
+   */
+  const getSlotFromPoint = useCallback((clientX, clientY) => {
+    if (!trackRef.current) return null;
+    const slots = trackRef.current.querySelectorAll('.chord-slot');
+    for (const slot of slots) {
+      const rect = slot.getBoundingClientRect();
+      if (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      ) {
+        return {
+          barIndex: parseInt(slot.dataset.bar, 10),
+          beatIndex: parseInt(slot.dataset.beat, 10),
+        };
+      }
+    }
+    return null;
+  }, []);
+
+  /**
+   * 外部调用：拖拽中检测高亮 slot
+   */
+  useEffect(() => {
+    const handleDragMove = (e) => {
+      const detail = e.detail;
+      if (!detail) return;
+      const slot = getSlotFromPoint(detail.clientX, detail.clientY);
+      setHighlightSlot(slot);
+    };
+
+    const handleDragEnd = (e) => {
+      const detail = e.detail;
+      setHighlightSlot(null);
+      if (!detail) return;
+      const slot = getSlotFromPoint(detail.clientX, detail.clientY);
+      if (slot && detail.chordId) {
+        setChordBlock(slot.barIndex, slot.beatIndex, detail.chordId);
+        // 播放和弦预览
+        const chord = CHORD_LIBRARY[detail.chordId];
+        if (chord) {
+          audioEngine.playChordPreview(chord.notes);
+        }
+      }
+    };
+
+    window.addEventListener('chord-drag-move', handleDragMove);
+    window.addEventListener('chord-drag-end', handleDragEnd);
+
+    return () => {
+      window.removeEventListener('chord-drag-move', handleDragMove);
+      window.removeEventListener('chord-drag-end', handleDragEnd);
+    };
+  }, [getSlotFromPoint, setChordBlock]);
+
+  /**
+   * 点击已有积木块 → 移除
+   */
+  const handleSlotClick = useCallback(
+    (barIndex, beatIndex, hasChord) => {
+      if (hasChord) {
+        removeChordBlock(barIndex, beatIndex);
+      }
+    },
+    [removeChordBlock]
+  );
+
+  // 渲染 8 bars, 每 bar 4 beats
+  const bars = [];
+  for (let barIdx = 0; barIdx < totalBars; barIdx++) {
+    const beats = [];
+    for (let beatIdx = 0; beatIdx < BEATS_PER_BAR; beatIdx++) {
+      const stepIdx = beatIdx * CHORD_SPAN;
+      const cellData = matrix.chord[barIdx][stepIdx];
+      const chordId = cellData?.chordId || null;
+      const chord = chordId ? CHORD_LIBRARY[chordId] : null;
+
+      const isCurrentBeat =
+        isPlaying &&
+        barIdx === currentBar &&
+        Math.floor(currentStep / CHORD_SPAN) === beatIdx;
+
+      const isHighlighted =
+        highlightSlot &&
+        highlightSlot.barIndex === barIdx &&
+        highlightSlot.beatIndex === beatIdx;
+
+      beats.push(
+        <div
+          key={`${barIdx}-${beatIdx}`}
+          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''}`}
+          data-bar={barIdx}
+          data-beat={beatIdx}
+          onClick={() => handleSlotClick(barIdx, beatIdx, !!chordId)}
+          style={
+            chord
+              ? {
+                  '--chord-color': chord.color,
+                  '--chord-glow': chord.glowColor,
+                }
+              : isHighlighted && dragChordId
+              ? {
+                  '--chord-color': CHORD_LIBRARY[dragChordId]?.color,
+                  '--chord-glow': CHORD_LIBRARY[dragChordId]?.glowColor,
+                }
+              : {}
+          }
+        >
+          {chordId && (
+            <span className="chord-slot-label">{chord.label}</span>
+          )}
+          {isCurrentBeat && chordId && <div className="chord-ripple" />}
+        </div>
+      );
+    }
+
+    bars.push(
+      <div key={barIdx} className={`chord-bar ${barIdx === currentBar && isPlaying ? 'current-bar' : ''}`}>
+        {beats}
+      </div>
+    );
+  }
+
+  return (
+    <div className="chord-track" id="chord-track" ref={trackRef}>
+      <div className="track-label">
+        <span className="track-label-icon">🎹</span>
+        <span className="track-label-text">CHORD</span>
+      </div>
+      <div className="chord-track-grid">
+        {bars}
+      </div>
+    </div>
+  );
+}

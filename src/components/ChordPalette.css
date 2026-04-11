@@ -1,0 +1,118 @@
+/* ===== ChordPalette ===== */
+
+.chord-palette {
+  padding: 12px 20px 24px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+  border-top: 1px solid rgba(122, 236, 240, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Header */
+.chord-palette-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.chord-palette-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #555;
+}
+
+.chord-palette-hint {
+  font-size: 0.6rem;
+  color: #383838;
+}
+
+/* Blocks container */
+.chord-palette-blocks {
+  display: flex;
+  gap: 12px;
+}
+
+/* Individual chord block */
+.chord-block {
+  flex: 1;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 14px;
+  cursor: grab;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  /* Gradient background using chord color */
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--chord-color) 22%, transparent),
+    color-mix(in srgb, var(--chord-color) 10%, transparent)
+  );
+  border: 1.5px solid color-mix(in srgb, var(--chord-color) 35%, transparent);
+  
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chord-block::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    color-mix(in srgb, var(--chord-color) 15%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.chord-block:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 24px var(--chord-glow),
+              0 4px 16px rgba(0, 0, 0, 0.4);
+  border-color: color-mix(in srgb, var(--chord-color) 60%, transparent);
+}
+
+.chord-block:active {
+  transform: scale(1.12);
+  box-shadow: 0 0 40px var(--chord-glow),
+              0 0 60px var(--chord-glow),
+              0 4px 20px rgba(0, 0, 0, 0.5);
+  border-color: var(--chord-color);
+}
+
+.chord-block.dragging {
+  opacity: 0.3;
+  transform: scale(0.92);
+}
+
+/* Label */
+.chord-block-label {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 12px var(--chord-glow);
+  z-index: 1;
+}
+
+.chord-block-notes {
+  font-size: 0.5rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.08em;
+  z-index: 1;
+}
+
+/* ---- Ghost element (created by JS, styled here for reference) ---- */
+.chord-ghost {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
