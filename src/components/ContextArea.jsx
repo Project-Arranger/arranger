@@ -43,19 +43,19 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
           className={`context-tab ${!activeContextTrack || activeContextTrack === 'chord' ? 'active' : ''}`}
           onClick={() => setActiveContextTrack('chord')}
         >
-          🎹 Chord
+          Chord
         </button>
         <button
           className={`context-tab ${activeContextTrack === 'bass' ? 'active' : ''}`}
           onClick={() => setActiveContextTrack('bass')}
         >
-          🎸 Bass
+          Bass
         </button>
         <button
           className={`context-tab ${activeContextTrack === 'perc' ? 'active' : ''}`}
           onClick={() => setActiveContextTrack('perc')}
         >
-          🥁 Perc
+          Perc
         </button>
       </div>
       {/* 动态内容 */}

@@ -200,7 +200,7 @@ class AudioEngine {
       await this.init();
     }
     this._epiano.triggerAttackRelease(notes, '4n', undefined, 0.8);
-    console.log(`[AudioEngine] 🎹 Preview: ${notes.join(', ')}`);
+    console.log(`[AudioEngine] Preview: ${notes.join(', ')}`);
   }
 
   /**
@@ -212,7 +212,7 @@ class AudioEngine {
       await this.init();
     }
     this._bass.triggerAttackRelease(note, '16n', undefined, 0.9);
-    console.log(`[AudioEngine] 🎸 Bass preview: ${note}`);
+    console.log(`[AudioEngine] Bass preview: ${note}`);
   }
 
   /**
@@ -223,7 +223,7 @@ class AudioEngine {
       await this.init();
     }
     this._triggerPercInstance(instrument, undefined);
-    console.log(`[AudioEngine] 🥁 Perc preview: ${instrument}`);
+    console.log(`[AudioEngine] Perc preview: ${instrument}`);
   }
 
   /**
