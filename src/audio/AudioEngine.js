@@ -123,22 +123,28 @@ class AudioEngine {
     this._leadEpiano.connect(this._reverb);
 
     // ---- 创建 Percussion 音色 (808 Sampler) ----
-    await new Promise((resolve, reject) => {
-      this._sampler = new Tone.Sampler({
-        urls: {
-          'C1': 'kick.wav',
-          'D1': 'snare.wav',
-          'E1': 'hihat.wav',
-          'F1': 'tom.wav',
-          'G1': 'clap.wav',
-        },
-        baseUrl: '/samples/808/',
-        onload: resolve,
-        onerror: reject,
-      }).toDestination();
-    });
-
-    this._sampler.volume.value = -2;
+    // 必须与 Vite `base`（GitHub Pages 项目站为 /repo-name/）一致，否则采样 404 会导致 init 失败、全站无声
+    const percBaseUrl = `${import.meta.env.BASE_URL}samples/808/`;
+    try {
+      await new Promise((resolve, reject) => {
+        this._sampler = new Tone.Sampler({
+          urls: {
+            C1: 'kick.wav',
+            D1: 'snare.wav',
+            E1: 'hihat.wav',
+            F1: 'tom.wav',
+            G1: 'clap.wav',
+          },
+          baseUrl: percBaseUrl,
+          onload: resolve,
+          onerror: reject,
+        }).toDestination();
+      });
+      this._sampler.volume.value = -2;
+    } catch (e) {
+      console.warn('[AudioEngine] 808 samples failed to load; percussion disabled.', e);
+      this._sampler = null;
+    }
 
     // ---- 创建 Sequence: 128 个 step, 每个 step 是 16n ----
     const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i);
