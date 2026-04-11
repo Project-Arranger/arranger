@@ -55,7 +55,14 @@
 }
 
 .chord-bar.current-bar {
-  border-color: rgba(122, 236, 240, 0.15);
+  border-color: rgba(160, 216, 239, 0.4);
+  box-shadow: 0 0 10px rgba(160, 216, 239, 0.1);
+  animation: bar-breathing 2s ease-in-out infinite;
+}
+
+@keyframes bar-breathing {
+  0%, 100% { box-shadow: 0 0 5px rgba(160, 216, 239, 0.05); }
+  50% { box-shadow: 0 0 15px rgba(160, 216, 239, 0.3); border-color: rgba(160, 216, 239, 0.6); }
 }
 
 /* Individual beat slot */

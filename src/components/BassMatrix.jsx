@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import useMusicStore from '../store/useMusicStore';
 import { BASS_NOTES, BASS_COLUMNS, eighthToStep } from '../data/bassNotes';
 import audioEngine from '../audio/AudioEngine';
@@ -41,12 +41,19 @@ export default function BassMatrix() {
   const toggleBassNote = useMusicStore((s) => s.toggleBassNote);
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
 
+  const [ripples, setRipples] = useState([]);
+
   /**
    * 点击/触摸 → 切换音符 + 播放预览
    */
   const handleCellTouchStart = useCallback(
     async (e, eighthIndex, note) => {
       e.preventDefault();
+      
+      const rId = Date.now() + Math.random();
+      setRipples(prev => [...prev, { id: rId, eighthIndex, note }]);
+      setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+
       toggleBassNote(selectedBar, eighthIndex, note);
 
       // 检查是否新写入（切换后刚点亮）
@@ -135,6 +142,10 @@ export default function BassMatrix() {
                   className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''} ${isGuide ? 'guide-blink' : ''}`}
                   onTouchStart={(e) => handleCellTouchStart(e, colIdx, note)}
                   onClick={async () => {
+                    const rId = Date.now() + Math.random();
+                    setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, note }]);
+                    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+                    
                     toggleBassNote(selectedBar, colIdx, note);
                     const s = eighthToStep(colIdx);
                     const c = matrix.bass[selectedBar][s];
@@ -144,7 +155,11 @@ export default function BassMatrix() {
                   }}
                   data-note={note}
                   data-col={colIdx}
-                />
+                >
+                  {ripples.map(r => r.eighthIndex === colIdx && r.note === note && (
+                    <span key={r.id} className="cell-ripple" />
+                  ))}
+                </div>
               );
             })}
           </div>

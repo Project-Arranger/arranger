@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import useMusicStore from '../store/useMusicStore';
 import { PERC_INSTRUMENTS, PERC_COLUMNS } from '../data/percNotes';
 import { eighthToStep } from '../data/bassNotes'; // reuse eighth mapping
@@ -25,9 +25,16 @@ export default function PercMatrix() {
   const togglePercNote = useMusicStore((s) => s.togglePercNote);
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
 
+  const [ripples, setRipples] = useState([]);
+
   const handleCellTouchStart = useCallback(
     async (e, eighthIndex, instrumentId) => {
       e.preventDefault();
+
+      const rId = Date.now() + Math.random();
+      setRipples(prev => [...prev, { id: rId, eighthIndex, instrumentId }]);
+      setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+
       togglePercNote(selectedBar, eighthIndex, instrumentId);
 
       // Play instrument instantly on interaction
@@ -109,6 +116,10 @@ export default function PercMatrix() {
                   style={{ '--inst-color': color }}
                   onTouchStart={(e) => handleCellTouchStart(e, colIdx, id)}
                   onClick={async () => {
+                    const rId = Date.now() + Math.random();
+                    setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, instrumentId: id }]);
+                    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+
                     togglePercNote(selectedBar, colIdx, id);
                     const hasInst = cell?.instruments?.includes(id);
                     if (!hasInst) {
@@ -117,7 +128,11 @@ export default function PercMatrix() {
                   }}
                   data-instrument={id}
                   data-col={colIdx}
-                />
+                >
+                  {ripples.map(r => r.eighthIndex === colIdx && r.instrumentId === id && (
+                    <span key={r.id} className="cell-ripple" />
+                  ))}
+                </div>
               );
             })}
           </div>
