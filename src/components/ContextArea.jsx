@@ -3,7 +3,9 @@ import useMusicStore from '../store/useMusicStore';
 import ChordPalette from './ChordPalette';
 import BassMatrix from './BassMatrix';
 import PercMatrix from './PercMatrix';
+import LeadMatrix from './LeadMatrix';
 import ChordVariationDrawer from './ChordVariationDrawer';
+import { ChordIcon, BassIcon, PercIcon, LeadIcon } from './Icons';
 import './ContextArea.css';
 
 /**
@@ -24,6 +26,8 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
         return <PercMatrix />;
       case 'bass':
         return <BassMatrix />;
+      case 'lead':
+        return <LeadMatrix />;
       case 'chord':
       default:
         return (
@@ -43,19 +47,37 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
           className={`context-tab ${!activeContextTrack || activeContextTrack === 'chord' ? 'active' : ''}`}
           onClick={() => setActiveContextTrack('chord')}
         >
-          Chord
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+             <ChordIcon active={!activeContextTrack || activeContextTrack === 'chord'} />
+             <span>CHORD</span>
+          </div>
         </button>
         <button
           className={`context-tab ${activeContextTrack === 'bass' ? 'active' : ''}`}
           onClick={() => setActiveContextTrack('bass')}
         >
-          Bass
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+             <BassIcon active={activeContextTrack === 'bass'} />
+             <span>BASS</span>
+          </div>
         </button>
         <button
           className={`context-tab ${activeContextTrack === 'perc' ? 'active' : ''}`}
           onClick={() => setActiveContextTrack('perc')}
         >
-          Perc
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+             <PercIcon active={activeContextTrack === 'perc'} />
+             <span>PERC</span>
+          </div>
+        </button>
+        <button
+          className={`context-tab ${activeContextTrack === 'lead' ? 'active' : ''}`}
+          onClick={() => setActiveContextTrack('lead')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+             <LeadIcon active={activeContextTrack === 'lead'} />
+             <span>LEAD</span>
+          </div>
         </button>
       </div>
       {/* 动态内容 */}

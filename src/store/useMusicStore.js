@@ -326,6 +326,39 @@ const useMusicStore = create((set, get) => ({
     });
   },
 
+  // -------- Actions: Lead 轨道专用 --------
+
+  /**
+   * 切换 lead 矩阵中某个音符的开/关
+   * @param {number} barIndex - 0~7
+   * @param {number} eighthIndex - 0~7（八分音符位）
+   * @param {string} note - 'C4' ~ 'B4'
+   */
+  toggleLeadNote: (barIndex, eighthIndex, note) => {
+    const { matrix } = get();
+    const stepIndex = eighthToStep(eighthIndex);
+    const newBar = [...matrix.lead[barIndex]];
+
+    const existing = newBar[stepIndex];
+    if (existing && existing.note === note) {
+      // 已存在 → 关闭
+      newBar[stepIndex] = null;
+    } else {
+      // 不存在或不同音符 → 写入
+      newBar[stepIndex] = { note, velocity: 100 };
+    }
+
+    const newTrack = [...matrix.lead];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        lead: newTrack,
+      },
+    });
+  },
+
   /**
    * 清空整个矩阵
    */

@@ -26,6 +26,7 @@ class AudioEngine {
     this._reverb = null;
     this._bassFilter = null;
     this._drums = null;
+    this._leadEpiano = null;
   }
 
   /**
@@ -102,6 +103,25 @@ class AudioEngine {
     this._bass.volume.value = -4;
     this._bass.connect(this._bassFilter);
 
+    // ---- 创建 Lead 音色（EPiano 副本）----
+    this._leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
+      maxPolyphony: 4,
+      voice: Tone.FMSynth,
+      options: {
+        harmonicity: 2.5,
+        modulationIndex: 1.2,
+        oscillator: { type: 'sine' },
+        envelope: {
+          attack: 0.01,
+          decay: 0.4,
+          sustain: 0.2,
+          release: 0.8,
+        },
+      },
+    });
+    this._leadEpiano.volume.value = -6;
+    this._leadEpiano.connect(this._reverb);
+
     // ---- 创建 Percussion 音色 (808 Sampler) ----
     await new Promise((resolve, reject) => {
       this._sampler = new Tone.Sampler({
@@ -174,6 +194,12 @@ class AudioEngine {
     if (percCell && percCell.instruments) {
       percCell.instruments.forEach(inst => this._triggerPercInstance(inst, time));
     }
+
+    // ---- 触发 lead 轨道 ----
+    const leadCell = matrix.lead?.[bar]?.[step];
+    if (leadCell && leadCell.note) {
+      this._leadEpiano.triggerAttackRelease(leadCell.note, '16n', time, 0.85);
+    }
   }
 
   _triggerPercInstance(instrument, time) {
@@ -224,6 +250,18 @@ class AudioEngine {
     }
     this._triggerPercInstance(instrument, undefined);
     console.log(`[AudioEngine] Perc preview: ${instrument}`);
+  }
+
+  /**
+   * 即时播放一个 lead 音符（用于矩阵点击反馈）
+   * @param {string} note - 如 'C4'
+   */
+  async playLeadPreview(note) {
+    if (!this._isInitialized) {
+      await this.init();
+    }
+    this._leadEpiano.triggerAttackRelease(note, '16n', undefined, 0.85);
+    console.log(`[AudioEngine] Lead preview: ${note}`);
   }
 
   /**
@@ -316,6 +354,10 @@ class AudioEngine {
     if (this._sampler) {
       this._sampler.dispose();
       this._sampler = null;
+    }
+    if (this._leadEpiano) {
+      this._leadEpiano.dispose();
+      this._leadEpiano = null;
     }
     Tone.getTransport().stop();
     Tone.getTransport().cancel();
