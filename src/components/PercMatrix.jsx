@@ -105,53 +105,56 @@ export default function PercMatrix() {
           })}
         </div>
 
-        {/* 乐器行 */}
-        {PERC_INSTRUMENTS.map(({ id, label, color }) => {
-          const InstIcon = ICON_MAP[id];
-          return (
-          <div key={id} className="perc-row">
-            <div className="perc-inst-label">
-              {InstIcon && <span style={{ color: color, display: 'flex', alignItems: 'center' }}><InstIcon /></span>}
-              <span>{label}</span>
+        {/* Scrolling container for rows to freeze headers */}
+        <div className="perc-rows-container">
+          {/* 乐器行 */}
+          {PERC_INSTRUMENTS.map(({ id, label, color }) => {
+            const InstIcon = ICON_MAP[id];
+            return (
+            <div key={id} className="perc-row">
+              <div className="perc-inst-label">
+                {InstIcon && <span style={{ color: color, display: 'flex', alignItems: 'center' }}><InstIcon /></span>}
+                <span>{label}</span>
+              </div>
+              {Array.from({ length: PERC_COLUMNS }, (_, colIdx) => {
+                const stepIdx = eighthToStep(colIdx);
+                const cell = barData[stepIdx];
+                const isActive = cell?.instruments?.includes(id);
+                const isCurrent =
+                  isPlaying &&
+                  selectedBar === currentBar &&
+                  (currentStep === stepIdx || currentStep === stepIdx + 1);
+
+                return (
+                  <div
+                    key={colIdx}
+                    className={`perc-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''}`}
+                    style={{ '--inst-color': color }}
+                    onTouchStart={(e) => handleCellTouchStart(e, colIdx, id)}
+                    onClick={async () => {
+                      const rId = Date.now() + Math.random();
+                      setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, instrumentId: id }]);
+                      setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+
+                      togglePercNote(selectedBar, colIdx, id);
+                      const hasInst = cell?.instruments?.includes(id);
+                      if (!hasInst) {
+                        await audioEngine.playPercPreview(id);
+                      }
+                    }}
+                    data-instrument={id}
+                    data-col={colIdx}
+                  >
+                    {ripples.map(r => r.eighthIndex === colIdx && r.instrumentId === id && (
+                      <span key={r.id} className="cell-ripple" />
+                    ))}
+                  </div>
+                );
+              })}
             </div>
-            {Array.from({ length: PERC_COLUMNS }, (_, colIdx) => {
-              const stepIdx = eighthToStep(colIdx);
-              const cell = barData[stepIdx];
-              const isActive = cell?.instruments?.includes(id);
-              const isCurrent =
-                isPlaying &&
-                selectedBar === currentBar &&
-                (currentStep === stepIdx || currentStep === stepIdx + 1);
-
-              return (
-                <div
-                  key={colIdx}
-                  className={`perc-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''}`}
-                  style={{ '--inst-color': color }}
-                  onTouchStart={(e) => handleCellTouchStart(e, colIdx, id)}
-                  onClick={async () => {
-                    const rId = Date.now() + Math.random();
-                    setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, instrumentId: id }]);
-                    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
-
-                    togglePercNote(selectedBar, colIdx, id);
-                    const hasInst = cell?.instruments?.includes(id);
-                    if (!hasInst) {
-                      await audioEngine.playPercPreview(id);
-                    }
-                  }}
-                  data-instrument={id}
-                  data-col={colIdx}
-                >
-                  {ripples.map(r => r.eighthIndex === colIdx && r.instrumentId === id && (
-                    <span key={r.id} className="cell-ripple" />
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

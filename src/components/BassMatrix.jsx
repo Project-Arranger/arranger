@@ -113,57 +113,60 @@ export default function BassMatrix() {
           })}
         </div>
 
-        {/* 12 行 (B2 → C2) */}
-        {BASS_NOTES.map(({ note, label, inScale }) => (
-          <div
-            key={note}
-            className={`bass-row ${inScale ? 'in-scale' : 'chromatic'}`}
-          >
-            <div className={`bass-note-label ${inScale ? 'in-scale' : ''}`}>
-              {label}
+        {/* Scrolling container for rows to freeze headers */}
+        <div className="bass-rows-container">
+          {/* 12 行 (B2 → C2) */}
+          {BASS_NOTES.map(({ note, label, inScale }) => (
+            <div
+              key={note}
+              className={`bass-row ${inScale ? 'in-scale' : 'chromatic'}`}
+            >
+              <div className={`bass-note-label ${inScale ? 'in-scale' : ''}`}>
+                {label}
+              </div>
+              {Array.from({ length: BASS_COLUMNS }, (_, colIdx) => {
+                const stepIdx = eighthToStep(colIdx);
+                const cell = barData[stepIdx];
+                const isActive = cell && cell.note === note;
+                const isCurrent =
+                  isPlaying &&
+                  selectedBar === currentBar &&
+                  (currentStep === stepIdx || currentStep === stepIdx + 1);
+
+                // 引导逻辑：与 chord 轨实时同步
+                const currentChordId = chordTrackData[stepIdx]?.chordId;
+                const guideNote = currentChordId ? CHORD_TO_BASS_GUIDE[currentChordId] : null;
+                const isGuide = guideNote === note && !isActive; // 没被点亮时才显示引导边缘闪烁
+
+                return (
+                  <div
+                    key={colIdx}
+                    className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''} ${isGuide ? 'guide-blink' : ''}`}
+                    onTouchStart={(e) => handleCellTouchStart(e, colIdx, note)}
+                    onClick={async () => {
+                      const rId = Date.now() + Math.random();
+                      setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, note }]);
+                      setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+                      
+                      toggleBassNote(selectedBar, colIdx, note);
+                      const s = eighthToStep(colIdx);
+                      const c = matrix.bass[selectedBar][s];
+                      if (!c || c.note !== note) {
+                        await audioEngine.playBassPreview(note);
+                      }
+                    }}
+                    data-note={note}
+                    data-col={colIdx}
+                  >
+                    {ripples.map(r => r.eighthIndex === colIdx && r.note === note && (
+                      <span key={r.id} className="cell-ripple" />
+                    ))}
+                  </div>
+                );
+              })}
             </div>
-            {Array.from({ length: BASS_COLUMNS }, (_, colIdx) => {
-              const stepIdx = eighthToStep(colIdx);
-              const cell = barData[stepIdx];
-              const isActive = cell && cell.note === note;
-              const isCurrent =
-                isPlaying &&
-                selectedBar === currentBar &&
-                (currentStep === stepIdx || currentStep === stepIdx + 1);
-
-              // 引导逻辑：与 chord 轨实时同步
-              const currentChordId = chordTrackData[stepIdx]?.chordId;
-              const guideNote = currentChordId ? CHORD_TO_BASS_GUIDE[currentChordId] : null;
-              const isGuide = guideNote === note && !isActive; // 没被点亮时才显示引导边缘闪烁
-
-              return (
-                <div
-                  key={colIdx}
-                  className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''} ${isGuide ? 'guide-blink' : ''}`}
-                  onTouchStart={(e) => handleCellTouchStart(e, colIdx, note)}
-                  onClick={async () => {
-                    const rId = Date.now() + Math.random();
-                    setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, note }]);
-                    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
-                    
-                    toggleBassNote(selectedBar, colIdx, note);
-                    const s = eighthToStep(colIdx);
-                    const c = matrix.bass[selectedBar][s];
-                    if (!c || c.note !== note) {
-                      await audioEngine.playBassPreview(note);
-                    }
-                  }}
-                  data-note={note}
-                  data-col={colIdx}
-                >
-                  {ripples.map(r => r.eighthIndex === colIdx && r.note === note && (
-                    <span key={r.id} className="cell-ripple" />
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

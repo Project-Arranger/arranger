@@ -87,44 +87,47 @@ export default function LeadMatrix() {
           })}
         </div>
 
-        {LEAD_NOTES.map(({ note, label, inScale }) => (
-          <div key={note} className={`bass-row ${inScale ? 'in-scale' : 'chromatic'}`}>
-            <div className={`bass-note-label ${inScale ? 'in-scale' : ''}`}>
-              {label}
-            </div>
-            {Array.from({ length: BASS_COLUMNS }, (_, colIdx) => {
-              const stepIdx = eighthToStep(colIdx);
-              const cell = barData[stepIdx];
-              const isActive = cell && cell.note === note;
-              const isCurrent =
-                isPlaying &&
-                selectedBar === currentBar &&
-                (currentStep === stepIdx || currentStep === stepIdx + 1);
+        {/* Scrolling container for rows to freeze headers */}
+        <div className="bass-rows-container">
+          {LEAD_NOTES.map(({ note, label, inScale }) => (
+            <div key={note} className={`bass-row ${inScale ? 'in-scale' : 'chromatic'}`}>
+              <div className={`bass-note-label ${inScale ? 'in-scale' : ''}`}>
+                {label}
+              </div>
+              {Array.from({ length: BASS_COLUMNS }, (_, colIdx) => {
+                const stepIdx = eighthToStep(colIdx);
+                const cell = barData[stepIdx];
+                const isActive = cell && cell.note === note;
+                const isCurrent =
+                  isPlaying &&
+                  selectedBar === currentBar &&
+                  (currentStep === stepIdx || currentStep === stepIdx + 1);
 
-              return (
-                <div
-                  key={colIdx}
-                  className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''}`}
-                  onTouchStart={(e) => handleCellTouchStart(e, colIdx, note)}
-                  onClick={async () => {
-                    const rId = Date.now() + Math.random();
-                    setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, note }]);
-                    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
-                    
-                    toggleLeadNote(selectedBar, colIdx, note);
-                    if (!isActive) {
-                      await audioEngine.playLeadPreview(note);
-                    }
-                  }}
-                >
-                  {ripples.map(r => r.eighthIndex === colIdx && r.note === note && (
-                    <span key={r.id} className="cell-ripple" />
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                return (
+                  <div
+                    key={colIdx}
+                    className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''}`}
+                    onTouchStart={(e) => handleCellTouchStart(e, colIdx, note)}
+                    onClick={async () => {
+                      const rId = Date.now() + Math.random();
+                      setRipples(prev => [...prev, { id: rId, eighthIndex: colIdx, note }]);
+                      setTimeout(() => setRipples(prev => prev.filter(r => r.id !== rId)), 500);
+                      
+                      toggleLeadNote(selectedBar, colIdx, note);
+                      if (!isActive) {
+                        await audioEngine.playLeadPreview(note);
+                      }
+                    }}
+                  >
+                    {ripples.map(r => r.eighthIndex === colIdx && r.note === note && (
+                      <span key={r.id} className="cell-ripple" />
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
