@@ -396,9 +396,191 @@ class AudioEngine {
     this._isInitialized = false;
     console.log('[AudioEngine] Disposed');
   }
+  async exportWav() {
+    if (!this._isInitialized) {
+      await this.init();
+    }
+    
+    // 强制暂停当前播放，防止干扰
+    this.pause();
+
+    const store = useMusicStore.getState();
+    const { bpm, matrix } = store;
+    
+    // 计算总时长：8小节 = 32拍。
+    const secondsPerBeat = 60 / bpm;
+    const songDuration = TOTAL_BARS * 4 * secondsPerBeat;
+    const renderDuration = songDuration + 4.0; // 留出 4 秒尾音(reverb tail)
+
+    console.log(`[AudioEngine] Start offline rendering... Duration: ${renderDuration.toFixed(2)}s`);
+
+    // 使用 Tone.Offline 离线极速渲染引擎
+    const renderBuffer = await Tone.Offline(async ({ transport }) => {
+      // 离线环境的时钟也需要同步
+      transport.bpm.value = bpm;
+
+      // 重新在离线 Context 内构建音源
+      const reverb = new Tone.Reverb({ decay: 2.5, wet: 0.3 }).toDestination();
+      const epiano = new Tone.PolySynth(Tone.FMSynth, {
+        maxPolyphony: 8,
+        voice: Tone.FMSynth,
+        options: {
+          harmonicity: 3.01, modulationIndex: 1.5,
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.005, decay: 0.6, sustain: 0.15, release: 1.2 },
+          modulation: { type: 'square' },
+          modulationEnvelope: { attack: 0.002, decay: 0.3, sustain: 0, release: 0.5 }
+        }
+      });
+      epiano.volume.value = -8;
+      epiano.connect(reverb);
+
+      const bassFilter = new Tone.Filter({ type: 'lowpass', frequency: 400, rolloff: -24 }).toDestination();
+      const bass = new Tone.MonoSynth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.005, decay: 0.2, sustain: 0.2, release: 0.1 },
+        filterEnvelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.1, baseFrequency: 80, octaves: 3 }
+      });
+      bass.volume.value = -4;
+      bass.connect(bassFilter);
+
+      const leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
+        maxPolyphony: 4,
+        voice: Tone.FMSynth,
+        options: {
+          harmonicity: 2.5, modulationIndex: 1.2,
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.01, decay: 0.4, sustain: 0.2, release: 0.8 }
+        }
+      });
+      leadEpiano.volume.value = -6;
+      leadEpiano.connect(reverb);
+
+      // 加载打击乐采样
+      const percBaseUrl = `${import.meta.env.BASE_URL}samples/808/`;
+      let sampler = null;
+      try {
+        sampler = await new Promise((resolve, reject) => {
+          const s = new Tone.Sampler({
+            urls: { C1: 'kick.wav', D1: 'snare.wav', E1: 'hihat.wav', F1: 'tom.wav', G1: 'clap.wav' },
+            baseUrl: percBaseUrl,
+            onload: () => resolve(s),
+            onerror: reject
+          }).toDestination();
+        });
+        sampler.volume.value = -2;
+      } catch (e) {
+        console.warn('[Offline Engine] Sampler load failed', e);
+      }
+
+      // 获取当前离线环境的 16分音符步长
+      const secondsPerStep = Tone.Time('16n').toSeconds();
+
+      // 一口气把所有矩阵里的音符都丢进离线时间轴
+      for (let globalStep = 0; globalStep < TOTAL_STEPS; globalStep++) {
+        const bar = Math.floor(globalStep / STEPS_PER_BAR);
+        const step = globalStep % STEPS_PER_BAR;
+        const time = globalStep * secondsPerStep;
+
+        // CHORD
+        const chordCell = matrix.chord?.[bar]?.[step];
+        if (chordCell && chordCell.notes) epiano.triggerAttackRelease(chordCell.notes, '8n', time, 0.7);
+
+        // BASS
+        const bassCell = matrix.bass?.[bar]?.[step];
+        if (bassCell && bassCell.note) bass.triggerAttackRelease(bassCell.note, '16n', time, 0.9);
+
+        // PERC
+        const percCell = matrix.perc?.[bar]?.[step];
+        if (percCell && percCell.instruments && sampler) {
+          const m = {'kick':'C1', 'snare':'D1', 'hihat':'E1', 'tom':'F1', 'clap':'G1'};
+          percCell.instruments.forEach(inst => sampler.triggerAttack(m[inst], time));
+        }
+
+        // LEAD
+        const leadCell = matrix.lead?.[bar]?.[step];
+        if (leadCell && leadCell.note) leadEpiano.triggerAttackRelease(leadCell.note, '16n', time, 0.85);
+      }
+    }, renderDuration);
+
+    console.log('[AudioEngine] Rendering finished. Encoding to WAV...');
+
+    // 将 ToneAudioBuffer 转成浏览器可直接下载的 WAV Blob
+    const wavBlob = audioBufferToWav(renderBuffer.get());
+    return wavBlob;
+  }
 }
 
-// 单例模式 —— 全局只有一个 AudioEngine
+// === AudioBuffer 转 WAV 编码器 ===
+function audioBufferToWav(buffer, opt) {
+  opt = opt || {};
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const format = opt.float32 ? 3 : 1;
+  const bitDepth = format === 3 ? 32 : 16;
+  let result;
+  
+  if (numChannels === 2) {
+    result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
+  } else {
+    result = buffer.getChannelData(0);
+  }
+  return encodeWAV(result, numChannels, sampleRate, format, bitDepth);
+}
+
+function interleave(inputL, inputR) {
+  const length = inputL.length + inputR.length;
+  const result = new Float32Array(length);
+  let index = 0, inputIndex = 0;
+  while (index < length) {
+    result[index++] = inputL[inputIndex];
+    result[index++] = inputR[inputIndex];
+    inputIndex++;
+  }
+  return result;
+}
+
+function encodeWAV(samples, numChannels, sampleRate, format, bitDepth) {
+  const bytesPerSample = bitDepth / 8;
+  const blockAlign = numChannels * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
+  const view = new DataView(buffer);
+  
+  function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+  }
+  
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, format, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitDepth, true);
+  writeString(view, 36, 'data');
+  view.setUint32(40, samples.length * bytesPerSample, true);
+  
+  if (format === 1) { // PCM (16-bit float to int)
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++, offset += 2) {
+      let s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+  } else {
+    let offset = 44;
+    for (let i = 0; i < samples.length; i++, offset += 4) {
+      view.setFloat32(offset, samples[i], true);
+    }
+  }
+  
+  return new Blob([view], { type: 'audio/wav' });
+}
 const audioEngine = new AudioEngine();
 
 export default audioEngine;

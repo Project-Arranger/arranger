@@ -155,32 +155,100 @@
 .bpm-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  padding: 0 10px; /* Overwrite transport-btn padding for input space */
 }
 
-.bpm-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: #555;
-  text-transform: uppercase;
+.bpm-adjust-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #A0D8EF;
+  font-size: 1.1rem;
+  font-weight: 400;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.15s ease;
+  touch-action: manipulate;
+}
+
+.bpm-adjust-btn:hover {
+  opacity: 1;
+  background: rgba(160, 216, 239, 0.15);
+}
+
+.bpm-adjust-btn:active {
+  background: rgba(160, 216, 239, 0.3);
+  transform: scale(0.9);
 }
 
 .bpm-input {
-  width: 56px;
-  padding: 8px 6px;
+  width: 50px;
+  padding: 4px;
   font-size: 1rem;
+  font-weight: 700;
   text-align: center;
   background: transparent;
-  border: 1px solid rgba(160, 216, 239, 0.25);
-  border-radius: 8px;
+  border: none;
   color: #A0D8EF;
   outline: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  transition: border-color 0.2s;
 }
 
-.bpm-input:focus {
+/* Hide native number spin buttons to prevent text clip */
+.bpm-input::-webkit-outer-spin-button,
+.bpm-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.bpm-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.transport-btn:focus-within {
   border-color: #A0D8EF;
   box-shadow: 0 0 10px rgba(160, 216, 239, 0.3);
+}
+
+.transport-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.transport-btn-export {
+  color: #d1b4ff;       /* light purple */
+  border-color: transparent;
+  padding: 8px 12px;
+  background: rgba(209, 180, 255, 0.08);
+}
+
+.transport-btn-export:hover {
+  background: rgba(209, 180, 255, 0.15);
+}
+
+.transport-btn-export:active {
+  background: rgba(209, 180, 255, 0.25);
+  transform: scale(0.96);
+}
+
+.transport-btn-export.exporting {
+  pointer-events: none;
+  opacity: 0.8;
+  color: #ffb4b4;
+}
+
+/* Spinner Animation */
+.spinner {
+  animation: spin 1.2s linear infinite;
+}
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
 }
