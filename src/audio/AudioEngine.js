@@ -83,22 +83,22 @@ class AudioEngine {
     this._bass = new Tone.MonoSynth({
       oscillator: { type: 'triangle' },
       envelope: {
-        attack: 0.01,
-        decay: 0.3,
-        sustain: 0.4,
-        release: 0.8,
-      },
-      filterEnvelope: {
-        attack: 0.01,
+        attack: 0.005,
         decay: 0.2,
         sustain: 0.2,
-        release: 0.5,
+        release: 0.1,
+      },
+      filterEnvelope: {
+        attack: 0.005,
+        decay: 0.15,
+        sustain: 0.1,
+        release: 0.1,
         baseFrequency: 80,
-        octaves: 2.5,
+        octaves: 3,
       },
     });
 
-    this._bass.volume.value = -6;
+    this._bass.volume.value = -4;
     this._bass.connect(this._bassFilter);
 
     // ---- 创建 Sequence: 128 个 step, 每个 step 是 16n ----
@@ -147,7 +147,7 @@ class AudioEngine {
     // ---- 触发 bass 轨道 ----
     const bassCell = matrix.bass?.[bar]?.[step];
     if (bassCell && bassCell.note) {
-      this._bass.triggerAttackRelease(bassCell.note, '8n', time, 0.9);
+      this._bass.triggerAttackRelease(bassCell.note, '16n', time, 0.9);
     }
   }
 
@@ -171,7 +171,7 @@ class AudioEngine {
     if (!this._isInitialized) {
       await this.init();
     }
-    this._bass.triggerAttackRelease(note, '8n', undefined, 0.9);
+    this._bass.triggerAttackRelease(note, '16n', undefined, 0.9);
     console.log(`[AudioEngine] 🎸 Bass preview: ${note}`);
   }
 
