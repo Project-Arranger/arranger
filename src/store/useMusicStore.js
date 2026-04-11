@@ -47,10 +47,12 @@ const useMusicStore = create((set, get) => ({
   currentStep: 0,
 
   // -------- Context Area 状态 --------
-  /** 当前显示详情编辑器的轨道 ('bass' | 'chord' | null) */
+  /** 当前显示详情编辑器的轨道 ('bass' | 'chord' | 'perc' | null) */
   activeContextTrack: null,
   /** 当前正在编辑的小节 index (0~7) */
   selectedBar: 0,
+  /** 选中的 Chord 实例（为了变体呼出）: { barIndex, stepIndex, baseChordId } */
+  selectedChordBlock: null,
 
   // -------- 矩阵数据 --------
   matrix: createEmptyMatrix(),
@@ -123,7 +125,9 @@ const useMusicStore = create((set, get) => ({
       if (stepIdx < STEPS_PER_BAR) {
         newBar[stepIdx] = {
           chordId,
+          baseChordId: chordId,
           notes: chord.notes,
+          variationId: chordId,
           isHead: i === 0, // 只有第一个 step 标记为 head（渲染积木块用）
         };
       }
@@ -169,6 +173,50 @@ const useMusicStore = create((set, get) => ({
   // -------- Actions: Context Area --------
   setActiveContextTrack: (trackId) => set({ activeContextTrack: trackId }),
   setSelectedBar: (barIndex) => set({ selectedBar: barIndex }),
+  setSelectedChordBlock: (blockData) => {
+    set({ selectedChordBlock: blockData });
+    if (blockData) {
+      set({ activeContextTrack: 'chord', selectedBar: blockData.barIndex });
+    }
+  },
+
+  /**
+   * 替换当前选中的和弦积木块属性（用于变体切换）
+   * @param {number} barIndex
+   * @param {number} stepIndex - head 的 stepIndex
+   * @param {string} variationId - 变体的 ID
+   * @param {string[]} notes - 变体组成的音数组
+   */
+  replaceChordBlock: (barIndex, stepIndex, variationId, notes) => {
+    const { matrix } = get();
+    const cell = matrix.chord[barIndex][stepIndex];
+    if (!cell || !cell.isHead) return;
+
+    const baseChordId = cell.baseChordId || cell.chordId;
+    const newBar = [...matrix.chord[barIndex]];
+
+    for (let i = 0; i < CHORD_SPAN; i++) {
+        const sIdx = stepIndex + i;
+        if (sIdx < STEPS_PER_BAR && newBar[sIdx]) {
+            newBar[sIdx] = {
+                ...newBar[sIdx],
+                variationId,
+                notes,
+                baseChordId,
+            };
+        }
+    }
+
+    const newTrack = [...matrix.chord];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        chord: newTrack,
+      },
+    });
+  },
 
   // -------- Actions: Bass 轨道专用 --------
 

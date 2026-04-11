@@ -1,0 +1,160 @@
+/* ===== ChordVariationDrawer ===== */
+
+.chord-variation-drawer {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: rgba(18, 18, 20, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 20;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 20px;
+}
+
+/* Header */
+.cv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.cv-header-title {
+  display: flex;
+  align-items:baseline;
+  gap: 12px;
+}
+
+.cv-base-chord {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.cv-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: 0.05em;
+}
+
+.cv-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.cv-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.cv-btn-danger {
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 80, 80, 0.2);
+}
+
+.cv-btn-danger:active {
+  background: rgba(255, 80, 80, 0.2);
+}
+
+.cv-btn-close {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cv-btn-close:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Horizontal List */
+.cv-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cv-list::-webkit-scrollbar {
+  display: none;
+}
+
+.cv-card {
+  flex: 0 0 auto;
+  min-width: 160px;
+  max-width: 180px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.cv-card:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.cv-card:active {
+  transform: scale(0.97);
+}
+
+.cv-card.active {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.cv-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cv-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #eee;
+}
+
+.cv-card-notes {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #888;
+}
+
+.cv-card-desc {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #aaa;
+  line-height: 1.4;
+}
+
+.cv-active-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}

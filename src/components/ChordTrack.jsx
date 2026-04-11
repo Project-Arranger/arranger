@@ -20,6 +20,8 @@ export default function ChordTrack({ dragChordId }) {
   const totalBars = useMusicStore((s) => s.totalBars);
   const setChordBlock = useMusicStore((s) => s.setChordBlock);
   const removeChordBlock = useMusicStore((s) => s.removeChordBlock);
+  const setSelectedChordBlock = useMusicStore((s) => s.setSelectedChordBlock);
+  const selectedChordBlock = useMusicStore((s) => s.selectedChordBlock);
   const trackRef = useRef(null);
 
   // 跟踪当前高亮的 drop slot
@@ -84,15 +86,19 @@ export default function ChordTrack({ dragChordId }) {
   }, [getSlotFromPoint, setChordBlock]);
 
   /**
-   * 点击已有积木块 → 移除
+   * 点击已有积木块 → 选中（弹出变体选项）
    */
   const handleSlotClick = useCallback(
-    (barIndex, beatIndex, hasChord) => {
-      if (hasChord) {
-        removeChordBlock(barIndex, beatIndex);
+    (barIndex, beatIndex, chordData) => {
+      if (chordData) {
+        setSelectedChordBlock({
+          barIndex,
+          stepIndex: beatIndex * CHORD_SPAN,
+          baseChordId: chordData.baseChordId || chordData.chordId
+        });
       }
     },
-    [removeChordBlock]
+    [setSelectedChordBlock]
   );
 
   // 渲染 8 bars, 每 bar 4 beats
@@ -103,7 +109,9 @@ export default function ChordTrack({ dragChordId }) {
       const stepIdx = beatIdx * CHORD_SPAN;
       const cellData = matrix.chord[barIdx][stepIdx];
       const chordId = cellData?.chordId || null;
-      const chord = chordId ? CHORD_LIBRARY[chordId] : null;
+      const variationId = cellData?.variationId || chordId; // 使用变体 ID 展示
+      const baseChordId = cellData?.baseChordId || chordId;
+      const chord = baseChordId ? CHORD_LIBRARY[baseChordId] : null;
 
       const isCurrentBeat =
         isPlaying &&
@@ -115,13 +123,18 @@ export default function ChordTrack({ dragChordId }) {
         highlightSlot.barIndex === barIdx &&
         highlightSlot.beatIndex === beatIdx;
 
+      const isSelected = 
+        selectedChordBlock &&
+        selectedChordBlock.barIndex === barIdx &&
+        selectedChordBlock.stepIndex === stepIdx;
+
       beats.push(
         <div
           key={`${barIdx}-${beatIdx}`}
-          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''}`}
+          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''}`}
           data-bar={barIdx}
           data-beat={beatIdx}
-          onClick={() => handleSlotClick(barIdx, beatIdx, !!chordId)}
+          onClick={() => handleSlotClick(barIdx, beatIdx, cellData)}
           style={
             chord
               ? {
@@ -137,7 +150,7 @@ export default function ChordTrack({ dragChordId }) {
           }
         >
           {chordId && (
-            <span className="chord-slot-label">{chord.label}</span>
+            <span className="chord-slot-label">{variationId}</span>
           )}
           {isCurrentBeat && chordId && <div className="chord-ripple" />}
         </div>
