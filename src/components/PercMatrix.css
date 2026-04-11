@@ -74,8 +74,8 @@
 }
 
 .perc-inst-label-spacer {
-  width: 48px;
-  min-width: 48px;
+  width: 80px;
+  min-width: 80px;
 }
 
 .perc-col-header {
@@ -107,12 +107,13 @@
 }
 
 .perc-inst-label {
-  width: 48px;
-  min-width: 48px;
+  width: 80px;
+  min-width: 80px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
+  justify-content: flex-start;
+  gap: 8px;
+  padding-left: 12px;
   font-size: 0.55rem;
   font-weight: 600;
   letter-spacing: 0.05em;

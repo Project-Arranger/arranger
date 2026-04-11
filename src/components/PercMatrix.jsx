@@ -3,7 +3,16 @@ import useMusicStore from '../store/useMusicStore';
 import { PERC_INSTRUMENTS, PERC_COLUMNS } from '../data/percNotes';
 import { eighthToStep } from '../data/bassNotes'; // reuse eighth mapping
 import audioEngine from '../audio/AudioEngine';
+import { KickIcon, SnareIcon, HihatIcon, TomIcon, ClapIcon } from './Icons';
 import './PercMatrix.css';
+
+const ICON_MAP = {
+  kick: KickIcon,
+  snare: SnareIcon,
+  hihat: HihatIcon,
+  tom: TomIcon,
+  clap: ClapIcon
+};
 
 /**
  * PercMatrix — 打击乐音序矩阵编辑器
@@ -97,9 +106,14 @@ export default function PercMatrix() {
         </div>
 
         {/* 乐器行 */}
-        {PERC_INSTRUMENTS.map(({ id, label, color }) => (
+        {PERC_INSTRUMENTS.map(({ id, label, color }) => {
+          const InstIcon = ICON_MAP[id];
+          return (
           <div key={id} className="perc-row">
-            <div className="perc-inst-label">{label}</div>
+            <div className="perc-inst-label">
+              {InstIcon && <span style={{ color: color, display: 'flex', alignItems: 'center' }}><InstIcon /></span>}
+              <span>{label}</span>
+            </div>
             {Array.from({ length: PERC_COLUMNS }, (_, colIdx) => {
               const stepIdx = eighthToStep(colIdx);
               const cell = barData[stepIdx];
@@ -136,7 +150,8 @@ export default function PercMatrix() {
               );
             })}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

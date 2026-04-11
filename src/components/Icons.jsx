@@ -49,3 +49,42 @@ export const LeadIcon = ({ active }) => (
     />
   </svg>
 );
+
+export const KickIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: 'block' }}>
+    <ellipse cx="9" cy="12" rx="4" ry="8" stroke="currentColor" strokeWidth="2" />
+    <path d="M9 4H15C17 4 19 8 19 12C19 16 17 20 15 20H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M19 12L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const SnareIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: 'block' }}>
+    <path d="M4 11H20V17C20 18.1 19.1 19 18 19H6C4.9 19 4 18.1 4 17V11Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    <path d="M4 15H20" stroke="currentColor" strokeWidth="2" strokeDasharray="2 3" />
+    <path d="M6 7L12 11M18 7L12 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const HihatIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: 'block' }}>
+    <path d="M4 9L20 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M4 14L20 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M12 7V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const TomIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: 'block' }}>
+    <ellipse cx="12" cy="8" rx="8" ry="3" stroke="currentColor" strokeWidth="2" />
+    <path d="M4 8V16C4 17.6569 7.58172 19 12 19C16.4183 19 20 17.6569 20 16V8" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
+
+export const ClapIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: 'block' }}>
+    <path d="M9 13C10.5 13 11.5 11 11.5 9.5L10 6C9.5 4.5 7.5 4.5 7 6L5.5 9V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M15 13C13.5 13 12.5 11 12.5 9.5L14 6C14.5 4.5 16.5 4.5 17 6L18.5 9V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M8 17H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);

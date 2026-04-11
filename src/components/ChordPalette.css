@@ -31,18 +31,21 @@
 /* Blocks container */
 .chord-palette-blocks {
   display: flex;
-  gap: 12px;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
-/* Individual chord block (Chip style) */
+/* Individual chord block (Square proportions) */
 .chord-block {
-  flex: 1;
-  min-height: 44px;
+  width: 64px;
+  height: 64px;
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: 8px;
+  gap: 4px;
+  border-radius: 12px;
   cursor: grab;
   position: relative;
   overflow: hidden;
@@ -51,13 +54,11 @@
   user-select: none;
 
   /* Gradient background using chord color */
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--chord-color) 22%, transparent),
-    color-mix(in srgb, var(--chord-color) 10%, transparent)
-  );
+  background: linear-gradient(145deg,
+      color-mix(in srgb, var(--chord-color) 22%, transparent),
+      color-mix(in srgb, var(--chord-color) 10%, transparent));
   border: 1.5px solid color-mix(in srgb, var(--chord-color) 35%, transparent);
-  
+
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -66,26 +67,24 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(
-    ellipse at 50% 0%,
-    color-mix(in srgb, var(--chord-color) 15%, transparent) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(ellipse at 50% 0%,
+      color-mix(in srgb, var(--chord-color) 15%, transparent) 0%,
+      transparent 70%);
   pointer-events: none;
 }
 
 .chord-block:hover {
   transform: scale(1.05);
   box-shadow: 0 0 24px var(--chord-glow),
-              0 4px 16px rgba(0, 0, 0, 0.4);
+    0 4px 16px rgba(0, 0, 0, 0.4);
   border-color: color-mix(in srgb, var(--chord-color) 60%, transparent);
 }
 
 .chord-block:active {
   transform: scale(1.12);
   box-shadow: 0 0 40px var(--chord-glow),
-              0 0 60px var(--chord-glow),
-              0 4px 20px rgba(0, 0, 0, 0.5);
+    0 0 60px var(--chord-glow),
+    0 4px 20px rgba(0, 0, 0, 0.5);
   border-color: var(--chord-color);
 }
 
@@ -96,18 +95,18 @@
 
 /* Label */
 .chord-block-label {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 800;
   color: #fff;
   text-shadow: 0 0 12px var(--chord-glow);
   z-index: 1;
 }
 
 .chord-block-notes {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   z-index: 1;
 }
 
