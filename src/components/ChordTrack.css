@@ -37,7 +37,8 @@
 .chord-track-grid {
   flex: 1;
   display: flex;
-  padding: 6px;
+  padding: 6px 0;
+  margin: 0 6px;
 }
 
 /* One bar = 4 beat slots */

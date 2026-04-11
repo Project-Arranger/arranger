@@ -47,7 +47,8 @@
 .track-row-grid {
   flex: 1;
   display: flex;
-  padding: 4px 6px;
+  padding: 4px 0;
+  margin: 0 6px;
 }
 
 .track-row-bar {

@@ -54,6 +54,10 @@ const useMusicStore = create((set, get) => ({
   /** 选中的 Chord 实例（为了变体呼出）: { barIndex, stepIndex, baseChordId } */
   selectedChordBlock: null,
 
+  // -------- Playhead Scrubbing 状态 --------
+  /** 用户拖拽进度时的虚拟进度 [0.0 ~ 1.0]，如果为 null 则显示真实进度 */
+  dragProgress: null,
+
   // -------- 矩阵数据 --------
   matrix: createEmptyMatrix(),
 
@@ -76,6 +80,11 @@ const useMusicStore = create((set, get) => ({
    * 更新当前播放位置（由 AudioEngine 调用）
    */
   setPosition: (bar, step) => set({ currentBar: bar, currentStep: step }),
+
+  /**
+   * 设置用户的拖拽视窗进度（挂起实际的引擎定位）
+   */
+  setDragProgress: (progress) => set({ dragProgress: progress }),
 
   // -------- Actions: Matrix 编辑 --------
 

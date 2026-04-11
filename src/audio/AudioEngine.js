@@ -284,6 +284,32 @@ class AudioEngine {
   }
 
   /**
+   * 跳转到指定位置 (Seek)
+   * @param {number} bar - 0~7
+   * @param {number} step - 0~15
+   */
+  async seekToStep(bar, step) {
+    if (!this._isInitialized) {
+      await this.init();
+    }
+    const globalStep = bar * STEPS_PER_BAR + step;
+    this._currentGlobalStep = globalStep;
+
+    // 更新 Tone.Transport 内部时间戳与 Sequence 进度
+    // Tone.Sequence 的进度对应 seconds。16n 的时值取决于 BPM
+    const secondsPerStep = Tone.Time('16n').toSeconds();
+    const targetSeconds = globalStep * secondsPerStep;
+
+    // 跳转 Transport 并同步更新 Sequence 内部指针
+    Tone.getTransport().seconds = targetSeconds;
+    
+    // 同步 Zustand store 的 UI 状态
+    useMusicStore.getState().setPosition(bar, step);
+    
+    console.log(`[AudioEngine] ⏩ Seek to ${bar + 1}:${step + 1} (${globalStep} steps)`);
+  }
+
+  /**
    * 暂停（保持当前位置）
    */
   pause() {
