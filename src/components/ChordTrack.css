@@ -7,6 +7,13 @@
   border-radius: 12px;
   overflow: visible; /* Don't hide overflow, so drag box shows and borders aren't clipped */
   flex-shrink: 0; /* CRITICAL: Prevent track from vertically squishing */
+  transition: all 0.2s ease;
+}
+
+.chord-track.active-track {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 0 1.5px rgba(160, 216, 239, 0.25);
+  z-index: 2;
 }
 
 /* Track label */

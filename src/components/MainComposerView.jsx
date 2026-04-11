@@ -127,7 +127,10 @@ export default function MainComposerView() {
         onTouchStart={onTouchStart}
         style={{ position: 'relative' }}
       >
-        <ChordTrack dragChordId={dragChordId} />
+        <ChordTrack 
+          dragChordId={dragChordId} 
+          onClick={() => handleTrackClick('chord')}
+        />
         <TrackRow
           trackId="bass"
           Icon={BassIcon}
@@ -140,7 +143,12 @@ export default function MainComposerView() {
           label="PERC" 
           onClick={() => handleTrackClick('perc')}
         />
-        <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" />
+        <TrackRow 
+          trackId="lead" 
+          Icon={LeadIcon} 
+          label="LEAD" 
+          onClick={() => handleTrackClick('lead')}
+        />
       </div>
 
       {/* 底部动态编辑区 */}

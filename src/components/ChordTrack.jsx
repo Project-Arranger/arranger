@@ -13,8 +13,9 @@ const BEATS_PER_BAR = 4; // 每小节 4 拍
  * 结构: 8 bars × 4 beats = 32 个 slot
  * 每个 slot 可以容纳一个和弦积木块
  */
-export default function ChordTrack({ dragChordId }) {
+export default function ChordTrack({ dragChordId, onClick }) {
   const matrix = useMusicStore((s) => s.matrix);
+  const activeContextTrack = useMusicStore((s) => s.activeContextTrack);
   const currentBar = useMusicStore((s) => s.currentBar);
   const currentStep = useMusicStore((s) => s.currentStep);
   const isPlaying = useMusicStore((s) => s.isPlaying);
@@ -167,10 +168,18 @@ export default function ChordTrack({ dragChordId }) {
     );
   }
 
+  const isActive = !activeContextTrack || activeContextTrack === 'chord';
+
   return (
-    <div className="chord-track" id="chord-track" ref={trackRef}>
+    <div 
+      className={`chord-track ${isActive ? 'active-track' : ''}`} 
+      id="chord-track" 
+      ref={trackRef}
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+    >
       <div className="track-label">
-        <span className="track-label-icon"><ChordIcon active={true} /></span>
+        <span className="track-label-icon"><ChordIcon active={isActive} /></span>
         <span className="track-label-text">CHORD</span>
       </div>
       <div className="chord-track-grid">
