@@ -128,10 +128,12 @@ export default function ChordTrack({ dragChordId }) {
         selectedChordBlock.barIndex === barIdx &&
         selectedChordBlock.stepIndex === stepIdx;
 
+      const isTransition = cellData?.isTransition;
+
       beats.push(
         <div
           key={`${barIdx}-${beatIdx}`}
-          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''}`}
+          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''} ${isTransition ? 'transition' : ''}`}
           data-bar={barIdx}
           data-beat={beatIdx}
           onClick={() => handleSlotClick(barIdx, beatIdx, cellData)}

@@ -218,6 +218,42 @@ const useMusicStore = create((set, get) => ({
     });
   },
 
+  /**
+   * Organize 功能：对整个小节执行切分转换
+   * 前两拍保留原和弦，后两拍替换为过渡和弦
+   */
+  applyOrganizeTransition: (barIndex, baseChordId, tranChordId, tranNotes) => {
+    const { matrix, setChordBlock } = get();
+    // 强制写入第 1、2 拍为 baseChordId
+    setChordBlock(barIndex, 0, baseChordId);
+    setChordBlock(barIndex, 1, baseChordId);
+
+    // 获取最新
+    const newBar = [...get().matrix.chord[barIndex]];
+
+    // 将第 3、4 拍（step 8 到 15）改写为过渡和弦
+    for (let i = 8; i < STEPS_PER_BAR; i++) {
+        newBar[i] = {
+            chordId: tranChordId,
+            baseChordId: baseChordId, // 仍保留 baseChordId 记录渊源
+            notes: tranNotes,
+            variationId: tranChordId,
+            isHead: i === 8, // 第二部分的头
+            isTransition: true
+        };
+    }
+
+    const newTrack = [...get().matrix.chord];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...get().matrix,
+        chord: newTrack,
+      },
+    });
+  },
+
   // -------- Actions: Bass 轨道专用 --------
 
   /**

@@ -66,4 +66,27 @@ const CHORD_VARIATIONS = {
   ]
 };
 
-export { CHORD_LIBRARY, AVAILABLE_CHORDS, CHORD_VARIATIONS };
+/**
+ * Organize 切分过渡专用映射
+ * 前两拍保持原本根音，后两拍切分为此列表中的选项
+ */
+const ORGANIZE_TRANSITIONS = {
+  C: [
+    { id: 'Em/B', label: 'Em/B', notes: ['B3', 'E4', 'G4'], desc: '平滑下行低音过渡' },
+    { id: 'G7', label: 'G7', notes: ['G3', 'B3', 'D4', 'F4'], desc: '强烈的属和弦回归' }
+  ],
+  Am: [
+    { id: 'G/B', label: 'G/B', notes: ['B3', 'D4', 'G4'], desc: '向上的明亮度连接' },
+    { id: 'E7', label: 'E7', notes: ['E3', 'G#3', 'B3', 'D4'], desc: '带张力的经典下属引导' }
+  ],
+  F: [
+    { id: 'Fm', label: 'Fm', notes: ['F3', 'Ab3', 'C4'], desc: '突然暗淡的离调色彩' },
+    { id: 'C/E', label: 'C/E', notes: ['E3', 'G3', 'C4'], desc: '平稳的大调归位过渡' }
+  ],
+  G: [
+    { id: 'Abdim', label: 'Abdim', notes: ['Ab3', 'B3', 'D4', 'F4'], desc: '极度紧张的减和弦色彩' },
+    { id: 'D/F#', label: 'D/F#', notes: ['Gb3', 'A3', 'D4'], desc: '经典的流行下行连接' }
+  ]
+};
+
+export { CHORD_LIBRARY, AVAILABLE_CHORDS, CHORD_VARIATIONS, ORGANIZE_TRANSITIONS };

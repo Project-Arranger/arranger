@@ -60,6 +60,23 @@
   touch-action: manipulation;
 }
 
+.cv-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cv-btn-secondary:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cv-btn-active {
+  background: rgba(122, 236, 240, 0.15);
+  color: #7aecf0;
+  border: 1px solid rgba(122, 236, 240, 0.3);
+  box-shadow: 0 0 10px rgba(122, 236, 240, 0.2);
+}
+
 .cv-btn-danger {
   background: rgba(255, 80, 80, 0.1);
   color: #ff6b6b;

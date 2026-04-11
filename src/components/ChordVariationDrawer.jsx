@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import useMusicStore from '../store/useMusicStore';
-import { CHORD_VARIATIONS, CHORD_LIBRARY } from '../data/chords';
+import { CHORD_VARIATIONS, CHORD_LIBRARY, ORGANIZE_TRANSITIONS } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
 import './ChordVariationDrawer.css';
 
@@ -9,9 +10,12 @@ import './ChordVariationDrawer.css';
  * 当用户点击已放置的 Chord 积木时，从下方弹出。
  */
 export default function ChordVariationDrawer() {
+  const [isOrganizeMode, setIsOrganizeMode] = useState(false);
+  
   const selectedChordBlock = useMusicStore((s) => s.selectedChordBlock);
   const setSelectedChordBlock = useMusicStore((s) => s.setSelectedChordBlock);
   const replaceChordBlock = useMusicStore((s) => s.replaceChordBlock);
+  const applyOrganizeTransition = useMusicStore((s) => s.applyOrganizeTransition);
   const removeChordBlock = useMusicStore((s) => s.removeChordBlock);
   const matrix = useMusicStore((s) => s.matrix);
 
@@ -19,16 +23,19 @@ export default function ChordVariationDrawer() {
 
   const { barIndex, stepIndex, baseChordId } = selectedChordBlock;
   const variations = CHORD_VARIATIONS[baseChordId] || [];
+  const transitions = ORGANIZE_TRANSITIONS[baseChordId] || [];
   
-  // 获取当前实际选择的变体 ID
+  // 获取当前实际选择的变体/过渡 ID
   const cell = matrix.chord[barIndex]?.[stepIndex];
   const currentVariationId = cell?.variationId || cell?.chordId;
   const baseColor = CHORD_LIBRARY[baseChordId]?.color || '#fff';
 
   const handleSelectVariation = async (variation) => {
-    // 替换和弦数据
-    replaceChordBlock(barIndex, stepIndex, variation.id, variation.notes);
-    // 即时预览
+    if (isOrganizeMode) {
+      applyOrganizeTransition(barIndex, baseChordId, variation.id, variation.notes);
+    } else {
+      replaceChordBlock(barIndex, stepIndex, variation.id, variation.notes);
+    }
     await audioEngine.playChordPreview(variation.notes);
   };
 
@@ -52,9 +59,17 @@ export default function ChordVariationDrawer() {
       <div className="cv-header">
         <div className="cv-header-title">
           <span className="cv-base-chord" style={{ color: baseColor }}>{baseChordId}</span>
-          <span className="cv-subtitle">Variations Editor ({currentBarString})</span>
+          <span className="cv-subtitle">
+            {isOrganizeMode ? `Transitions (Bar ${barIndex + 1})` : `Variations (Bar ${barIndex + 1})`}
+          </span>
         </div>
         <div className="cv-actions">
+          <button 
+            className={`cv-btn ${isOrganizeMode ? 'cv-btn-active' : 'cv-btn-secondary'}`} 
+            onClick={() => setIsOrganizeMode(!isOrganizeMode)}
+          >
+            {isOrganizeMode ? 'Variations' : 'Organize'}
+          </button>
           <button className="cv-btn cv-btn-danger" onClick={handleRemove}>
             Delete
           </button>
@@ -65,7 +80,7 @@ export default function ChordVariationDrawer() {
       </div>
 
       <div className="cv-list">
-        {variations.map((v) => {
+        {(isOrganizeMode ? transitions : variations).map((v) => {
           const isActive = v.id === currentVariationId;
           return (
             <div

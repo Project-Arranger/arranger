@@ -136,6 +136,18 @@
   transform: scale(0.95);
 }
 
+/* Visualization for cut/transition blocks */
+.chord-slot.transition {
+  border-left: 2px dashed rgba(255, 255, 255, 0.4);
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--chord-color) 15%, transparent),
+    color-mix(in srgb, var(--chord-color) 15%, transparent) 8px,
+    color-mix(in srgb, var(--chord-color) 5%, transparent) 8px,
+    color-mix(in srgb, var(--chord-color) 5%, transparent) 16px
+  );
+}
+
 .chord-slot-label {
   font-size: 0.75rem;
   font-weight: 700;

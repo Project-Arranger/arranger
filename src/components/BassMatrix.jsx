@@ -20,6 +20,15 @@ const CHORD_TO_BASS_GUIDE = {
   'Am': 'A2',
   'F': 'F2',
   'G': 'G2',
+  // Transitions
+  'Em/B': 'B2',
+  'G7': 'G2',
+  'G/B': 'B2',
+  'E7': 'E2',
+  'Fm': 'F2',
+  'C/E': 'E2',
+  'Abdim': 'Ab2',
+  'D/F#': 'Gb2',
 };
 
 export default function BassMatrix() {
