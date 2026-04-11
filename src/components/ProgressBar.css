@@ -35,18 +35,16 @@
   border-color: rgba(122, 236, 240, 0.15);
 }
 
-.progress-fill {
+.global-playhead-line {
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: linear-gradient(90deg, rgba(122, 236, 240, 0.3), rgba(122, 236, 240, 0.5));
-  transition: width 0.08s linear;
-  border-radius: 3px;
-}
-
-.progress-segment.past .progress-fill {
-  background: rgba(122, 236, 240, 0.15);
+  top: -10px;
+  bottom: -10px;
+  width: 2px;
+  background: #A0D8EF;
+  box-shadow: 0 0 15px #A0D8EF, 0 0 5px #fff;
+  z-index: 100;
+  border-radius: 2px;
+  pointer-events: none;
 }
 
 .progress-segment-label {

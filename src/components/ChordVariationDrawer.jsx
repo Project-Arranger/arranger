@@ -51,10 +51,10 @@ export default function ChordVariationDrawer() {
   return (
     <motion.div
       className="chord-variation-drawer"
-      initial={{ y: '100%', opacity: 0.5 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: '100%', opacity: 0 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', damping: 22, stiffness: 200 }}
     >
       <div className="cv-header">
         <div className="cv-header-title">
