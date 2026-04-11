@@ -3,12 +3,11 @@
 .track-row {
   display: flex;
   align-items: stretch;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
+  background: #1A1A1A;
+  border-radius: 12px;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  transition: all 0.2s ease;
 }
 
 .track-row[style*="cursor: pointer"]:hover {
@@ -48,18 +47,14 @@
 .track-row-grid {
   flex: 1;
   display: flex;
-  gap: 2px;
   padding: 4px 6px;
 }
 
 .track-row-bar {
   flex: 1;
   display: flex;
-  gap: 1px;
-  padding: 2px;
-  border-radius: 4px;
+  padding: 2px 0;
   border: 1px solid transparent;
-  transition: border-color 0.2s;
 }
 
 .track-row-bar.current {
@@ -68,14 +63,17 @@
 
 .track-row-step {
   flex: 1;
-  min-height: 28px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.02);
-  transition: background 0.1s;
+  min-height: 48px; /* 1.5x larger */
+  background: transparent;
+  border-right: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.track-row-step:last-child {
+  border-right: none;
 }
 
 .track-row-step.beat-start {
-  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 1px dashed rgba(255, 255, 255, 0.15);
 }
 
 .track-row-step.active {

@@ -34,16 +34,15 @@
   gap: 12px;
 }
 
-/* Individual chord block */
+/* Individual chord block (Chip style) */
 .chord-block {
   flex: 1;
-  min-height: 72px;
+  min-height: 44px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
-  gap: 4px;
-  border-radius: 14px;
+  gap: 8px;
+  border-radius: 8px;
   cursor: grab;
   position: relative;
   overflow: hidden;
@@ -97,18 +96,18 @@
 
 /* Label */
 .chord-block-label {
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #fff;
   text-shadow: 0 0 12px var(--chord-glow);
   z-index: 1;
 }
 
 .chord-block-notes {
-  font-size: 0.5rem;
+  font-size: 0.55rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.05em;
   z-index: 1;
 }
 

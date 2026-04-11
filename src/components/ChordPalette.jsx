@@ -64,14 +64,14 @@ export default function ChordPalette({ onDragStart, onDragEnd }) {
               onDrag={(e, info) => handleDrag(e, info, chordId)}
               onDragEnd={(e, info) => handleDragEnd(e, info, chordId)}
               whileDrag={{ 
-                scale: 1.1, 
-                boxShadow: `0 15px 30px rgba(0,0,0,0.5), 0 0 20px ${chord.glowColor}` 
+                scale: 0.85, 
+                boxShadow: `0 15px 30px rgba(160,216,239,0.5), 0 0 40px #A0D8EF, inset 0 0 10px #A0D8EF` 
               }}
               style={{
                 '--chord-color': chord.color,
                 '--chord-glow': chord.glowColor,
-                zIndex: isDragging ? 9999 : 1, // 确保拖拽时在最上层
-                borderRadius: '12px',
+                zIndex: isDragging ? 9999 : 1,
+                borderRadius: '8px',
               }}
               className={`chord-block ${isDragging ? 'dragging' : ''}`}
             >

@@ -2,6 +2,7 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import useMusicStore, { CHORD_SPAN } from '../store/useMusicStore';
 import { CHORD_LIBRARY } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
+import { ChordIcon } from './Icons';
 import './ChordTrack.css';
 
 const BEATS_PER_BAR = 4; // 每小节 4 拍
@@ -169,7 +170,7 @@ export default function ChordTrack({ dragChordId }) {
   return (
     <div className="chord-track" id="chord-track" ref={trackRef}>
       <div className="track-label">
-        <span className="track-label-icon">🎹</span>
+        <span className="track-label-icon"><ChordIcon active={true} /></span>
         <span className="track-label-text">CHORD</span>
       </div>
       <div className="chord-track-grid">

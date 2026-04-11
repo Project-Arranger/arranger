@@ -5,6 +5,7 @@ import ProgressBar from './ProgressBar';
 import ChordTrack from './ChordTrack';
 import TrackRow from './TrackRow';
 import ContextArea from './ContextArea';
+import { BassIcon, PercIcon, LeadIcon } from './Icons';
 import './MainComposerView.css';
 
 /**
@@ -55,17 +56,17 @@ export default function MainComposerView() {
         <ChordTrack dragChordId={dragChordId} />
         <TrackRow
           trackId="bass"
-          icon="🎸"
+          Icon={BassIcon}
           label="BASS"
           onClick={() => handleTrackClick('bass')}
         />
         <TrackRow 
           trackId="perc" 
-          icon="🥁" 
+          Icon={PercIcon} 
           label="PERC" 
           onClick={() => handleTrackClick('perc')}
         />
-        <TrackRow trackId="lead" icon="🎵" label="LEAD" />
+        <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" />
       </div>
 
       {/* 底部动态编辑区 */}

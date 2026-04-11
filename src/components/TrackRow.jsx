@@ -5,7 +5,7 @@ import './TrackRow.css';
  * TrackRow — 占位轨道行（Bass / Perc / Lead）
  * 目前仅显示空的矩阵网格，未来实现具体交互
  */
-export default function TrackRow({ trackId, icon, label, onClick }) {
+export default function TrackRow({ trackId, Icon, label, onClick }) {
   const totalBars = useMusicStore((s) => s.totalBars);
   const stepsPerBar = useMusicStore((s) => s.stepsPerBar);
   const currentBar = useMusicStore((s) => s.currentBar);
@@ -24,7 +24,7 @@ export default function TrackRow({ trackId, icon, label, onClick }) {
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       <div className="track-row-label">
-        <span className="track-row-icon">{icon}</span>
+        <span className="track-row-icon">{Icon && <Icon active={isActive} />}</span>
         <span className="track-row-text">{label}</span>
       </div>
       <div className="track-row-grid">

@@ -12,56 +12,33 @@
 .progress-segments {
   flex: 1;
   display: flex;
-  gap: 3px;
-  height: 28px;
-}
-
-.progress-segment {
-  flex: 1;
-  position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: border-color 0.15s;
-}
-
-.progress-segment.current {
-  border-color: rgba(122, 236, 240, 0.4);
-  box-shadow: 0 0 8px rgba(122, 236, 240, 0.15);
-}
-
-.progress-segment.past {
-  border-color: rgba(122, 236, 240, 0.15);
-}
-
-.global-playhead-line {
-  position: absolute;
-  top: -10px;
-  bottom: -10px;
-  width: 2px;
-  background: #A0D8EF;
-  box-shadow: 0 0 15px #A0D8EF, 0 0 5px #fff;
-  z-index: 100;
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-.progress-segment-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
+  gap: 8px; /* discrete gaps */
+  height: 4px; /* drastically thin */
   align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.25);
-  z-index: 1;
-  pointer-events: none;
 }
 
-.progress-segment.current .progress-segment-label {
-  color: rgba(255, 255, 255, 0.7);
+.progress-light-slot {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08); /* disabled base */
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-light-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #6BBBDD, #A0D8EF);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(160, 216, 239, 0.8), 0 0 20px rgba(160, 216, 239, 0.4);
+}
+
+.progress-light-slot.past .progress-light-fill {
+  background: rgba(160, 216, 239, 0.4); /* dim down past segments slightly */
+  box-shadow: 0 0 4px rgba(160, 216, 239, 0.2);
 }
 
 .progress-info {
