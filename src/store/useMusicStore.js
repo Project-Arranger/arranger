@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { CHORD_LIBRARY } from '../data/chords';
+import { eighthToStep } from '../data/bassNotes';
 
 /**
  * 生成 8 小节的矩阵数据结构
@@ -44,6 +45,12 @@ const useMusicStore = create((set, get) => ({
   // 当前播放位置 (0-indexed)
   currentBar: 0,
   currentStep: 0,
+
+  // -------- Context Area 状态 --------
+  /** 当前显示详情编辑器的轨道 ('bass' | 'chord' | null) */
+  activeContextTrack: null,
+  /** 当前正在编辑的小节 index (0~7) */
+  selectedBar: 0,
 
   // -------- 矩阵数据 --------
   matrix: createEmptyMatrix(),
@@ -155,6 +162,43 @@ const useMusicStore = create((set, get) => ({
       matrix: {
         ...matrix,
         chord: newTrack,
+      },
+    });
+  },
+
+  // -------- Actions: Context Area --------
+  setActiveContextTrack: (trackId) => set({ activeContextTrack: trackId }),
+  setSelectedBar: (barIndex) => set({ selectedBar: barIndex }),
+
+  // -------- Actions: Bass 轨道专用 --------
+
+  /**
+   * 切换 bass 矩阵中某个音符的开/关
+   * @param {number} barIndex - 0~7
+   * @param {number} eighthIndex - 0~7（八分音符位）
+   * @param {string} note - 'C2' ~ 'B2'
+   */
+  toggleBassNote: (barIndex, eighthIndex, note) => {
+    const { matrix } = get();
+    const stepIndex = eighthToStep(eighthIndex);
+    const newBar = [...matrix.bass[barIndex]];
+
+    const existing = newBar[stepIndex];
+    if (existing && existing.note === note) {
+      // 已存在 → 关闭
+      newBar[stepIndex] = null;
+    } else {
+      // 不存在或不同音符 → 写入
+      newBar[stepIndex] = { note, velocity: 100 };
+    }
+
+    const newTrack = [...matrix.bass];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        bass: newTrack,
       },
     });
   },

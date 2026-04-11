@@ -7,6 +7,18 @@
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.04);
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.track-row[style*="cursor: pointer"]:hover {
+  background: rgba(122, 236, 240, 0.03);
+  border-color: rgba(122, 236, 240, 0.15);
+}
+
+.track-row.active-track {
+  background: rgba(122, 236, 240, 0.06);
+  border-color: rgba(122, 236, 240, 0.3);
+  box-shadow: 0 0 15px rgba(122, 236, 240, 0.1);
 }
 
 .track-row-label {

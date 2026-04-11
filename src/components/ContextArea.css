@@ -1,0 +1,43 @@
+/* ===== ContextArea ===== */
+
+.context-area {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(122, 236, 240, 0.06);
+}
+
+/* Tab bar */
+.context-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.context-tab {
+  padding: 8px 16px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #444;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.context-tab:hover {
+  color: #666;
+}
+
+.context-tab.active {
+  color: #7aecf0;
+  border-bottom-color: rgba(122, 236, 240, 0.5);
+  text-shadow: 0 0 8px rgba(122, 236, 240, 0.2);
+}

@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
+import useMusicStore from '../store/useMusicStore';
 import TransportBar from './TransportBar';
 import ProgressBar from './ProgressBar';
 import ChordTrack from './ChordTrack';
 import TrackRow from './TrackRow';
-import ChordPalette from './ChordPalette';
+import ContextArea from './ContextArea';
 import './MainComposerView.css';
 
 /**
@@ -14,14 +15,17 @@ import './MainComposerView.css';
  *   ├─ ProgressBar (8 小节进度) ──────┤
  *   ├─ TrackOverview ─────────────────┤
  *   │   CHORD: 和弦积木轨道           │
- *   │   BASS:  Bass 占位              │
+ *   │   BASS:  Bass 轨道              │
  *   │   PERC:  打击占位               │
  *   │   LEAD:  旋律占位               │
- *   ├─ ChordPalette (底部积木面板) ───┤
+ *   ├─ ContextArea (底部动态编辑区) ──┤
+ *   │   [Chord Tab] [Bass Tab]        │
+ *   │   → ChordPalette / BassMatrix   │
  *   └────────────────────────────────┘
  */
 export default function MainComposerView() {
   const [dragChordId, setDragChordId] = useState(null);
+  const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
 
   const handleDragStart = useCallback((chordId) => {
     setDragChordId(chordId);
@@ -30,6 +34,13 @@ export default function MainComposerView() {
   const handleDragEnd = useCallback(() => {
     setDragChordId(null);
   }, []);
+
+  const handleTrackClick = useCallback(
+    (trackId) => {
+      setActiveContextTrack(trackId);
+    },
+    [setActiveContextTrack]
+  );
 
   return (
     <div className="main-composer" id="main-composer-view">
@@ -42,13 +53,18 @@ export default function MainComposerView() {
       {/* 轨道概览区 */}
       <div className="track-overview" id="track-overview">
         <ChordTrack dragChordId={dragChordId} />
-        <TrackRow trackId="bass" icon="🎸" label="BASS" />
+        <TrackRow
+          trackId="bass"
+          icon="🎸"
+          label="BASS"
+          onClick={() => handleTrackClick('bass')}
+        />
         <TrackRow trackId="perc" icon="🥁" label="PERC" />
         <TrackRow trackId="lead" icon="🎵" label="LEAD" />
       </div>
 
-      {/* 底部和弦积木面板 */}
-      <ChordPalette
+      {/* 底部动态编辑区 */}
+      <ContextArea
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       />

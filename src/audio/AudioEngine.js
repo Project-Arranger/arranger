@@ -22,7 +22,9 @@ class AudioEngine {
     this._isInitialized = false;
     this._currentGlobalStep = 0;
     this._epiano = null;
+    this._bass = null;
     this._reverb = null;
+    this._bassFilter = null;
   }
 
   /**
@@ -71,6 +73,34 @@ class AudioEngine {
     this._epiano.volume.value = -8;
     this._epiano.connect(this._reverb);
 
+    // ---- 创建 Bass 音色（MonoSynth + LowPass）----
+    this._bassFilter = new Tone.Filter({
+      type: 'lowpass',
+      frequency: 400,
+      rolloff: -24,
+    }).toDestination();
+
+    this._bass = new Tone.MonoSynth({
+      oscillator: { type: 'triangle' },
+      envelope: {
+        attack: 0.01,
+        decay: 0.3,
+        sustain: 0.4,
+        release: 0.8,
+      },
+      filterEnvelope: {
+        attack: 0.01,
+        decay: 0.2,
+        sustain: 0.2,
+        release: 0.5,
+        baseFrequency: 80,
+        octaves: 2.5,
+      },
+    });
+
+    this._bass.volume.value = -6;
+    this._bass.connect(this._bassFilter);
+
     // ---- 创建 Sequence: 128 个 step, 每个 step 是 16n ----
     const steps = Array.from({ length: TOTAL_STEPS }, (_, i) => i);
 
@@ -113,6 +143,12 @@ class AudioEngine {
     if (chordCell && chordCell.notes) {
       this._epiano.triggerAttackRelease(chordCell.notes, '8n', time, 0.7);
     }
+
+    // ---- 触发 bass 轨道 ----
+    const bassCell = matrix.bass?.[bar]?.[step];
+    if (bassCell && bassCell.note) {
+      this._bass.triggerAttackRelease(bassCell.note, '8n', time, 0.9);
+    }
   }
 
   /**
@@ -125,6 +161,18 @@ class AudioEngine {
     }
     this._epiano.triggerAttackRelease(notes, '4n', undefined, 0.8);
     console.log(`[AudioEngine] 🎹 Preview: ${notes.join(', ')}`);
+  }
+
+  /**
+   * 即时播放一个 bass 音符（用于矩阵点击反馈）
+   * @param {string} note - 如 'C2'
+   */
+  async playBassPreview(note) {
+    if (!this._isInitialized) {
+      await this.init();
+    }
+    this._bass.triggerAttackRelease(note, '8n', undefined, 0.9);
+    console.log(`[AudioEngine] 🎸 Bass preview: ${note}`);
   }
 
   /**
@@ -201,6 +249,14 @@ class AudioEngine {
     if (this._epiano) {
       this._epiano.dispose();
       this._epiano = null;
+    }
+    if (this._bass) {
+      this._bass.dispose();
+      this._bass = null;
+    }
+    if (this._bassFilter) {
+      this._bassFilter.dispose();
+      this._bassFilter = null;
     }
     if (this._reverb) {
       this._reverb.dispose();
