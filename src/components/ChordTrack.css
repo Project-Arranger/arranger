@@ -55,14 +55,23 @@
 }
 
 @keyframes bar-breathing {
-  0%, 100% { box-shadow: 0 0 5px rgba(160, 216, 239, 0.05); }
-  50% { box-shadow: 0 0 15px rgba(160, 216, 239, 0.3); border-color: rgba(160, 216, 239, 0.6); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(160, 216, 239, 0.05);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+    border-color: rgba(160, 216, 239, 0.6);
+  }
 }
 
 /* Individual beat slot */
 .chord-slot {
   flex: 1;
-  min-height: 52px; /* Similar to TrackRow's 1.5x upscaling */
+  min-height: 52px;
+  /* Similar to TrackRow's 1.5x upscaling */
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -88,7 +97,7 @@
   background: rgba(122, 236, 240, 0.08);
   border: 1px solid var(--chord-color, rgba(122, 236, 240, 0.3));
   box-shadow: inset 0 0 20px var(--chord-glow, rgba(122, 236, 240, 0.15)),
-              0 0 12px var(--chord-glow, rgba(122, 236, 240, 0.1));
+    0 0 12px var(--chord-glow, rgba(122, 236, 240, 0.1));
   transform: scale(1.02);
 }
 
@@ -111,17 +120,22 @@
 }
 
 @keyframes pulse-border {
-  0% { opacity: 0.5; box-shadow: 0 0 10px rgba(160, 216, 239, 0.2); }
-  100% { opacity: 1; box-shadow: 0 0 15px rgba(160, 216, 239, 0.6); }
+  0% {
+    opacity: 0.5;
+    box-shadow: 0 0 10px rgba(160, 216, 239, 0.2);
+  }
+
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(160, 216, 239, 0.6);
+  }
 }
 
 /* Filled chord block */
 .chord-slot.filled {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--chord-color) 25%, transparent),
-    color-mix(in srgb, var(--chord-color) 12%, transparent)
-  );
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--chord-color) 25%, transparent),
+      color-mix(in srgb, var(--chord-color) 12%, transparent));
   border: none;
   box-shadow: 0 0 12px var(--chord-glow, rgba(160, 216, 239, 0.2));
 }
@@ -138,13 +152,11 @@
 /* Visualization for cut/transition blocks */
 .chord-slot.transition {
   border-left: 2px dashed rgba(255, 255, 255, 0.4);
-  background: repeating-linear-gradient(
-    -45deg,
-    color-mix(in srgb, var(--chord-color) 15%, transparent),
-    color-mix(in srgb, var(--chord-color) 15%, transparent) 8px,
-    color-mix(in srgb, var(--chord-color) 5%, transparent) 8px,
-    color-mix(in srgb, var(--chord-color) 5%, transparent) 16px
-  );
+  background: repeating-linear-gradient(-45deg,
+      color-mix(in srgb, var(--chord-color) 15%, transparent),
+      color-mix(in srgb, var(--chord-color) 15%, transparent) 8px,
+      color-mix(in srgb, var(--chord-color) 5%, transparent) 8px,
+      color-mix(in srgb, var(--chord-color) 5%, transparent) 16px);
 }
 
 .chord-slot-label {
@@ -166,11 +178,9 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(
-    circle at center,
-    var(--chord-glow, rgba(122, 236, 240, 0.3)) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle at center,
+      var(--chord-glow, rgba(122, 236, 240, 0.3)) 0%,
+      transparent 70%);
   animation: ripple-glow 0.4s ease-out;
   pointer-events: none;
 }
@@ -180,6 +190,7 @@
     opacity: 0.8;
     transform: scale(0.6);
   }
+
   100% {
     opacity: 0;
     transform: scale(1.4);

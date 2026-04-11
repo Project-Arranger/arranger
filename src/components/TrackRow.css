@@ -64,7 +64,8 @@
 
 .track-row-step {
   flex: 1;
-  min-height: 48px; /* 1.5x larger */
+  min-height: 48px;
+  /* 1.5x larger */
   background: transparent;
   border-right: 1px dashed rgba(255, 255, 255, 0.08);
 }
