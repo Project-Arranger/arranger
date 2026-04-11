@@ -15,6 +15,13 @@ import './BassMatrix.css';
  *   - C 大调音阶行高亮背景
  *   - 点亮格使用冰蓝发光
  */
+const CHORD_TO_BASS_GUIDE = {
+  'C': 'C2',
+  'Am': 'A2',
+  'F': 'F2',
+  'G': 'G2',
+};
+
 export default function BassMatrix() {
   const selectedBar = useMusicStore((s) => s.selectedBar);
   const totalBars = useMusicStore((s) => s.totalBars);
@@ -46,6 +53,7 @@ export default function BassMatrix() {
 
   // 当前 bar 数据
   const barData = matrix.bass[selectedBar];
+  const chordTrackData = matrix.chord[selectedBar];
 
   return (
     <div className="bass-matrix" id="bass-matrix">
@@ -107,10 +115,15 @@ export default function BassMatrix() {
                 selectedBar === currentBar &&
                 (currentStep === stepIdx || currentStep === stepIdx + 1);
 
+              // 引导逻辑：与 chord 轨实时同步
+              const currentChordId = chordTrackData[stepIdx]?.chordId;
+              const guideNote = currentChordId ? CHORD_TO_BASS_GUIDE[currentChordId] : null;
+              const isGuide = guideNote === note && !isActive; // 没被点亮时才显示引导边缘闪烁
+
               return (
                 <div
                   key={colIdx}
-                  className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''}`}
+                  className={`bass-cell ${isActive ? 'lit' : ''} ${isCurrent ? 'cursor' : ''} ${isCurrent && isActive ? 'lit-cursor' : ''} ${isGuide ? 'guide-blink' : ''}`}
                   onTouchStart={(e) => handleCellTouchStart(e, colIdx, note)}
                   onClick={async () => {
                     toggleBassNote(selectedBar, colIdx, note);
