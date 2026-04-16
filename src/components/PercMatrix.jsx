@@ -32,9 +32,18 @@ export default function PercMatrix() {
   const currentStep = useMusicStore((s) => s.currentStep);
   const isPlaying = useMusicStore((s) => s.isPlaying);
   const togglePercNote = useMusicStore((s) => s.togglePercNote);
+  const autoFillPercGroove = useMusicStore((s) => s.autoFillPercGroove);
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
 
   const [ripples, setRipples] = useState([]);
+  const [fillFlash, setFillFlash] = useState(false);
+
+  /** 一键生成基础律动 */
+  const handleAutoFill = useCallback(() => {
+    autoFillPercGroove(selectedBar);
+    setFillFlash(true);
+    setTimeout(() => setFillFlash(false), 900);
+  }, [autoFillPercGroove, selectedBar]);
 
   const handleCellTouchStart = useCallback(
     async (e, eighthIndex, instrumentId) => {
@@ -80,6 +89,16 @@ export default function PercMatrix() {
             </button>
           ))}
         </div>
+        {/* 一键生成基础律动 */}
+        <button
+          id="perc-auto-fill-btn"
+          className={`perc-auto-fill-btn ${fillFlash ? 'flash' : ''}`}
+          onClick={handleAutoFill}
+          onTouchStart={handleAutoFill}
+          title="在每小节第1位写入Kick，第1/3/5/7位写入HiHat，第5位写入Clap+Snare"
+        >
+          {fillFlash ? '✓ 已生成' : '⚡ 基础律动'}
+        </button>
       </div>
 
       {/* 矩阵网格 */}

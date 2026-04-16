@@ -405,6 +405,38 @@ const useMusicStore = create((set, get) => ({
     });
   },
 
+  /**
+   * 一键生成基础律动：在指定小节写入固定 groove 模式
+   *   第1位 (eighthIndex 0): Kick + HiHat
+   *   第3位 (eighthIndex 2): HiHat
+   *   第5位 (eighthIndex 4): Clap + Snare + HiHat
+   *   第7位 (eighthIndex 6): HiHat
+   * @param {number} barIndex - 0~7
+   */
+  autoFillPercGroove: (barIndex) => {
+    const { matrix } = get();
+    const newBar = [...matrix.perc[barIndex]];
+
+    const GROOVE = [
+      { eighthIndex: 0, instruments: ['kick', 'hihat'] },
+      { eighthIndex: 2, instruments: ['hihat'] },
+      { eighthIndex: 4, instruments: ['clap', 'snare', 'hihat'] },
+      { eighthIndex: 6, instruments: ['hihat'] },
+    ];
+
+    for (const { eighthIndex, instruments } of GROOVE) {
+      const stepIndex = eighthToStep(eighthIndex);
+      // Merge with existing instruments at that step (don't erase others)
+      const existing = newBar[stepIndex]?.instruments ?? [];
+      const merged = [...new Set([...existing, ...instruments])];
+      newBar[stepIndex] = { instruments: merged };
+    }
+
+    const newTrack = [...matrix.perc];
+    newTrack[barIndex] = newBar;
+    set({ matrix: { ...matrix, perc: newTrack } });
+  },
+
   // -------- Actions: Lead 轨道专用 --------
 
   /**
