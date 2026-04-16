@@ -22,6 +22,8 @@ class AudioEngine {
     this._isInitialized = false;
     this._currentGlobalStep = 0;
     this._epiano = null;
+    this._padChorus = null;
+    this._padReverb = null;
     this._bass = null;
     this._reverb = null;
     this._bassFilter = null;
@@ -43,37 +45,42 @@ class AudioEngine {
     const { bpm } = useMusicStore.getState();
     Tone.getTransport().bpm.value = bpm;
 
-    // ---- 创建 EPiano 音色（FM 合成 + Reverb）----
-    this._reverb = new Tone.Reverb({
-      decay: 2.5,
-      wet: 0.3,
+    // ---- 创建 Chord Pad 音色（柔和 FM Pad + Chorus + Reverb）----
+    // 单独给 Pad 分配更深的 Reverb，与鼓/Bass 保持空间隔离
+    this._padReverb = new Tone.Reverb({
+      decay: 4.0,
+      wet: 0.45,
     }).toDestination();
 
+    // 轻微 Chorus，赋予 Pad 厚度而不占频段
+    this._padChorus = new Tone.Chorus(2.5, 2.0, 0.25).start();
+    this._padChorus.connect(this._padReverb);
+
+    // FM 调制量极低（0.15）+ 正弦波调制 → 近似纯正弦，柔和无毛刺
     this._epiano = new Tone.PolySynth(Tone.FMSynth, {
-      maxPolyphony: 8,
-      voice: Tone.FMSynth,
+      maxPolyphony: 12,
       options: {
-        harmonicity: 3.01,
-        modulationIndex: 1.5,
+        harmonicity: 1.0,         // 八度谐波关系，温暖不刺耳
+        modulationIndex: 0.15,    // 极低 FM 指数 → 接近纯 Sine
         oscillator: { type: 'sine' },
         envelope: {
-          attack: 0.005,
-          decay: 0.6,
-          sustain: 0.15,
-          release: 1.2,
+          attack: 0.15,           // 慢起音，Pad 感
+          decay: 0.8,
+          sustain: 0.75,          // 高 Sustain，和声持续填充空间
+          release: 3.0,           // 长释放，自然消散
         },
-        modulation: { type: 'square' },
+        modulation: { type: 'sine' },  // 正弦调制，无方波毛刺
         modulationEnvelope: {
-          attack: 0.002,
-          decay: 0.3,
-          sustain: 0,
-          release: 0.5,
+          attack: 0.2,
+          decay: 0.8,
+          sustain: 0.2,
+          release: 1.5,
         },
       },
     });
 
-    this._epiano.volume.value = -8;
-    this._epiano.connect(this._reverb);
+    this._epiano.volume.value = -12; // 比之前更轻，不抢 Lead/Bass 频段
+    this._epiano.connect(this._padChorus);
 
     // ---- 创建 Bass 音色（MonoSynth + LowPass）----
     this._bassFilter = new Tone.Filter({
@@ -103,10 +110,14 @@ class AudioEngine {
     this._bass.volume.value = -4;
     this._bass.connect(this._bassFilter);
 
-    // ---- 创建 Lead 音色（EPiano 副本）----
+    // ---- 创建 Lead 音色（柔和 FM，接入共享 Reverb）----
+    this._reverb = new Tone.Reverb({
+      decay: 2.0,
+      wet: 0.28,
+    }).toDestination();
+
     this._leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
       maxPolyphony: 4,
-      voice: Tone.FMSynth,
       options: {
         harmonicity: 2.5,
         modulationIndex: 1.2,
@@ -186,7 +197,8 @@ class AudioEngine {
     const { matrix } = useMusicStore.getState();
     const chordCell = matrix.chord?.[bar]?.[step];
     if (chordCell && chordCell.notes) {
-      this._epiano.triggerAttackRelease(chordCell.notes, '8n', time, 0.7);
+      // '2n' 半音符时值 — 让和声像 Pad 一样填满拍子
+      this._epiano.triggerAttackRelease(chordCell.notes, '2n', time, 0.65);
     }
 
     // ---- 触发 bass 轨道 ----
@@ -379,6 +391,14 @@ class AudioEngine {
       this._bassFilter.dispose();
       this._bassFilter = null;
     }
+    if (this._padChorus) {
+      this._padChorus.dispose();
+      this._padChorus = null;
+    }
+    if (this._padReverb) {
+      this._padReverb.dispose();
+      this._padReverb = null;
+    }
     if (this._reverb) {
       this._reverb.dispose();
       this._reverb = null;
@@ -420,20 +440,22 @@ class AudioEngine {
       transport.bpm.value = bpm;
 
       // 重新在离线 Context 内构建音源
-      const reverb = new Tone.Reverb({ decay: 2.5, wet: 0.3 }).toDestination();
+      const reverb = new Tone.Reverb({ decay: 2.0, wet: 0.28 }).toDestination();
+      const padChorus = new Tone.Chorus(2.5, 2.0, 0.25).start();
+      const padReverb = new Tone.Reverb({ decay: 4.0, wet: 0.45 }).toDestination();
       const epiano = new Tone.PolySynth(Tone.FMSynth, {
-        maxPolyphony: 8,
-        voice: Tone.FMSynth,
+        maxPolyphony: 12,
         options: {
-          harmonicity: 3.01, modulationIndex: 1.5,
+          harmonicity: 1.0, modulationIndex: 0.15,
           oscillator: { type: 'sine' },
-          envelope: { attack: 0.005, decay: 0.6, sustain: 0.15, release: 1.2 },
-          modulation: { type: 'square' },
-          modulationEnvelope: { attack: 0.002, decay: 0.3, sustain: 0, release: 0.5 }
+          envelope: { attack: 0.15, decay: 0.8, sustain: 0.75, release: 3.0 },
+          modulation: { type: 'sine' },
+          modulationEnvelope: { attack: 0.2, decay: 0.8, sustain: 0.2, release: 1.5 }
         }
       });
-      epiano.volume.value = -8;
-      epiano.connect(reverb);
+      epiano.volume.value = -12;
+      padChorus.connect(padReverb);
+      epiano.connect(padChorus);
 
       const bassFilter = new Tone.Filter({ type: 'lowpass', frequency: 400, rolloff: -24 }).toDestination();
       const bass = new Tone.MonoSynth({
@@ -484,7 +506,7 @@ class AudioEngine {
 
         // CHORD
         const chordCell = matrix.chord?.[bar]?.[step];
-        if (chordCell && chordCell.notes) epiano.triggerAttackRelease(chordCell.notes, '8n', time, 0.7);
+        if (chordCell && chordCell.notes) epiano.triggerAttackRelease(chordCell.notes, '2n', time, 0.65);
 
         // BASS
         const bassCell = matrix.bass?.[bar]?.[step];
