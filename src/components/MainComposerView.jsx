@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import useMusicStore from '../store/useMusicStore';
 import audioEngine from '../audio/AudioEngine';
 import TransportBar from './TransportBar';
@@ -19,16 +19,34 @@ import './MainComposerView.css';
  */
 export default function MainComposerView() {
   const [dragChordId, setDragChordId] = useState(null);
+  const [paletteDrag, setPaletteDrag] = useState(null); // Global ghost
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
   const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
   const trackOverviewRef = useRef(null);
 
-  const handleDragStart = useCallback((chordId) => {
-    setDragChordId(chordId);
-  }, []);
+  useEffect(() => {
+    const onDragStart = (e) => {
+      setDragChordId(e.detail.chordId);
+      if (e.detail.label) {
+        setPaletteDrag({ ...e.detail });
+      }
+    };
+    const onDragMove = (e) => {
+      setPaletteDrag(prev => prev ? { ...prev, clientX: e.detail.clientX, clientY: e.detail.clientY } : null);
+    };
+    const onDragEnd = () => {
+      setDragChordId(null);
+      setPaletteDrag(null);
+    };
 
-  const handleDragEnd = useCallback(() => {
-    setDragChordId(null);
+    window.addEventListener('chord-drag-start', onDragStart);
+    window.addEventListener('chord-drag-move', onDragMove);
+    window.addEventListener('chord-drag-end', onDragEnd);
+    return () => {
+      window.removeEventListener('chord-drag-start', onDragStart);
+      window.removeEventListener('chord-drag-move', onDragMove);
+      window.removeEventListener('chord-drag-end', onDragEnd);
+    };
   }, []);
 
   const handleTrackClick = useCallback(
@@ -105,10 +123,24 @@ export default function MainComposerView() {
       </div>
 
       {/* 底部动态编辑区 */}
-      <ContextArea
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      />
+      <ContextArea />
+
+      {/* Global Palette Drag Ghost */}
+      {paletteDrag && (
+        <div
+          className="chord-drag-ghost"
+          style={{
+            left: paletteDrag.clientX,
+            top: paletteDrag.clientY,
+            '--chord-color': paletteDrag.color,
+            '--chord-glow': paletteDrag.glowColor,
+            color: '#fff',
+            zIndex: 99999, // Ensure it's above absolutely everything
+          }}
+        >
+          {paletteDrag.label}
+        </div>
+      )}
     </div>
   );
 }

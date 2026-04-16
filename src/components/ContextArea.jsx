@@ -13,7 +13,7 @@ import './ContextArea.css';
  *   - null / 'chord' → ChordPalette（默认）
  *   - 'bass' → BassMatrix
  */
-export default function ContextArea({ onDragStart, onDragEnd }) {
+export default function ContextArea() {
   const activeContextTrack = useMusicStore((s) => s.activeContextTrack);
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
 
@@ -27,12 +27,7 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
         return <LeadMatrix />;
       case 'chord':
       default:
-        return (
-          <ChordEditor
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-          />
-        );
+        return <ChordEditor />;
     }
   };
 

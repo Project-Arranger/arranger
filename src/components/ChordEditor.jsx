@@ -44,59 +44,68 @@ const TRANSITION_PATTERNS = [
 
 /** Reusable draggable chord block */
 function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', onDragStart, onDragEnd }) {
-  const handleDragStart = useCallback(async () => {
-    await audioEngine.init();
-    window.dispatchEvent(new CustomEvent('chord-drag-start', {
-      detail: { chordId }
-    }));
+  const handlePointerDown = useCallback((e) => {
+    if (e.button !== 0 && e.type.includes('mouse')) return; // left click / touch only
+    e.stopPropagation();
+    e.currentTarget.releasePointerCapture(e.pointerId);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    let didMove = false;
+
+    // Dispatch start immediately with full style info for the global ghost
+    window.dispatchEvent(
+      new CustomEvent('chord-drag-start', {
+        detail: { chordId, label, color, glowColor, clientX: startX, clientY: startY },
+      })
+    );
     if (onDragStart) onDragStart(chordId);
-  }, [chordId, onDragStart]);
 
-  const lastMoveTimeRef = useRef(0);
+    // Use a variable instead of ref for throttle inside closure
+    let lastMoveTime = 0;
 
-  const handleDrag = useCallback((e, info) => {
-    const now = Date.now();
-    if (now - lastMoveTimeRef.current < 16) return; // Throttle to ~60fps
-    lastMoveTimeRef.current = now;
+    const onPointerMove = (ev) => {
+      didMove = true;
+      const now = Date.now();
+      if (now - lastMoveTime < 16) return;
+      lastMoveTime = now;
 
-    window.dispatchEvent(new CustomEvent('chord-drag-move', {
-      detail: { clientX: info.point.x, clientY: info.point.y, chordId },
-    }));
-  }, [chordId]);
+      window.dispatchEvent(
+        new CustomEvent('chord-drag-move', {
+          detail: { clientX: ev.clientX, clientY: ev.clientY, chordId },
+        })
+      );
+    };
 
-  const handleDragEnd = useCallback((e, info) => {
-    window.dispatchEvent(new CustomEvent('chord-drag-end', {
-      detail: { clientX: info.point.x, clientY: info.point.y, chordId },
-    }));
-    if (onDragEnd) onDragEnd();
-  }, [chordId, onDragEnd]);
+    const onPointerUp = (ev) => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+
+      window.dispatchEvent(
+        new CustomEvent('chord-drag-end', {
+          detail: { clientX: ev.clientX, clientY: ev.clientY, chordId },
+        })
+      );
+      if (onDragEnd) onDragEnd();
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+  }, [chordId, label, color, glowColor, onDragStart, onDragEnd]);
 
   return (
-    <motion.div
-      drag
-      dragSnapToOrigin
-      dragElastic={0}
-      dragMomentum={false}
-      dragTransition={{ power: 0, timeConstant: 0 }}
-      onDragStart={handleDragStart}
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
-      whileDrag={{ 
-        scale: 0.9, 
-        zIndex: 9999, 
-        boxShadow: `0 20px 50px ${glowColor || 'rgba(160,216,239,0.5)'}` 
-      }}
-      transition={{ duration: 0 }}
+    <div
       className={`ce-block ce-block--${variant}`}
       style={{ '--cc': color, '--cg': glowColor }}
+      onPointerDown={handlePointerDown}
     >
       <span className="ce-block-label">{label}</span>
       <span className="ce-block-notes">{notes.slice(0, 3).join(' ')}</span>
-    </motion.div>
+    </div>
   );
 }
 
-export default function ChordEditor({ onDragStart, onDragEnd }) {
+export default function ChordEditor() {
   const [activePreset, setActivePreset] = useState('pop');
 
   const preset = STYLE_PRESETS.find((p) => p.id === activePreset) || STYLE_PRESETS[0];
@@ -142,8 +151,6 @@ export default function ChordEditor({ onDragStart, onDragEnd }) {
                   color={root.color}
                   glowColor={root.glowColor}
                   variant="base"
-                  onDragStart={onDragStart}
-                  onDragEnd={onDragEnd}
                 />
                 <span className="ce-arrow">→</span>
                 {/* Variation chords (blue, skip index 0 which is the base itself) */}
@@ -157,8 +164,6 @@ export default function ChordEditor({ onDragStart, onDragEnd }) {
                         color="#2563EB"
                         glowColor="rgba(37,99,235,0.35)"
                         variant="alt"
-                        onDragStart={onDragStart}
-                        onDragEnd={onDragEnd}
                       />
                       <span className="ce-alt-desc">{v.desc}</span>
                     </div>
@@ -196,8 +201,6 @@ export default function ChordEditor({ onDragStart, onDragEnd }) {
                       color="#2563EB"
                       glowColor="rgba(37,99,235,0.35)"
                       variant="alt"
-                      onDragStart={onDragStart}
-                      onDragEnd={onDragEnd}
                     />
                     <span className="ce-alt-desc">{tp.desc}</span>
                   </div>

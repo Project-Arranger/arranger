@@ -11,18 +11,19 @@
   color: #F2F2F7;
 }
 
-/* Track overview area — scrollable if content overflows */
+/* Track overview area — tightly hugs the 4 tracks, independent scroll */
 .track-overview {
-  flex: 1;
+  flex: 0 0 auto;
+  max-height: 45vh; /* Prevent tracks from consuming the whole screen */
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 12px 16px;
-  overflow-y: auto;
-  overflow-x: auto; /* Enable horizontal scrolling on mobile */
+  overflow-y: auto; /* Independent vertical scroll */
+  overflow-x: auto; /* Independent horizontal scroll */
   -webkit-overflow-scrolling: touch;
   position: relative;
-  z-index: 1; /* Keep it below dragging layers in ContextArea */
+  z-index: 1; /* Keep below dragged ContextArea items */
 }
 
 /* Hide scrollbar but keep functionality */
@@ -45,11 +46,7 @@
 
 @media (max-height: 500px) and (orientation: landscape) {
   .track-overview {
-    flex: 0 0 120px; /* Limit arrangement height to save space for Matrix */
-    min-height: 120px;
-  }
-  .context-area {
-      flex: 1; /* Matrix takes the rest */
+    flex: 0 0 auto; /* Keep it tight */
   }
 }
 
