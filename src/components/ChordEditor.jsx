@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { CHORD_LIBRARY, CHORD_VARIATIONS, ORGANIZE_TRANSITIONS } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
+import { showDragGhost, moveDragGhost, hideDragGhost } from '../utils/dragGhost';
 import './ChordEditor.css';
 
 /**
@@ -53,45 +53,51 @@ function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', 
     const startY = e.clientY;
     let didMove = false;
 
-    // Dispatch start immediately with full style info for the global ghost
+    // Show ghost immediately via direct DOM (no React, no events)
+    showDragGhost({ label, color, glowColor, clientX: startX, clientY: startY });
+
+    // Notify ChordTrack to prepare drop zones
     window.dispatchEvent(
       new CustomEvent('chord-drag-start', {
-        detail: { chordId, label, color, glowColor, clientX: startX, clientY: startY },
+        detail: { chordId, clientX: startX, clientY: startY },
       })
     );
-    if (onDragStart) onDragStart(chordId);
 
-    // Use a variable instead of ref for throttle inside closure
-    let lastMoveTime = 0;
-
+    let rafId = null;
     const onPointerMove = (ev) => {
       didMove = true;
-      const now = Date.now();
-      if (now - lastMoveTime < 16) return;
-      lastMoveTime = now;
 
-      window.dispatchEvent(
-        new CustomEvent('chord-drag-move', {
-          detail: { clientX: ev.clientX, clientY: ev.clientY, chordId },
-        })
-      );
+      // Ghost: update directly, no RAF, no events
+      moveDragGhost(ev.clientX, ev.clientY);
+
+      // Drop target detection: RAF-throttled
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        window.dispatchEvent(
+          new CustomEvent('chord-drag-move', {
+            detail: { clientX: ev.clientX, clientY: ev.clientY, chordId },
+          })
+        );
+      });
     };
 
     const onPointerUp = (ev) => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
 
+      hideDragGhost();
       window.dispatchEvent(
         new CustomEvent('chord-drag-end', {
           detail: { clientX: ev.clientX, clientY: ev.clientY, chordId },
         })
       );
-      if (onDragEnd) onDragEnd();
     };
 
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
-  }, [chordId, label, color, glowColor, onDragStart, onDragEnd]);
+  }, [chordId, label, color, glowColor]);
 
   return (
     <div

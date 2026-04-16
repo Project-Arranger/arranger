@@ -2,6 +2,7 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import useMusicStore, { CHORD_SPAN } from '../store/useMusicStore';
 import { CHORD_LIBRARY } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
+import { showDragGhost, moveDragGhost, hideDragGhost } from '../utils/dragGhost';
 import { ChordIcon } from './Icons';
 import './ChordTrack.css';
 
@@ -30,6 +31,7 @@ export default function ChordTrack({ dragChordId, onClick }) {
 
   // ── External palette drag: highlight drop slot ──
   const [highlightSlot, setHighlightSlot] = useState(null);
+  const highlightSlotRef = useRef(null);
 
   // 缓存所有 slot 的位置
   const slotRectsRef = useRef([]);
@@ -88,16 +90,21 @@ export default function ChordTrack({ dragChordId, onClick }) {
       const detail = e.detail;
       if (!detail) return;
       const slot = getSlotFromPoint(detail.clientX, detail.clientY);
-      // 只有当 slot 变化时才更新 state，减少 React render 次数
-      setHighlightSlot(prev => {
-        if (!prev && !slot) return null;
-        if (prev?.barIndex === slot?.barIndex && prev?.beatIndex === slot?.beatIndex) return prev;
-        return slot;
-      });
+      
+      const prev = highlightSlotRef.current;
+      const isSame = 
+        (!prev && !slot) || 
+        (prev && slot && prev.barIndex === slot.barIndex && prev.beatIndex === slot.beatIndex);
+
+      if (!isSame) {
+        highlightSlotRef.current = slot;
+        setHighlightSlot(slot);
+      }
     };
 
     const handleDragEnd = (e) => {
       const detail = e.detail;
+      highlightSlotRef.current = null;
       setHighlightSlot(null);
       if (!detail) return;
       // 结束时使用当前坐标最后判定一次
@@ -158,47 +165,79 @@ export default function ChordTrack({ dragChordId, onClick }) {
         glowColor: chord?.glowColor,
         fromBar: barIndex,
         fromBeat: beatIndex,
-        ghostX: e.clientX,
-        ghostY: e.clientY,
         overDelete: false,
         didMove: false,
-        pointerId: e.pointerId,
       };
       internalDragRef.current = dragState;
-      setInternalDrag({ ...dragState });
 
+      showDragGhost({
+        label: dragState.variationId,
+        color: chord?.color,
+        glowColor: chord?.glowColor,
+        clientX: e.clientX,
+        clientY: e.clientY,
+      });
+
+      setInternalDrag({ ...dragState }); // only used for delete zone + didMove UI
+
+      let rafId = null;
       const onPointerMove = (ev) => {
-        const d = internalDragRef.current;
-        if (!d) return;
-        d.didMove = true;
-        d.ghostX = ev.clientX;
-        d.ghostY = ev.clientY;
+        // Ghost: direct DOM call — no RAF, no event bus
+        moveDragGhost(ev.clientX, ev.clientY);
 
-        // Check if hovering the delete zone
-        const deleteZone = document.getElementById('chord-delete-zone');
-        let overDelete = false;
-        if (deleteZone) {
-          const rect = deleteZone.getBoundingClientRect();
-          overDelete =
-            ev.clientX >= rect.left && ev.clientX <= rect.right &&
-            ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
-        }
-        d.overDelete = overDelete;
+        // Drop-target + state logic via RAF
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          const d = internalDragRef.current;
+          if (!d) return;
+          d.didMove = true;
 
-        // Check hovered slot
-        const slot = getSlotFromPoint(ev.clientX, ev.clientY);
-        setHighlightSlot(slot);
+          // Check if hovering the delete zone
+          const deleteZone = document.getElementById('chord-delete-zone');
+          let overDelete = false;
+          if (deleteZone) {
+            const rect = deleteZone.getBoundingClientRect();
+            overDelete =
+              ev.clientX >= rect.left && ev.clientX <= rect.right &&
+              ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
+          }
 
-        setInternalDrag({ ...d });
+          // Check hovered slot
+          const slot = getSlotFromPoint(ev.clientX, ev.clientY);
+
+          let statusChanged = false;
+          if (d.overDelete !== overDelete) {
+            d.overDelete = overDelete;
+            statusChanged = true;
+          }
+
+          const prevSlot = highlightSlotRef.current;
+          const isSameSlot = 
+            (!prevSlot && !slot) || 
+            (prevSlot && slot && prevSlot.barIndex === slot.barIndex && prevSlot.beatIndex === slot.beatIndex);
+
+          if (!isSameSlot) {
+            highlightSlotRef.current = slot;
+            setHighlightSlot(slot);
+          }
+
+          if (statusChanged) {
+            setInternalDrag({ ...d });
+          }
+        });
       };
 
       const onPointerUp = (ev) => {
+        if (rafId) cancelAnimationFrame(rafId);
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
 
+        hideDragGhost();
         const d = internalDragRef.current;
         internalDragRef.current = null;
         setInternalDrag(null);
+        highlightSlotRef.current = null;
         setHighlightSlot(null);
 
         if (!d || !d.didMove) return;
@@ -335,21 +374,7 @@ export default function ChordTrack({ dragChordId, onClick }) {
           <span>拖到此处删除</span>
         </div>
       )}
-
-      {/* Floating ghost block following the cursor */}
-      {internalDrag && internalDrag.didMove && (
-        <div
-          className="chord-drag-ghost"
-          style={{
-            left: internalDrag.ghostX,
-            top: internalDrag.ghostY,
-            '--chord-color': internalDrag.color,
-            '--chord-glow': internalDrag.glowColor,
-          }}
-        >
-          {internalDrag.variationId}
-        </div>
-      )}
+      {/* Ghost is rendered by dragGhost.js on document.body — no React */}
     </div>
   );
 }

@@ -262,41 +262,31 @@
 /* ── Internal drag: floating ghost block ── */
 .chord-drag-ghost {
   position: fixed;
-  transform: translate(-50%, -50%);
+  left: 0;
+  top: 0;
   z-index: 99999;
   pointer-events: none;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: rgba(30, 30, 35, 0.95);
-  backdrop-filter: blur(10px);
-  border: 2px solid var(--chord-color);
-  box-shadow: 0 10px 40px var(--chord-glow);
+  padding: 8px 14px;
+  border-radius: 10px;
+  /* NO backdrop-filter — extremely expensive when moving */
+  background: color-mix(in srgb, var(--chord-color, #7aecf0) 30%, #1a1a1e);
+  border: 1.5px solid color-mix(in srgb, var(--chord-color, #7aecf0) 60%, transparent);
+  /* Minimal shadow only — large shadows recompute every frame */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+  /* Isolate this layer from the rest of the paint tree */
+  isolation: isolate;
+  contain: layout style;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  letter-spacing: 0.08em;
+  gap: 3px;
+  letter-spacing: 0.06em;
   color: #fff;
-  white-space: normal;
-  text-align: center;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--chord-color, #7aecf0) 35%, #252528),
-    color-mix(in srgb, var(--chord-color, #7aecf0) 18%, #151517)
-  );
-  border: 1.5px solid color-mix(in srgb, var(--chord-color, #7aecf0) 70%, transparent);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.6),
-    0 0 20px var(--chord-glow, rgba(122, 236, 240, 0.4));
-  text-shadow: 0 0 8px var(--chord-glow, rgba(122, 236, 240, 0.8));
-  opacity: 0.92;
-  animation: ghost-pop-in 0.1s ease-out;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: grabbing;
-}
-
-@keyframes ghost-pop-in {
-  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
-  to   { transform: translate(-50%, -50%) scale(1);    opacity: 0.92; }
 }
 
 /* ── Internal drag: delete zone ── */

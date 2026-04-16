@@ -11,57 +11,32 @@ import './MainComposerView.css';
 /**
  * MainComposerView — 主编曲视图容器
  *
- * Ableton 风格播放头：
- *  - 不再有独立进度条，移除 ProgressBar
- *  - seekBar：用户点击设定的定位小节，在所有轨道上显示一个红色列框
- *  - 点击小节格子 → 设置 seekBar + 引擎 seek（不自动播放）
- *  - 播放中 seekBar 框不动，逐步点亮格子代表实时进度
+ * Ghost drag is fully handled by dragGhost.js (no React state).
+ * dragChordId is only used to highlight drop zones in ChordTrack.
  */
 export default function MainComposerView() {
   const [dragChordId, setDragChordId] = useState(null);
-  const [paletteDrag, setPaletteDrag] = useState(null); // Global ghost
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
   const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
   const trackOverviewRef = useRef(null);
 
   useEffect(() => {
-    const onDragStart = (e) => {
-      setDragChordId(e.detail.chordId);
-      if (e.detail.label) {
-        setPaletteDrag({ ...e.detail });
-      }
-    };
-    const onDragMove = (e) => {
-      setPaletteDrag(prev => prev ? { ...prev, clientX: e.detail.clientX, clientY: e.detail.clientY } : null);
-    };
-    const onDragEnd = () => {
-      setDragChordId(null);
-      setPaletteDrag(null);
-    };
+    const onDragStart = (e) => setDragChordId(e.detail.chordId);
+    const onDragEnd   = ()    => setDragChordId(null);
 
     window.addEventListener('chord-drag-start', onDragStart);
-    window.addEventListener('chord-drag-move', onDragMove);
-    window.addEventListener('chord-drag-end', onDragEnd);
+    window.addEventListener('chord-drag-end',   onDragEnd);
     return () => {
       window.removeEventListener('chord-drag-start', onDragStart);
-      window.removeEventListener('chord-drag-move', onDragMove);
-      window.removeEventListener('chord-drag-end', onDragEnd);
+      window.removeEventListener('chord-drag-end',   onDragEnd);
     };
   }, []);
 
   const handleTrackClick = useCallback(
-    (trackId) => {
-      setActiveContextTrack(trackId);
-    },
+    (trackId) => setActiveContextTrack(trackId),
     [setActiveContextTrack]
   );
 
-  /**
-   * Click anywhere on the track grid → Ableton-style beat-level seek
-   * 1. Detect which bar was clicked via data-bar
-   * 2. Detect which beat via data-beat (if available) else compute from X position
-   * 3. Seek engine, do NOT auto-play
-   */
   const handleOverviewClick = useCallback((e) => {
     const barEl = e.target.closest('[data-bar]');
     if (!barEl) return;
@@ -69,28 +44,24 @@ export default function MainComposerView() {
     const barIndex = parseInt(barEl.dataset.bar, 10);
     if (isNaN(barIndex)) return;
 
-    // Try beat from data-beat attribute (chord slot OR track-row-beat)
     const beatEl = e.target.closest('[data-beat]');
     let beatIndex = 0;
     if (beatEl && beatEl.dataset.beat !== undefined) {
       beatIndex = parseInt(beatEl.dataset.beat, 10);
     } else {
-      // Compute beat from X position within the bar container
       const rect = barEl.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       beatIndex = Math.min(3, Math.floor(x * 4));
     }
 
     setSeekPosition(barIndex, beatIndex);
-    audioEngine.seekToStep(barIndex, beatIndex * 4); // 4 steps per beat
+    audioEngine.seekToStep(barIndex, beatIndex * 4);
   }, [setSeekPosition]);
 
   return (
     <div className="main-composer" id="main-composer-view">
-      {/* 顶部控制栏 */}
       <TransportBar />
 
-      {/* 轨道概览区 — ProgressBar 已移除，点击直接定位 */}
       <div
         className="track-overview"
         id="track-overview"
@@ -102,45 +73,13 @@ export default function MainComposerView() {
           dragChordId={dragChordId}
           onClick={() => handleTrackClick('chord')}
         />
-        <TrackRow
-          trackId="bass"
-          Icon={BassIcon}
-          label="BASS"
-          onClick={() => handleTrackClick('bass')}
-        />
-        <TrackRow
-          trackId="perc"
-          Icon={PercIcon}
-          label="PERC"
-          onClick={() => handleTrackClick('perc')}
-        />
-        <TrackRow
-          trackId="lead"
-          Icon={LeadIcon}
-          label="LEAD"
-          onClick={() => handleTrackClick('lead')}
-        />
+        <TrackRow trackId="bass" Icon={BassIcon} label="BASS" onClick={() => handleTrackClick('bass')} />
+        <TrackRow trackId="perc" Icon={PercIcon} label="PERC" onClick={() => handleTrackClick('perc')} />
+        <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" onClick={() => handleTrackClick('lead')} />
       </div>
 
-      {/* 底部动态编辑区 */}
       <ContextArea />
-
-      {/* Global Palette Drag Ghost */}
-      {paletteDrag && (
-        <div
-          className="chord-drag-ghost"
-          style={{
-            left: paletteDrag.clientX,
-            top: paletteDrag.clientY,
-            '--chord-color': paletteDrag.color,
-            '--chord-glow': paletteDrag.glowColor,
-            color: '#fff',
-            zIndex: 99999, // Ensure it's above absolutely everything
-          }}
-        >
-          {paletteDrag.label}
-        </div>
-      )}
+      {/* Ghost is rendered by dragGhost.js directly on document.body — no React involved */}
     </div>
   );
 }
