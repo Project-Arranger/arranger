@@ -100,7 +100,7 @@ function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', 
       onPointerDown={handlePointerDown}
     >
       <span className="ce-block-label">{label}</span>
-      <span className="ce-block-notes">{notes.slice(0, 3).join(' ')}</span>
+      <span className="ce-block-notes">{notes.join(' ')}</span>
     </div>
   );
 }

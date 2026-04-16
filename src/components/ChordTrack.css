@@ -96,6 +96,7 @@
   border-radius: 6px; 
   margin: 2px; /* Smaller physical margin to save vertical height */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -192,12 +193,32 @@
 }
 
 .chord-slot-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   color: #fff;
   text-shadow: 0 0 8px var(--chord-glow);
   z-index: 1;
+  width: 90%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chord-slot-label:has(+ .chord-slot-notes) {
+  font-size: 0.6rem;
+}
+
+.chord-slot-notes {
+  font-size: 0.45rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
 }
 
 /* Playing state → ripple glow */
@@ -242,15 +263,22 @@
 .chord-drag-ghost {
   position: fixed;
   transform: translate(-50%, -50%);
-  z-index: 9999;
+  z-index: 99999;
   pointer-events: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(30, 30, 35, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--chord-color);
+  box-shadow: 0 10px 40px var(--chord-glow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   letter-spacing: 0.08em;
   color: #fff;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
   background: linear-gradient(
     145deg,
     color-mix(in srgb, var(--chord-color, #7aecf0) 35%, #252528),
