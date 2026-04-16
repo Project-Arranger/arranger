@@ -218,6 +218,27 @@ const useMusicStore = create((set, get) => ({
     });
   },
 
+  /**
+   * 移除任意轨道某个位置的数据
+   */
+  clearStep: (trackId, barIndex, stepIndex) => {
+    const { matrix } = get();
+    if (!matrix[trackId]) return;
+    
+    const newBar = [...matrix[trackId][barIndex]];
+    newBar[stepIndex] = null;
+
+    const newTrack = [...matrix[trackId]];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        [trackId]: newTrack,
+      },
+    });
+  },
+
   // -------- Actions: Context Area --------
   setActiveContextTrack: (trackId) => set({ activeContextTrack: trackId }),
   setSelectedBar: (barIndex) => set({ selectedBar: barIndex }),

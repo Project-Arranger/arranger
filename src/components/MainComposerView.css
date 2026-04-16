@@ -57,3 +57,42 @@
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* Unified Global Delete Zone */
+.global-delete-zone {
+  margin-top: 20px;
+  flex: 0 0 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(220, 38, 38, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1.5px dashed rgba(220, 38, 38, 0.3);
+  border-radius: 12px;
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  animation: delete-pop-up 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.global-delete-zone.active {
+  background: rgba(220, 38, 38, 0.35);
+  border-style: solid;
+  border-color: #ef4444;
+  color: #fff;
+  transform: scale(1.01);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
+}
+
+.global-delete-zone .delete-icon {
+  font-size: 1.4rem;
+}
+
+@keyframes delete-pop-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

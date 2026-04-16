@@ -120,3 +120,50 @@
   box-shadow: 0 0 8px rgba(160, 216, 239, 0.5);
   border: none;
 }
+
+.track-row-step.dragging {
+  opacity: 0.3 !important;
+  box-shadow: none !important;
+}
+
+/* Delete zone local to the track row */
+.track-delete-zone {
+  position: absolute;
+  bottom: -4px; /* Slightly overlap or stay very close */
+  left: var(--track-sidebar-width);
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(220, 38, 38, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1.5px dashed rgba(220, 38, 38, 0.4);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 1000;
+  pointer-events: none;
+  margin: 0 12px;
+  animation: track-delete-pop 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.track-delete-zone.active {
+  background: rgba(220, 38, 38, 0.4);
+  border-style: solid;
+  border-color: #ef4444;
+  color: #fff;
+  transform: scale(1.02);
+  box-shadow: 0 0 25px rgba(220, 38, 38, 0.4);
+}
+
+.track-delete-zone .delete-icon {
+  font-size: 1.2rem;
+}
+
+@keyframes track-delete-pop {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

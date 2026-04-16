@@ -15,20 +15,39 @@ import './MainComposerView.css';
  * dragChordId is only used to highlight drop zones in ChordTrack.
  */
 export default function MainComposerView() {
+  const [isDraggingAny, setIsDraggingAny] = useState(false);
   const [dragChordId, setDragChordId] = useState(null);
+  const [dragOverDelete, setDragOverDelete] = useState(false);
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
   const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
   const trackOverviewRef = useRef(null);
 
   useEffect(() => {
-    const onDragStart = (e) => setDragChordId(e.detail.chordId);
-    const onDragEnd   = ()    => setDragChordId(null);
+    const onDragStart = (e) => {
+      setDragChordId(e.detail.chordId);
+      setIsDraggingAny(true);
+    };
+    const onDragEnd = () => {
+      setDragChordId(null);
+      setIsDraggingAny(false);
+      setDragOverDelete(false);
+    };
+
+    // Listen for 'over-delete' signals from individual tracks
+    const onOverDelete = (e) => setDragOverDelete(e.detail.over);
 
     window.addEventListener('chord-drag-start', onDragStart);
     window.addEventListener('chord-drag-end',   onDragEnd);
+    window.addEventListener('drag-active-start', () => setIsDraggingAny(true));
+    window.addEventListener('drag-active-end',   onDragEnd);
+    window.addEventListener('drag-over-delete', onOverDelete);
+
     return () => {
       window.removeEventListener('chord-drag-start', onDragStart);
       window.removeEventListener('chord-drag-end',   onDragEnd);
+      window.removeEventListener('drag-active-start', () => setIsDraggingAny(true));
+      window.removeEventListener('drag-active-end',   onDragEnd);
+      window.removeEventListener('drag-over-delete', onOverDelete);
     };
   }, []);
 
@@ -76,6 +95,17 @@ export default function MainComposerView() {
         <TrackRow trackId="bass" Icon={BassIcon} label="BASS" onClick={() => handleTrackClick('bass')} />
         <TrackRow trackId="perc" Icon={PercIcon} label="PERC" onClick={() => handleTrackClick('perc')} />
         <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" onClick={() => handleTrackClick('lead')} />
+        
+        {/* Unified Global Delete Zone */}
+        {isDraggingAny && (
+          <div
+            id="global-arrangement-delete-zone"
+            className={`global-delete-zone ${dragOverDelete ? 'active' : ''}`}
+          >
+            <span className="delete-icon">🗑</span>
+            <span>拖到此处删除</span>
+          </div>
+        )}
       </div>
 
       <ContextArea />

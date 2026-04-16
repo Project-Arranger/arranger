@@ -169,6 +169,8 @@ export default function ChordTrack({ dragChordId, onClick }) {
         didMove: false,
       };
       internalDragRef.current = dragState;
+      setInternalDrag({ ...dragState });
+      window.dispatchEvent(new CustomEvent('drag-active-start'));
 
       showDragGhost({
         label: dragState.variationId,
@@ -177,8 +179,6 @@ export default function ChordTrack({ dragChordId, onClick }) {
         clientX: e.clientX,
         clientY: e.clientY,
       });
-
-      setInternalDrag({ ...dragState }); // only used for delete zone + didMove UI
 
       let rafId = null;
       const onPointerMove = (ev) => {
@@ -194,7 +194,7 @@ export default function ChordTrack({ dragChordId, onClick }) {
           d.didMove = true;
 
           // Check if hovering the delete zone
-          const deleteZone = document.getElementById('chord-delete-zone');
+          const deleteZone = document.getElementById('global-arrangement-delete-zone');
           let overDelete = false;
           if (deleteZone) {
             const rect = deleteZone.getBoundingClientRect();
@@ -210,6 +210,7 @@ export default function ChordTrack({ dragChordId, onClick }) {
           if (d.overDelete !== overDelete) {
             d.overDelete = overDelete;
             statusChanged = true;
+            window.dispatchEvent(new CustomEvent('drag-over-delete', { detail: { over: overDelete } }));
           }
 
           const prevSlot = highlightSlotRef.current;
@@ -219,7 +220,8 @@ export default function ChordTrack({ dragChordId, onClick }) {
 
           if (!isSameSlot) {
             highlightSlotRef.current = slot;
-            setHighlightSlot(slot);
+            // Disable highlighting if over delete zone
+            setHighlightSlot(overDelete ? null : slot);
           }
 
           if (statusChanged) {
@@ -234,6 +236,8 @@ export default function ChordTrack({ dragChordId, onClick }) {
         window.removeEventListener('pointerup', onPointerUp);
 
         hideDragGhost();
+        window.dispatchEvent(new CustomEvent('drag-active-end'));
+
         const d = internalDragRef.current;
         internalDragRef.current = null;
         setInternalDrag(null);
@@ -364,16 +368,7 @@ export default function ChordTrack({ dragChordId, onClick }) {
         {bars}
       </div>
 
-      {/* Delete zone — only visible while internally dragging a block */}
-      {internalDrag && (
-        <div
-          id="chord-delete-zone"
-          className={`chord-delete-zone ${internalDrag.overDelete ? 'active' : ''}`}
-        >
-          <span className="chord-delete-icon">🗑</span>
-          <span>拖到此处删除</span>
-        </div>
-      )}
+      {/* Global arrangement delete zone used via ID / events */}
       {/* Ghost is rendered by dragGhost.js on document.body — no React */}
     </div>
   );
