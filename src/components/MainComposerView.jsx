@@ -19,6 +19,7 @@ export default function MainComposerView() {
   const [dragChordId, setDragChordId] = useState(null);
   const [dragOverDelete, setDragOverDelete] = useState(false);
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
+  const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
   const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
   const trackOverviewRef = useRef(null);
 
@@ -74,8 +75,9 @@ export default function MainComposerView() {
     }
 
     setSeekPosition(barIndex, beatIndex);
+    setSelectedBar(barIndex);
     audioEngine.seekToStep(barIndex, beatIndex * 4);
-  }, [setSeekPosition]);
+  }, [setSeekPosition, setSelectedBar]);
 
   return (
     <div className="main-composer" id="main-composer-view">
