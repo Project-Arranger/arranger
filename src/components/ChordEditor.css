@@ -5,7 +5,7 @@
   flex-direction: row;
   gap: 0;
   height: 100%;
-  overflow: hidden;
+  overflow: visible; /* ALLOW dragged blocks to escape the container boundary */
 }
 
 /* ── Common Panel Shell ── */

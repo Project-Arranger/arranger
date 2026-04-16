@@ -46,6 +46,9 @@ const TRANSITION_PATTERNS = [
 function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', onDragStart, onDragEnd }) {
   const handleDragStart = useCallback(async () => {
     await audioEngine.init();
+    window.dispatchEvent(new CustomEvent('chord-drag-start', {
+      detail: { chordId }
+    }));
     if (onDragStart) onDragStart(chordId);
   }, [chordId, onDragStart]);
 
@@ -66,10 +69,18 @@ function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', 
     <motion.div
       drag
       dragSnapToOrigin
+      dragElastic={0}
+      dragMomentum={false}
+      dragTransition={{ power: 0, timeConstant: 0 }}
       onDragStart={handleDragStart}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      whileDrag={{ scale: 0.88, zIndex: 9999, boxShadow: `0 20px 40px ${glowColor || 'rgba(160,216,239,0.4)'}` }}
+      whileDrag={{ 
+        scale: 0.9, 
+        zIndex: 9999, 
+        boxShadow: `0 20px 50px ${glowColor || 'rgba(160,216,239,0.5)'}` 
+      }}
+      transition={{ duration: 0 }}
       className={`ce-block ce-block--${variant}`}
       style={{ '--cc': color, '--cg': glowColor }}
     >

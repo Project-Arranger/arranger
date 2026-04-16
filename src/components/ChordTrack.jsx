@@ -31,24 +31,39 @@ export default function ChordTrack({ dragChordId, onClick }) {
   // 跟踪当前高亮的 drop slot
   const [highlightSlot, setHighlightSlot] = useState(null);
 
+  // 缓存所有 slot 的位置，避免在 handleDragMove 中频繁读取 DOM
+  const slotRectsRef = useRef([]);
+
   /**
-   * 根据触摸坐标计算对应的 { barIndex, beatIndex }
+   * 刷新所有 slot 的位置缓存
+   */
+  const refreshSlotRects = useCallback(() => {
+    if (!trackRef.current) return;
+    const slots = trackRef.current.querySelectorAll('.chord-slot');
+    const rects = [];
+    slots.forEach(slot => {
+      rects.push({
+        barIndex: parseInt(slot.dataset.bar, 10),
+        beatIndex: parseInt(slot.dataset.beat, 10),
+        rect: slot.getBoundingClientRect()
+      });
+    });
+    slotRectsRef.current = rects;
+  }, []);
+
+  /**
+   * 根据坐标在缓存中查找对应的 { barIndex, beatIndex }
    */
   const getSlotFromPoint = useCallback((clientX, clientY) => {
-    if (!trackRef.current) return null;
-    const slots = trackRef.current.querySelectorAll('.chord-slot');
-    for (const slot of slots) {
-      const rect = slot.getBoundingClientRect();
+    for (const item of slotRectsRef.current) {
+      const { rect } = item;
       if (
         clientX >= rect.left &&
         clientX <= rect.right &&
         clientY >= rect.top &&
         clientY <= rect.bottom
       ) {
-        return {
-          barIndex: parseInt(slot.dataset.bar, 10),
-          beatIndex: parseInt(slot.dataset.beat, 10),
-        };
+        return { barIndex: item.barIndex, beatIndex: item.beatIndex };
       }
     }
     return null;
@@ -58,17 +73,28 @@ export default function ChordTrack({ dragChordId, onClick }) {
    * 外部调用：拖拽中检测高亮 slot
    */
   useEffect(() => {
+    const handleDragStart = () => {
+      // 拖拽开始时刷新一次缓存即可
+      refreshSlotRects();
+    };
+
     const handleDragMove = (e) => {
       const detail = e.detail;
       if (!detail) return;
       const slot = getSlotFromPoint(detail.clientX, detail.clientY);
-      setHighlightSlot(slot);
+      // 只有当 slot 变化时才更新 state，减少 React render 次数
+      setHighlightSlot(prev => {
+        if (!prev && !slot) return null;
+        if (prev?.barIndex === slot?.barIndex && prev?.beatIndex === slot?.beatIndex) return prev;
+        return slot;
+      });
     };
 
     const handleDragEnd = (e) => {
       const detail = e.detail;
       setHighlightSlot(null);
       if (!detail) return;
+      // 结束时使用当前坐标最后判定一次
       const slot = getSlotFromPoint(detail.clientX, detail.clientY);
       if (slot && detail.chordId) {
         setChordBlock(slot.barIndex, slot.beatIndex, detail.chordId);
@@ -78,16 +104,19 @@ export default function ChordTrack({ dragChordId, onClick }) {
           audioEngine.playChordPreview(chord.notes);
         }
       }
+      slotRectsRef.current = []; // 清空缓存
     };
 
+    window.addEventListener('chord-drag-start', handleDragStart);
     window.addEventListener('chord-drag-move', handleDragMove);
     window.addEventListener('chord-drag-end', handleDragEnd);
 
     return () => {
+      window.removeEventListener('chord-drag-start', handleDragStart);
       window.removeEventListener('chord-drag-move', handleDragMove);
       window.removeEventListener('chord-drag-end', handleDragEnd);
     };
-  }, [getSlotFromPoint, setChordBlock]);
+  }, [getSlotFromPoint, refreshSlotRects, setChordBlock]);
 
   /**
    * 点击已有积木块 → 选中（弹出变体选项）

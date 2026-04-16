@@ -21,6 +21,8 @@
   overflow-y: auto;
   overflow-x: auto; /* Enable horizontal scrolling on mobile */
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1; /* Keep it below dragging layers in ContextArea */
 }
 
 /* Hide scrollbar but keep functionality */
