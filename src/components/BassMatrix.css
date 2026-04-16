@@ -22,6 +22,54 @@
   gap: 10px;
 }
 
+/* ---- 一键匹配和弦进行按钮 ---- */
+.bass-auto-fill-btn {
+  margin-left: auto;
+  height: 26px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #A0D8EF;
+  background: rgba(160, 216, 239, 0.06);
+  border: 1px solid rgba(160, 216, 239, 0.18);
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.bass-auto-fill-btn:hover {
+  background: rgba(160, 216, 239, 0.12);
+  border-color: rgba(160, 216, 239, 0.35);
+  box-shadow: 0 0 10px rgba(160, 216, 239, 0.15);
+}
+
+.bass-auto-fill-btn:active {
+  transform: scale(0.96);
+}
+
+/* 成功闪光态：变为绿色确认 */
+.bass-auto-fill-btn.flash {
+  color: #7EFFC5;
+  background: rgba(126, 255, 197, 0.1);
+  border-color: rgba(126, 255, 197, 0.35);
+  box-shadow: 0 0 14px rgba(126, 255, 197, 0.25);
+  animation: fill-flash-pulse 0.9s ease-out;
+}
+
+@keyframes fill-flash-pulse {
+  0%   { box-shadow: 0 0 0px rgba(126, 255, 197, 0); }
+  30%  { box-shadow: 0 0 20px rgba(126, 255, 197, 0.5); }
+  100% { box-shadow: 0 0 10px rgba(126, 255, 197, 0.2); }
+}
+
 .bass-bar-label {
   font-size: 0.6rem;
   font-weight: 700;

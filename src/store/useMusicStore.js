@@ -2,6 +2,34 @@ import { create } from 'zustand';
 import { CHORD_LIBRARY } from '../data/chords';
 import { eighthToStep } from '../data/bassNotes';
 
+/** 和弦 ID → Bass 根音映射（跨越所有内置和弦）*/
+const CHORD_TO_BASS_ROOT = {
+  'C':       'C2',
+  'Am':      'A2',
+  'F':       'F2',
+  'G':       'G2',
+  'Cmaj7':   'C2',
+  'Cmaj9':   'C2',
+  'Cadd9':   'C2',
+  'Am7':     'A2',
+  'Am9':     'A2',
+  'Am(add9)':'A2',
+  'Fmaj7':   'F2',
+  'F6':      'F2',
+  'Fadd9':   'F2',
+  'G7':      'G2',
+  'G9':      'G2',
+  'Gsus4':   'G2',
+  'Em/B':    'B2',
+  'F#m7b5':  'F#2',
+  'G/B':     'B2',
+  'E7':      'E2',
+  'Fm':      'F2',
+  'C/E':     'E2',
+  'Abdim':   'G#2',
+  'D/F#':    'F#2',
+};
+
 /**
  * 生成 8 小节的矩阵数据结构
  * 每个 track 有 8 个 bar，每个 bar 有 16 个 step
@@ -275,6 +303,37 @@ const useMusicStore = create((set, get) => ({
   },
 
   // -------- Actions: Bass 轨道专用 --------
+
+  /**
+   * 一键匹配和弦进行：读取指定小节 chord 轨的和弦，
+   * 在 Bass 矩阵的 第1、3、5、7 位（eighthIndex 0/2/4/6）写入各拍根音。
+   * 已有同位置的 bass 音符将被覆盖，空拍位则跳过不写入。
+   * @param {number} barIndex - 0~7
+   */
+  autoFillBassFromChord: (barIndex) => {
+    const { matrix } = get();
+    const chordBar = matrix.chord[barIndex];
+    const newBar = [...matrix.bass[barIndex]];
+
+    // 4 拍，每拍的 downbeat 八分音符位 = 拍序 * 2
+    for (let beat = 0; beat < 4; beat++) {
+      const eighthIndex = beat * 2;          // 0, 2, 4, 6
+      const stepIndex = eighthIndex * 2;     // 0, 4, 8, 12（对应 chord 轨拍头 step）
+      const cell = chordBar[stepIndex];
+      if (!cell) continue;                   // 该拍无和弦，跳过
+
+      // 优先取 chordId，再取 variationId（处理变体和过渡和弦）
+      const chordId = cell.chordId || cell.variationId;
+      const rootNote = CHORD_TO_BASS_ROOT[chordId];
+      if (!rootNote) continue;               // 未知和弦，跳过
+
+      newBar[eighthIndex * 2] = { note: rootNote, velocity: 100 };
+    }
+
+    const newTrack = [...matrix.bass];
+    newTrack[barIndex] = newBar;
+    set({ matrix: { ...matrix, bass: newTrack } });
+  },
 
   /**
    * 切换 bass 矩阵中某个音符的开/关

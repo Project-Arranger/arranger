@@ -40,8 +40,17 @@ export default function BassMatrix() {
   const isPlaying = useMusicStore((s) => s.isPlaying);
   const toggleBassNote = useMusicStore((s) => s.toggleBassNote);
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
+  const autoFillBassFromChord = useMusicStore((s) => s.autoFillBassFromChord);
 
   const [ripples, setRipples] = useState([]);
+  const [fillFlash, setFillFlash] = useState(false);
+
+  /** 一键匹配和弦进行 */
+  const handleAutoFill = useCallback(() => {
+    autoFillBassFromChord(selectedBar);
+    setFillFlash(true);
+    setTimeout(() => setFillFlash(false), 900);
+  }, [autoFillBassFromChord, selectedBar]);
 
   /**
    * 点击/触摸 → 切换音符 + 播放预览
@@ -88,6 +97,16 @@ export default function BassMatrix() {
             </button>
           ))}
         </div>
+        {/* 一键匹配和弦进行 */}
+        <button
+          id="bass-auto-fill-btn"
+          className={`bass-auto-fill-btn ${fillFlash ? 'flash' : ''}`}
+          onClick={handleAutoFill}
+          onTouchStart={handleAutoFill}
+          title="根据和弦轨自动在第1、3、5、7位写入根音"
+        >
+          {fillFlash ? '✓ 已匹配' : '⚡ 匹配和弦'}
+        </button>
       </div>
 
       {/* 矩阵网格 */}
