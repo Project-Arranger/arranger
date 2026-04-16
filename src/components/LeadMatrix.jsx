@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useMusicStore from '../store/useMusicStore';
 import { BASS_NOTES, BASS_COLUMNS, eighthToStep } from '../data/bassNotes';
 import audioEngine from '../audio/AudioEngine';
@@ -16,6 +16,17 @@ const LEAD_NOTES = BASS_NOTES.map(n => ({
     label: n.label // Keep same labels C, C#, etc.
 }));
 
+/** 键盘 1-7 → C D E F G A B (Octave 4) */
+const KEY_TO_NOTE = {
+  '1': 'C4',
+  '2': 'D4',
+  '3': 'E4',
+  '4': 'F4',
+  '5': 'G4',
+  '6': 'A4',
+  '7': 'B4',
+};
+
 export default function LeadMatrix() {
   const selectedBar = useMusicStore((s) => s.selectedBar);
   const totalBars = useMusicStore((s) => s.totalBars);
@@ -27,6 +38,60 @@ export default function LeadMatrix() {
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
 
   const [ripples, setRipples] = useState([]);
+  // Track held keys using a ref (no re-render needed)
+  const heldKeysRef = useRef(new Set());
+  // Step-sequencer cursor for writing when paused
+  const stepCursorRef = useRef(0);
+
+  // Reset step cursor when switching bars
+  useEffect(() => {
+    stepCursorRef.current = 0;
+  }, [selectedBar]);
+
+  /**
+   * 键盘 1-7 快捷键：对应 C4–B4
+   * 写入逻辑：
+   * - 播放中: Live Record (写到播放头所在位置)
+   * - 暂停中: Step Sequencer (写入当前选中 bar 并自动步进)
+   */
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const note = KEY_TO_NOTE[e.key];
+      if (!note) return;
+      if (heldKeysRef.current.has(e.key)) return; // prevent key-repeat
+      
+      heldKeysRef.current.add(e.key);
+      audioEngine.playLeadPreview(note);
+
+      // Write Logic
+      const storeState = useMusicStore.getState();
+      if (storeState.isPlaying) {
+        // Live record to current playhead position
+        const eighthIndex = Math.floor(storeState.currentStep / 2);
+        storeState.setLeadNote(storeState.currentBar, eighthIndex, note);
+      } else {
+        // Step sequence to the current highlighted bar
+        storeState.setLeadNote(storeState.selectedBar, stepCursorRef.current, note);
+        // Advance cursor
+        stepCursorRef.current = (stepCursorRef.current + 1) % BASS_COLUMNS;
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      heldKeysRef.current.delete(e.key);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []); // mount/unmount only
+
+
 
   const handleCellTouchStart = useCallback(
     async (e, eighthIndex, note) => {

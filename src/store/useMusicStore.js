@@ -440,6 +440,27 @@ const useMusicStore = create((set, get) => ({
   // -------- Actions: Lead 轨道专用 --------
 
   /**
+   * 写入 lead 矩阵中某个音符（非 toggle，纯写入）
+   */
+  setLeadNote: (barIndex, eighthIndex, note) => {
+    const { matrix } = get();
+    const stepIndex = eighthToStep(eighthIndex);
+    const newBar = [...matrix.lead[barIndex]];
+
+    newBar[stepIndex] = { note, velocity: 100 };
+
+    const newTrack = [...matrix.lead];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        lead: newTrack,
+      },
+    });
+  },
+
+  /**
    * 切换 lead 矩阵中某个音符的开/关
    * @param {number} barIndex - 0~7
    * @param {number} eighthIndex - 0~7（八分音符位）
