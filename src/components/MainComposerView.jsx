@@ -1,9 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
 import useMusicStore from '../store/useMusicStore';
 import audioEngine from '../audio/AudioEngine';
 import TransportBar from './TransportBar';
-import ProgressBar from './ProgressBar';
 import ChordTrack from './ChordTrack';
 import TrackRow from './TrackRow';
 import ContextArea from './ContextArea';
@@ -12,26 +10,18 @@ import './MainComposerView.css';
 
 /**
  * MainComposerView — 主编曲视图容器
- * 
- * 布局对应 README 中的 ASCII 原型:
- *   ┌─ TransportBar (Play/Stop/BPM) ─┐
- *   ├─ ProgressBar (8 小节进度) ──────┤
- *   ├─ TrackOverview ─────────────────┤
- *   │   CHORD: 和弦积木轨道           │
- *   │   BASS:  Bass 轨道              │
- *   │   PERC:  打击占位               │
- *   │   LEAD:  旋律占位               │
- *   ├─ ContextArea (底部动态编辑区) ──┤
- *   │   [Chord Tab] [Bass Tab]        │
- *   │   → ChordPalette / BassMatrix   │
- *   └────────────────────────────────┘
+ *
+ * Ableton 风格播放头：
+ *  - 不再有独立进度条，移除 ProgressBar
+ *  - seekBar：用户点击设定的定位小节，在所有轨道上显示一个红色列框
+ *  - 点击小节格子 → 设置 seekBar + 引擎 seek（不自动播放）
+ *  - 播放中 seekBar 框不动，逐步点亮格子代表实时进度
  */
 export default function MainComposerView() {
   const [dragChordId, setDragChordId] = useState(null);
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
-  const setDragProgress = useMusicStore((s) => s.setDragProgress);
-  const totalBars = useMusicStore((s) => s.totalBars);
-  const stepsPerBar = useMusicStore((s) => s.stepsPerBar);
+  const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
+  const trackOverviewRef = useRef(null);
 
   const handleDragStart = useCallback((chordId) => {
     setDragChordId(chordId);
@@ -48,87 +38,50 @@ export default function MainComposerView() {
     [setActiveContextTrack]
   );
 
-  const trackOverviewRef = useRef(null);
+  /**
+   * Click anywhere on the track grid → Ableton-style beat-level seek
+   * 1. Detect which bar was clicked via data-bar
+   * 2. Detect which beat via data-beat (if available) else compute from X position
+   * 3. Seek engine, do NOT auto-play
+   */
+  const handleOverviewClick = useCallback((e) => {
+    const barEl = e.target.closest('[data-bar]');
+    if (!barEl) return;
 
-  // Logic to handle scrubbing/seeking from anywhere in TrackOverview
-  const handleSeekUpdate = useCallback((e, isRelease = false) => {
-    if (!trackOverviewRef.current) return;
-    
-    // Check if we are interacting with the grid areas
-    const targetEl = e.target.closest('.chord-track-grid, .track-row-grid');
-    if (!targetEl) return;
+    const barIndex = parseInt(barEl.dataset.bar, 10);
+    if (isNaN(barIndex)) return;
 
-    const rect = targetEl.getBoundingClientRect();
-    const x = ((e.clientX || (e.touches && e.touches[0].clientX))) - rect.left;
-    
-    let progress = Math.max(0, Math.min(1, x / rect.width));
-
-    if (isRelease) {
-      // Seek on mouse release
-      const finalProgress = useMusicStore.getState().dragProgress ?? progress;
-      const totalStepsVal = totalBars * stepsPerBar;
-      const targetGlobalStep = Math.floor(finalProgress * totalStepsVal);
-      
-      const bar = Math.floor(targetGlobalStep / stepsPerBar);
-      const step = targetGlobalStep % stepsPerBar;
-      
-      setDragProgress(null);
-      audioEngine.seekToStep(bar, step);
-      audioEngine.play();
+    // Try beat from data-beat attribute (chord slot OR track-row-beat)
+    const beatEl = e.target.closest('[data-beat]');
+    let beatIndex = 0;
+    if (beatEl && beatEl.dataset.beat !== undefined) {
+      beatIndex = parseInt(beatEl.dataset.beat, 10);
     } else {
-      // Just update visual needle via store
-      setDragProgress(progress);
+      // Compute beat from X position within the bar container
+      const rect = barEl.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      beatIndex = Math.min(3, Math.floor(x * 4));
     }
-  }, [totalBars, stepsPerBar, setDragProgress]);
 
-  const onMouseDown = (e) => {
-    // Only capture if clicking on grid, otherwise let chord drag/clicking happen
-    if (!e.target.closest('.chord-track-grid, .track-row-grid')) return;
-    
-    handleSeekUpdate(e, false);
-    const onMouseMove = (me) => handleSeekUpdate(me, false);
-    const onMouseUp = (me) => {
-        handleSeekUpdate(me, true);
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  };
-
-  const onTouchStart = (e) => {
-    if (!e.target.closest('.chord-track-grid, .track-row-grid')) return;
-
-    handleSeekUpdate(e, false);
-    const onTouchMove = (te) => handleSeekUpdate(te, false);
-    const onTouchEnd = (te) => {
-        handleSeekUpdate(te, true);
-        window.removeEventListener('touchmove', onTouchMove);
-        window.removeEventListener('touchend', onTouchEnd);
-    };
-    window.addEventListener('touchmove', onTouchMove);
-    window.addEventListener('touchend', onTouchEnd);
-  };
+    setSeekPosition(barIndex, beatIndex);
+    audioEngine.seekToStep(barIndex, beatIndex * 4); // 4 steps per beat
+  }, [setSeekPosition]);
 
   return (
     <div className="main-composer" id="main-composer-view">
       {/* 顶部控制栏 */}
       <TransportBar />
 
-      {/* 进度条 */}
-      <ProgressBar />
-
-      {/* 轨道概览区 */}
-      <div 
-        className="track-overview" 
-        id="track-overview" 
+      {/* 轨道概览区 — ProgressBar 已移除，点击直接定位 */}
+      <div
+        className="track-overview"
+        id="track-overview"
         ref={trackOverviewRef}
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
+        onClick={handleOverviewClick}
         style={{ position: 'relative' }}
       >
-        <ChordTrack 
-          dragChordId={dragChordId} 
+        <ChordTrack
+          dragChordId={dragChordId}
           onClick={() => handleTrackClick('chord')}
         />
         <TrackRow
@@ -137,16 +90,16 @@ export default function MainComposerView() {
           label="BASS"
           onClick={() => handleTrackClick('bass')}
         />
-        <TrackRow 
-          trackId="perc" 
-          Icon={PercIcon} 
-          label="PERC" 
+        <TrackRow
+          trackId="perc"
+          Icon={PercIcon}
+          label="PERC"
           onClick={() => handleTrackClick('perc')}
         />
-        <TrackRow 
-          trackId="lead" 
-          Icon={LeadIcon} 
-          label="LEAD" 
+        <TrackRow
+          trackId="lead"
+          Icon={LeadIcon}
+          label="LEAD"
           onClick={() => handleTrackClick('lead')}
         />
       </div>

@@ -76,9 +76,11 @@
 }
 
 .transport-btn-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+  text-transform: uppercase;
 }
 
 .transport-btn-play {
@@ -190,7 +192,7 @@
 .bpm-input {
   width: 50px;
   padding: 4px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   text-align: center;
   background: transparent;
@@ -210,15 +212,47 @@
   -moz-appearance: textfield;
 }
 
-.transport-btn:focus-within {
-  border-color: #A0D8EF;
-  box-shadow: 0 0 10px rgba(160, 216, 239, 0.3);
-}
-
 .transport-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px; /* Further reduced gap for 4 elements */
+}
+
+.transport-btn-key, .transport-btn-scale {
+  min-width: 85px;
+  background: rgba(160, 216, 239, 0.02);
+  gap: 4px;
+}
+
+.transport-btn-scale {
+  min-width: 130px; /* Scale names are longer */
+}
+
+.key-select {
+  background: transparent;
+  border: none;
+  color: #A0D8EF;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0 4px;
+  outline: none;
+  text-align: center;
+}
+
+/* Ensure options look okay (OS dependent but background helps) */
+.key-select option {
+  background: #1A1A1A;
+  color: #A0D8EF;
+}
+
+.key-select-arrow {
+  opacity: 0.5;
+  margin-left: -5px; /* Adjust for larger font and better alignment */
+  pointer-events: none;
 }
 
 .transport-btn-export {

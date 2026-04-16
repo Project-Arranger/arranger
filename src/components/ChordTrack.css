@@ -65,6 +65,16 @@
   animation: bar-breathing 2s ease-in-out infinite;
 }
 
+/* Seek position marker — vertical line at beat left edge */
+.chord-bar.seek-bar {} /* unused now; beat-level handled below */
+
+.chord-slot.seek-beat {
+  border-left: 2px solid rgba(160, 216, 239, 0.9);
+  box-shadow: -1px 0 8px rgba(160, 216, 239, 0.35);
+  border-radius: 0;
+  z-index: 2;
+}
+
 @keyframes bar-breathing {
 
   0%,

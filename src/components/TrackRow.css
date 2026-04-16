@@ -78,6 +78,22 @@
   border-color: rgba(122, 236, 240, 0.1);
 }
 
+/* Ableton-style seek position marker — vertical line */
+.track-row-bar.seek-bar {} /* unused now; beat-level handled below */
+
+/* Beat group within a bar (4 beats × 4 steps = 16 steps) */
+.track-row-beat {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+
+.track-row-beat.seek-beat {
+  border-left: 2px solid rgba(160, 216, 239, 0.9);
+  box-shadow: -1px 0 8px rgba(160, 216, 239, 0.35);
+  z-index: 2;
+}
+
 .track-row-step {
   flex: 1;
   min-width: 0;

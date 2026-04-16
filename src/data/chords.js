@@ -7,30 +7,32 @@
  */
 
 const CHORD_LIBRARY = {
-  C: {
-    label: 'C',
-    notes: ['C4', 'E4', 'G4'],
-    color: '#3498DB',    // 亮蓝 (Cyber Blue)
-    glowColor: 'rgba(52, 152, 219, 0.3)',
-  },
-  Am: {
-    label: 'Am',
-    notes: ['A3', 'C4', 'E4'],
-    color: '#9B86D4',    // 丁香紫 (Lilac)
-    glowColor: 'rgba(155, 134, 212, 0.3)',
-  },
-  F: {
-    label: 'F',
-    notes: ['F3', 'A3', 'C4'],
-    color: '#4FC1FF',    // 冰晶青 (Cyan Ice)
-    glowColor: 'rgba(79, 193, 255, 0.3)',
-  },
-  G: {
-    label: 'G',
-    notes: ['G3', 'B3', 'D4'],
-    color: '#5D6FC0',    // 深海蓝 (Deep Sea)
-    glowColor: 'rgba(93, 111, 192, 0.3)',
-  },
+  C:    { label: 'C',    notes: ['C4','E4','G4'],           color: '#3498DB', glowColor: 'rgba(52,152,219,0.3)' },
+  Am:   { label: 'Am',   notes: ['A3','C4','E4'],           color: '#9B86D4', glowColor: 'rgba(155,134,212,0.3)' },
+  F:    { label: 'F',    notes: ['F3','A3','C4'],           color: '#4FC1FF', glowColor: 'rgba(79,193,255,0.3)' },
+  G:    { label: 'G',    notes: ['G3','B3','D4'],           color: '#5D6FC0', glowColor: 'rgba(93,111,192,0.3)' },
+  // Variations — shown in the ChordEditor middle panel (blue blocks)
+  Cmaj7:     { label: 'Cmaj7',     notes: ['C4','E4','G4','B4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Cmaj9:     { label: 'Cmaj9',     notes: ['C4','E4','G4','B4','D5'],      color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Cadd9:     { label: 'Cadd9',     notes: ['C4','E4','G4','D5'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Am7:       { label: 'Am7',       notes: ['A3','C4','E4','G4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Am9:       { label: 'Am9',       notes: ['A3','C4','E4','G4','B4'],      color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  'Am(add9)':{ label: 'Am(add9)',  notes: ['A3','C4','E4','B4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Fmaj7:     { label: 'Fmaj7',     notes: ['F3','A3','C4','E4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  F6:        { label: 'F6',        notes: ['F3','A3','C4','D4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Fadd9:     { label: 'Fadd9',     notes: ['F3','A3','C4','G4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  G7:        { label: 'G7',        notes: ['G3','B3','D4','F4'],           color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  G9:        { label: 'G9',        notes: ['G3','B3','D4','F4','A4'],      color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Gsus4:     { label: 'Gsus4',     notes: ['G3','C4','D4'],                color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  // Transition pivot chords (right panel, blue blocks)
+  'Em/B':    { label: 'Em/B',      notes: ['B3','E4','G4'],                color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  'F#m7b5':  { label: 'F#m7b5',   notes: ['F#3','A3','C4','E4'],          color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  'G/B':     { label: 'G/B',       notes: ['B3','D4','G4'],                color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  E7:        { label: 'E7',        notes: ['E3','G#3','B3','D4'],          color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Fm:        { label: 'Fm',        notes: ['F3','Ab3','C4'],               color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  'C/E':     { label: 'C/E',       notes: ['E3','G3','C4'],                color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  Abdim:     { label: 'Abdim',     notes: ['Ab3','B3','D4','F4'],          color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
+  'D/F#':    { label: 'D/F#',      notes: ['Gb3','A3','D4'],               color: '#2563EB', glowColor: 'rgba(37,99,235,0.3)' },
 };
 
 const AVAILABLE_CHORDS = ['C', 'Am', 'F', 'G'];

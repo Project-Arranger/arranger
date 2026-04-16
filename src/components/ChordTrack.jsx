@@ -24,6 +24,8 @@ export default function ChordTrack({ dragChordId, onClick }) {
   const removeChordBlock = useMusicStore((s) => s.removeChordBlock);
   const setSelectedChordBlock = useMusicStore((s) => s.setSelectedChordBlock);
   const selectedChordBlock = useMusicStore((s) => s.selectedChordBlock);
+  const seekBar = useMusicStore((s) => s.seekBar);
+  const seekBeat = useMusicStore((s) => s.seekBeat);
   const trackRef = useRef(null);
 
   // 跟踪当前高亮的 drop slot
@@ -132,10 +134,12 @@ export default function ChordTrack({ dragChordId, onClick }) {
 
       const isTransition = cellData?.isTransition;
 
+      const isSeekBeat = barIdx === seekBar && beatIdx === seekBeat;
+
       beats.push(
         <div
           key={`${barIdx}-${beatIdx}`}
-          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''} ${isTransition ? 'transition' : ''}`}
+          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''} ${isTransition ? 'transition' : ''} ${isSeekBeat ? 'seek-beat' : ''}`}
           data-bar={barIdx}
           data-beat={beatIdx}
           onClick={() => handleSlotClick(barIdx, beatIdx, cellData)}
@@ -162,7 +166,11 @@ export default function ChordTrack({ dragChordId, onClick }) {
     }
 
     bars.push(
-      <div key={barIdx} className={`chord-bar ${barIdx === currentBar && isPlaying ? 'current-bar' : ''}`}>
+      <div
+        key={barIdx}
+        className={`chord-bar ${barIdx === currentBar && isPlaying ? 'current-bar' : ''} ${barIdx === seekBar ? 'seek-bar' : ''}`}
+        data-bar={barIdx}
+      >
         {beats}
       </div>
     );

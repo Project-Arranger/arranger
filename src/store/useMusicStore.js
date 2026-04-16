@@ -41,6 +41,12 @@ const useMusicStore = create((set, get) => ({
   // -------- Transport 状态 --------
   bpm: 120,
   isPlaying: false,
+  rootKey: 'C',
+  scale: 'Ionian',
+
+  // 用户手动点击定位的小节（与 currentBar 引擎播放位置分离）
+  seekBar: 0,
+  seekBeat: 0, // 小节内的拍子 (0-3)
 
   // 当前播放位置 (0-indexed)
   currentBar: 0,
@@ -75,6 +81,11 @@ const useMusicStore = create((set, get) => ({
     const clamped = Math.max(40, Math.min(300, bpm));
     set({ bpm: clamped });
   },
+
+  setRootKey: (key) => set({ rootKey: key }),
+  setScale: (scale) => set({ scale: scale }),
+  setSeekBar: (barIndex) => set({ seekBar: barIndex }),
+  setSeekPosition: (barIndex, beatIndex) => set({ seekBar: barIndex, seekBeat: beatIndex }),
 
   /**
    * 更新当前播放位置（由 AudioEngine 调用）

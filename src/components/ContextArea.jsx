@@ -1,10 +1,8 @@
-import { AnimatePresence } from 'framer-motion';
 import useMusicStore from '../store/useMusicStore';
-import ChordPalette from './ChordPalette';
+import ChordEditor from './ChordEditor';
 import BassMatrix from './BassMatrix';
 import PercMatrix from './PercMatrix';
 import LeadMatrix from './LeadMatrix';
-import ChordVariationDrawer from './ChordVariationDrawer';
 import { ChordIcon, BassIcon, PercIcon, LeadIcon } from './Icons';
 import './ContextArea.css';
 
@@ -18,7 +16,6 @@ import './ContextArea.css';
 export default function ContextArea({ onDragStart, onDragEnd }) {
   const activeContextTrack = useMusicStore((s) => s.activeContextTrack);
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
-  const selectedChordBlock = useMusicStore((s) => s.selectedChordBlock);
 
   const renderContent = () => {
     switch (activeContextTrack) {
@@ -31,7 +28,7 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
       case 'chord':
       default:
         return (
-          <ChordPalette
+          <ChordEditor
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
           />
@@ -82,11 +79,6 @@ export default function ContextArea({ onDragStart, onDragEnd }) {
       </div>
       {/* 动态内容 */}
       {renderContent()}
-
-      {/* 变体抽屉 (Framer Motion 动画控制) */}
-      <AnimatePresence>
-        {selectedChordBlock && <ChordVariationDrawer />}
-      </AnimatePresence>
     </div>
   );
 }

@@ -1,0 +1,305 @@
+/* ===== ChordEditor — 3-panel chord editing area ===== */
+
+.chord-editor {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Common Panel Shell ── */
+.ce-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 10px;
+  /* overflow:visible allows dragged blocks to escape the panel */
+  overflow: visible;
+  position: relative;
+}
+
+.ce-panel:last-child {
+  border-right: none;
+}
+
+.ce-panel-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(160, 216, 239, 0.5);
+  margin: 0 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Panel 1: Presets ── */
+.ce-panel--presets {
+  flex: 1;
+  min-width: 180px;
+  padding: 24px;
+  align-items: center;
+}
+
+.ce-presets-list {
+  width: 100%;
+  max-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ce-preset-btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ce-preset-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ce-preset-btn.active {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.ce-preset-btn.placeholder {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ce-preset-btn.placeholder:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ce-preset-more {
+  border-style: dashed;
+}
+
+.ce-preset-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c8daee;
+  letter-spacing: 0.04em;
+}
+
+.ce-preset-desc {
+  font-size: 0.6rem;
+  line-height: 1.4;
+  color: rgba(160, 216, 239, 0.4);
+}
+
+/* ── Panel 2: Variations ── */
+.ce-panel--variations {
+  flex: 2.5;
+  min-width: 450px;
+  padding: 24px 30px;
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  align-items: center;
+}
+
+.ce-variations-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ce-variation-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.ce-variation-alts {
+  display: flex;
+  gap: 24px;
+}
+
+.ce-variation-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 80px;
+}
+
+.ce-alt-desc {
+  font-size: 0.58rem;
+  color: rgba(160, 216, 239, 0.4);
+  text-align: center;
+  line-height: 1.4;
+  padding: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ce-arrow {
+  font-size: 0.85rem;
+  color: rgba(160, 216, 239, 0.25);
+  flex-shrink: 0;
+}
+
+/* ── Panel 3: Transitions ── */
+.ce-panel--transitions {
+  flex: 1.5;
+  min-width: 250px;
+  padding: 24px;
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  align-items: center;
+}
+
+.ce-transition-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ce-transition-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.ce-transition-context {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(160, 216, 239, 0.03);
+  border: 1px solid rgba(160, 216, 239, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 76px;
+  flex-shrink: 0;
+}
+
+.ce-transition-anchor {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: rgba(160, 216, 239, 0.6);
+}
+
+.ce-transition-dash {
+  font-size: 0.8rem;
+  color: rgba(160, 216, 239, 0.1);
+  margin: 2px 0;
+}
+
+.ce-transition-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ce-transition-pivot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Chord Block (shared) ── */
+.ce-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 62px;
+  height: 48px;
+  border-radius: 10px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.ce-variation-row > .ce-block {
+  width: 68px; /* Slightly wider for root chords */
+}
+
+.ce-block--base {
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--cc, #3498DB) 30%, #1a2a40),
+    color-mix(in srgb, var(--cc, #3498DB) 15%, #111820));
+  border: 1.5px solid color-mix(in srgb, var(--cc, #3498DB) 60%, transparent);
+}
+
+.ce-block--alt {
+  background: linear-gradient(145deg,
+    rgba(37, 99, 235, 0.35),
+    rgba(29, 78, 216, 0.2));
+  border: 1.5px solid rgba(37, 99, 235, 0.55);
+}
+
+.ce-block:hover {
+  box-shadow: 0 4px 16px var(--cg, rgba(37, 99, 235, 0.3));
+}
+
+.ce-block:active {
+  cursor: grabbing;
+}
+
+.ce-block-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.ce-block-notes {
+  font-size: 0.45rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.05em;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .chord-editor {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .ce-panel--presets {
+    flex: 0 0 auto;
+  }
+
+  .ce-presets-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .ce-preset-btn {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .ce-panel--variations,
+  .ce-panel--transitions {
+    flex: 0 0 auto;
+  }
+
+  .ce-panel--transitions {
+    min-width: unset;
+  }
+
+  .ce-block {
+    width: 52px;
+    height: 42px;
+  }
+}

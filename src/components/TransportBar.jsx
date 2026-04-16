@@ -10,6 +10,10 @@ import './TransportBar.css';
 export default function TransportBar() {
   const isPlaying = useMusicStore((s) => s.isPlaying);
   const globalBpm = useMusicStore((s) => s.bpm);
+  const rootKey = useMusicStore((s) => s.rootKey);
+  const setRootKey = useMusicStore((s) => s.setRootKey);
+  const scale = useMusicStore((s) => s.scale);
+  const setScale = useMusicStore((s) => s.setScale);
   const currentBar = useMusicStore((s) => s.currentBar);
   const currentStep = useMusicStore((s) => s.currentStep);
   const [isExporting, setIsExporting] = useState(false);
@@ -58,6 +62,14 @@ export default function TransportBar() {
     setLocalBpm(value.toString());
     audioEngine.setBpm(value);
   }, [localBpm]);
+
+  const handleKeyChange = useCallback((e) => {
+    setRootKey(e.target.value);
+  }, [setRootKey]);
+
+  const handleScaleChange = useCallback((e) => {
+    setScale(e.target.value);
+  }, [setScale]);
 
   const handleExport = useCallback(async () => {
     if (isExporting) return;
@@ -128,6 +140,40 @@ export default function TransportBar() {
       </div>
 
       <div className="transport-right">
+        {/* Key Display (Select) */}
+        <div className="transport-btn transport-btn-key">
+          <span className="transport-btn-label">1=</span>
+          <select 
+            className="key-select" 
+            value={rootKey} 
+            onChange={handleKeyChange}
+          >
+            {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map(k => (
+              <option key={k} value={k}>{k}</option>
+            ))}
+          </select>
+          <svg className="key-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+
+        {/* Scale Display (Select) */}
+        <div className="transport-btn transport-btn-scale">
+          <span className="transport-btn-label">SCALE</span>
+          <select 
+            className="key-select scale-select" 
+            value={scale} 
+            onChange={handleScaleChange}
+          >
+            {['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'].map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <svg className="key-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+
         <label className="bpm-group transport-btn" style={{ minWidth: '120px', cursor: 'text' }}>
           <span className="transport-btn-label" style={{ marginRight: '0px' }}>BPM</span>
           <button className="bpm-adjust-btn" onClick={(e) => adjustBpm(-5, e)}>−</button>
