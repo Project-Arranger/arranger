@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CHORD_LIBRARY, CHORD_VARIATIONS, ORGANIZE_TRANSITIONS } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
@@ -52,7 +52,13 @@ function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', 
     if (onDragStart) onDragStart(chordId);
   }, [chordId, onDragStart]);
 
+  const lastMoveTimeRef = useRef(0);
+
   const handleDrag = useCallback((e, info) => {
+    const now = Date.now();
+    if (now - lastMoveTimeRef.current < 16) return; // Throttle to ~60fps
+    lastMoveTimeRef.current = now;
+
     window.dispatchEvent(new CustomEvent('chord-drag-move', {
       detail: { clientX: info.point.x, clientY: info.point.y, chordId },
     }));

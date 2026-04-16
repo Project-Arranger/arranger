@@ -28,11 +28,17 @@ export default function ChordTrack({ dragChordId, onClick }) {
   const seekBeat = useMusicStore((s) => s.seekBeat);
   const trackRef = useRef(null);
 
-  // 跟踪当前高亮的 drop slot
+  // ── External palette drag: highlight drop slot ──
   const [highlightSlot, setHighlightSlot] = useState(null);
 
-  // 缓存所有 slot 的位置，避免在 handleDragMove 中频繁读取 DOM
+  // 缓存所有 slot 的位置
   const slotRectsRef = useRef([]);
+
+  // ── Internal block drag (reorder / delete) ──
+  const [internalDrag, setInternalDrag] = useState(null);
+  // internalDrag = { chordId, variationId, color, glowColor,
+  //                  fromBar, fromBeat, ghostX, ghostY, overDelete }
+  const internalDragRef = useRef(null); // mirror for event handlers
 
   /**
    * 刷新所有 slot 的位置缓存
@@ -120,10 +126,11 @@ export default function ChordTrack({ dragChordId, onClick }) {
 
   /**
    * 点击已有积木块 → 选中（弹出变体选项）
+   * 只有在没有发生拖动时才触发
    */
   const handleSlotClick = useCallback(
     (barIndex, beatIndex, chordData) => {
-      if (chordData) {
+      if (chordData && !internalDragRef.current?.didMove) {
         setSelectedChordBlock({
           barIndex,
           stepIndex: beatIndex * CHORD_SPAN,
@@ -132,6 +139,94 @@ export default function ChordTrack({ dragChordId, onClick }) {
       }
     },
     [setSelectedChordBlock]
+  );
+
+  /**
+   * Internal drag: pointer down on a filled slot starts reorder/delete mode
+   */
+  const handleBlockPointerDown = useCallback(
+    (e, barIndex, beatIndex, cellData) => {
+      if (!cellData?.chordId) return;
+      e.stopPropagation();
+      e.currentTarget.releasePointerCapture(e.pointerId);
+
+      const chord = CHORD_LIBRARY[cellData.chordId];
+      const dragState = {
+        chordId: cellData.chordId,
+        variationId: cellData.variationId || cellData.chordId,
+        color: chord?.color,
+        glowColor: chord?.glowColor,
+        fromBar: barIndex,
+        fromBeat: beatIndex,
+        ghostX: e.clientX,
+        ghostY: e.clientY,
+        overDelete: false,
+        didMove: false,
+        pointerId: e.pointerId,
+      };
+      internalDragRef.current = dragState;
+      setInternalDrag({ ...dragState });
+
+      const onPointerMove = (ev) => {
+        const d = internalDragRef.current;
+        if (!d) return;
+        d.didMove = true;
+        d.ghostX = ev.clientX;
+        d.ghostY = ev.clientY;
+
+        // Check if hovering the delete zone
+        const deleteZone = document.getElementById('chord-delete-zone');
+        let overDelete = false;
+        if (deleteZone) {
+          const rect = deleteZone.getBoundingClientRect();
+          overDelete =
+            ev.clientX >= rect.left && ev.clientX <= rect.right &&
+            ev.clientY >= rect.top  && ev.clientY <= rect.bottom;
+        }
+        d.overDelete = overDelete;
+
+        // Check hovered slot
+        const slot = getSlotFromPoint(ev.clientX, ev.clientY);
+        setHighlightSlot(slot);
+
+        setInternalDrag({ ...d });
+      };
+
+      const onPointerUp = (ev) => {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+
+        const d = internalDragRef.current;
+        internalDragRef.current = null;
+        setInternalDrag(null);
+        setHighlightSlot(null);
+
+        if (!d || !d.didMove) return;
+
+        // Drop on delete zone → remove
+        if (d.overDelete) {
+          removeChordBlock(d.fromBar, d.fromBeat);
+          return;
+        }
+
+        // Drop on a different valid slot → move
+        const targetSlot = getSlotFromPoint(ev.clientX, ev.clientY);
+        if (
+          targetSlot &&
+          (targetSlot.barIndex !== d.fromBar || targetSlot.beatIndex !== d.fromBeat)
+        ) {
+          setChordBlock(targetSlot.barIndex, targetSlot.beatIndex, d.chordId);
+          removeChordBlock(d.fromBar, d.fromBeat);
+          const targetChord = CHORD_LIBRARY[d.chordId];
+          if (targetChord) audioEngine.playChordPreview(targetChord.notes);
+        }
+      };
+
+      refreshSlotRects();
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+    },
+    [getSlotFromPoint, refreshSlotRects, removeChordBlock, setChordBlock]
   );
 
   // 渲染 8 bars, 每 bar 4 beats
@@ -165,13 +260,20 @@ export default function ChordTrack({ dragChordId, onClick }) {
 
       const isSeekBeat = barIdx === seekBar && beatIdx === seekBeat;
 
+      // During internal drag, hide & ghost-ify the source block
+      const isBeingDragged =
+        internalDrag &&
+        internalDrag.fromBar === barIdx &&
+        internalDrag.fromBeat === beatIdx;
+
       beats.push(
         <div
           key={`${barIdx}-${beatIdx}`}
-          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''} ${isTransition ? 'transition' : ''} ${isSeekBeat ? 'seek-beat' : ''}`}
+          className={`chord-slot ${chordId ? 'filled' : 'empty'} ${isCurrentBeat ? 'playing' : ''} ${isHighlighted ? 'highlight' : ''} ${isSelected ? 'selected' : ''} ${isTransition ? 'transition' : ''} ${isSeekBeat ? 'seek-beat' : ''} ${isBeingDragged ? 'dragging-source' : ''}`}
           data-bar={barIdx}
           data-beat={beatIdx}
           onClick={() => handleSlotClick(barIdx, beatIdx, cellData)}
+          onPointerDown={chordId ? (e) => handleBlockPointerDown(e, barIdx, beatIdx, cellData) : undefined}
           style={
             chord
               ? {
@@ -186,7 +288,7 @@ export default function ChordTrack({ dragChordId, onClick }) {
               : {}
           }
         >
-          {chordId && (
+          {chordId && !isBeingDragged && (
             <span className="chord-slot-label">{variationId}</span>
           )}
           {isCurrentBeat && chordId && <div className="chord-ripple" />}
@@ -222,6 +324,32 @@ export default function ChordTrack({ dragChordId, onClick }) {
       <div className="chord-track-grid">
         {bars}
       </div>
+
+      {/* Delete zone — only visible while internally dragging a block */}
+      {internalDrag && (
+        <div
+          id="chord-delete-zone"
+          className={`chord-delete-zone ${internalDrag.overDelete ? 'active' : ''}`}
+        >
+          <span className="chord-delete-icon">🗑</span>
+          <span>拖到此处删除</span>
+        </div>
+      )}
+
+      {/* Floating ghost block following the cursor */}
+      {internalDrag && internalDrag.didMove && (
+        <div
+          className="chord-drag-ghost"
+          style={{
+            left: internalDrag.ghostX,
+            top: internalDrag.ghostY,
+            '--chord-color': internalDrag.color,
+            '--chord-glow': internalDrag.glowColor,
+          }}
+        >
+          {internalDrag.variationId}
+        </div>
+      )}
     </div>
   );
 }

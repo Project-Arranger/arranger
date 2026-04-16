@@ -3,6 +3,7 @@
 .chord-track {
   display: flex;
   align-items: stretch;
+  position: relative; /* anchors internal delete zone */
   background: #1A1A1A;
   border-radius: 12px;
   overflow: visible; /* Don't hide overflow, so drag box shows and borders aren't clipped */
@@ -226,4 +227,86 @@
     opacity: 0;
     transform: scale(1.4);
   }
+}
+
+/* ── Internal drag: source slot dims while being dragged ── */
+.chord-slot.dragging-source {
+  opacity: 0.3;
+  border-style: dashed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+/* ── Internal drag: floating ghost block ── */
+.chord-drag-ghost {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  pointer-events: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fff;
+  white-space: nowrap;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--chord-color, #7aecf0) 35%, #252528),
+    color-mix(in srgb, var(--chord-color, #7aecf0) 18%, #151517)
+  );
+  border: 1.5px solid color-mix(in srgb, var(--chord-color, #7aecf0) 70%, transparent);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    0 0 20px var(--chord-glow, rgba(122, 236, 240, 0.4));
+  text-shadow: 0 0 8px var(--chord-glow, rgba(122, 236, 240, 0.8));
+  opacity: 0.92;
+  animation: ghost-pop-in 0.1s ease-out;
+  cursor: grabbing;
+}
+
+@keyframes ghost-pop-in {
+  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
+  to   { transform: translate(-50%, -50%) scale(1);    opacity: 0.92; }
+}
+
+/* ── Internal drag: delete zone ── */
+.chord-delete-zone {
+  position: absolute;
+  bottom: -44px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1.5px dashed rgba(255, 80, 80, 0.4);
+  background: rgba(255, 60, 60, 0.06);
+  color: rgba(255, 120, 120, 0.7);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: default;
+  pointer-events: all;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  animation: delete-zone-in 0.18s ease-out;
+}
+
+@keyframes delete-zone-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chord-delete-zone.active {
+  background: rgba(255, 60, 60, 0.18);
+  border-color: rgba(255, 80, 80, 0.9);
+  color: #ff7070;
+  box-shadow: 0 0 20px rgba(255, 60, 60, 0.25);
+}
+
+.chord-delete-icon {
+  font-size: 0.9rem;
 }
