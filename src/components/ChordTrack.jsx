@@ -28,6 +28,8 @@ export default function ChordTrack({ dragChordId, onClick }) {
   const seekBar = useMusicStore((s) => s.seekBar);
   const seekBeat = useMusicStore((s) => s.seekBeat);
   const clearTrack = useMusicStore((s) => s.clearTrack);
+  const volume = useMusicStore((s) => s.volumes.chord || 0);
+  const setTrackVolume = useMusicStore((s) => s.setTrackVolume);
   const trackRef = useRef(null);
 
   // ── External palette drag: highlight drop slot ──
@@ -369,15 +371,33 @@ export default function ChordTrack({ dragChordId, onClick }) {
         {bars}
       </div>
 
-      {/* Clear button at far right */}
-      <button
-        className="track-clear-btn"
-        title="清空 CHORD 轨道"
-        onClick={(e) => {
-          e.stopPropagation();
-          clearTrack('chord');
-        }}
-      >✕</button>
+      <div className="track-controls-right">
+        {/* Volume Slider */}
+        <input
+          type="range"
+          className="track-vol-slider"
+          min="-24"
+          max="6"
+          step="1"
+          value={volume}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            setTrackVolume('chord', v);
+            import('../audio/AudioEngine').then(m => m.default.setTrackVolume('chord', v));
+          }}
+          title="CHORD Volume"
+        />
+        {/* Clear button at far right */}
+        <button
+          className="track-clear-btn"
+          title="清空 CHORD 轨道"
+          onClick={(e) => {
+            e.stopPropagation();
+            clearTrack('chord');
+          }}
+        >✕</button>
+      </div>
 
       {/* Global arrangement delete zone used via ID / events */}
       {/* Ghost is rendered by dragGhost.js on document.body — no React */}

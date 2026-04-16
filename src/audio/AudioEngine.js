@@ -40,8 +40,7 @@ class AudioEngine {
     await Tone.start();
     console.log('[AudioEngine] Tone.js AudioContext started');
 
-    // 同步 BPM
-    const { bpm } = useMusicStore.getState();
+    const { bpm, volumes } = useMusicStore.getState();
     Tone.getTransport().bpm.value = bpm;
 
     // ---- 创建 Chord Sampler（用户录制的 A4~G4 真实采样）----
@@ -87,8 +86,7 @@ class AudioEngine {
       });
       this._epiano.connect(this._padReverb);
     }
-
-    this._epiano.volume.value = -10;
+    this._epiano.volume.value = -10 + (volumes.chord || 0);
 
     // ---- 创建 Bass 音色（MonoSynth + LowPass）----
     this._bassFilter = new Tone.Filter({
@@ -115,7 +113,7 @@ class AudioEngine {
       },
     });
 
-    this._bass.volume.value = -4;
+    this._bass.volume.value = -4 + (volumes.bass || 0);
     this._bass.connect(this._bassFilter);
 
     // ---- 创建 Lead 音色（柔和 FM，接入共享 Reverb）----
@@ -138,7 +136,7 @@ class AudioEngine {
         },
       },
     });
-    this._leadEpiano.volume.value = -6;
+    this._leadEpiano.volume.value = -6 + (volumes.lead || 0);
     this._leadEpiano.connect(this._reverb);
 
     // ---- 创建 Percussion 音色 (808 Sampler) ----
@@ -159,7 +157,7 @@ class AudioEngine {
           onerror: reject,
         }).toDestination();
       });
-      this._sampler.volume.value = -2;
+      this._sampler.volume.value = -2 + (volumes.perc || 0);
     } catch (e) {
       console.warn('[AudioEngine] 808 samples failed to load; percussion disabled.', e);
       this._sampler = null;
@@ -251,7 +249,7 @@ class AudioEngine {
     if (!this._isInitialized) {
       await this.init();
     }
-    this._epiano.triggerAttackRelease(notes, '4n', undefined, 0.8);
+    this._epiano.triggerAttackRelease(notes, '4n', Tone.immediate(), 0.8);
     console.log(`[AudioEngine] Preview: ${notes.join(', ')}`);
   }
 
@@ -263,7 +261,7 @@ class AudioEngine {
     if (!this._isInitialized) {
       await this.init();
     }
-    this._bass.triggerAttackRelease(note, '16n', undefined, 0.9);
+    this._bass.triggerAttackRelease(note, '16n', Tone.immediate(), 0.9);
     console.log(`[AudioEngine] Bass preview: ${note}`);
   }
 
@@ -274,7 +272,7 @@ class AudioEngine {
     if (!this._isInitialized) {
       await this.init();
     }
-    this._triggerPercInstance(instrument, undefined);
+    this._triggerPercInstance(instrument, Tone.immediate());
     console.log(`[AudioEngine] Perc preview: ${instrument}`);
   }
 
@@ -286,7 +284,7 @@ class AudioEngine {
     if (!this._isInitialized) {
       await this.init();
     }
-    this._leadEpiano.triggerAttackRelease(note, '16n', undefined, 0.85);
+    this._leadEpiano.triggerAttackRelease(note, '16n', Tone.immediate(), 0.85);
     console.log(`[AudioEngine] Lead preview: ${note}`);
   }
 
@@ -379,6 +377,35 @@ class AudioEngine {
     };
   }
 
+  setTrackVolume(trackId, volumeDb) {
+    if (!this._isInitialized) return;
+    
+    // Define base mix offsets so the UI slider '0' sounds balanced
+    const BASE_OFFSETS = {
+      chord: -10,
+      bass: -4,
+      perc: -2,
+      lead: -6,
+    };
+
+    const targetVol = BASE_OFFSETS[trackId] + volumeDb;
+
+    switch (trackId) {
+      case 'chord':
+        if (this._epiano) this._epiano.volume.rampTo(targetVol, 0.1);
+        break;
+      case 'bass':
+        if (this._bass) this._bass.volume.rampTo(targetVol, 0.1);
+        break;
+      case 'perc':
+        if (this._sampler) this._sampler.volume.rampTo(targetVol, 0.1);
+        break;
+      case 'lead':
+        if (this._leadEpiano) this._leadEpiano.volume.rampTo(targetVol, 0.1);
+        break;
+    }
+  }
+
   /**
    * 销毁（清理资源）
    */
@@ -429,7 +456,7 @@ class AudioEngine {
     this.pause();
 
     const store = useMusicStore.getState();
-    const { bpm, matrix } = store;
+    const { bpm, matrix, volumes } = store;
     
     // 计算总时长：8小节 = 32拍。
     const secondsPerBeat = 60 / bpm;
@@ -460,7 +487,7 @@ class AudioEngine {
         });
         s.connect(padReverb);
       });
-      if (epiano) epiano.volume.value = -10;
+      if (epiano) epiano.volume.value = -10 + (volumes.chord || 0);
 
       const bassFilter = new Tone.Filter({ type: 'lowpass', frequency: 400, rolloff: -24 }).toDestination();
       const bass = new Tone.MonoSynth({
@@ -468,7 +495,7 @@ class AudioEngine {
         envelope: { attack: 0.005, decay: 0.2, sustain: 0.2, release: 0.1 },
         filterEnvelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.1, baseFrequency: 80, octaves: 3 }
       });
-      bass.volume.value = -4;
+      bass.volume.value = -4 + (volumes.bass || 0);
       bass.connect(bassFilter);
 
       const leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
@@ -480,7 +507,7 @@ class AudioEngine {
           envelope: { attack: 0.01, decay: 0.4, sustain: 0.2, release: 0.8 }
         }
       });
-      leadEpiano.volume.value = -6;
+      leadEpiano.volume.value = -6 + (volumes.lead || 0);
       leadEpiano.connect(reverb);
 
       // 加载打击乐采样
@@ -495,7 +522,7 @@ class AudioEngine {
             onerror: reject
           }).toDestination();
         });
-        sampler.volume.value = -2;
+        sampler.volume.value = -2 + (volumes.perc || 0);
       } catch (e) {
         console.warn('[Offline Engine] Sampler load failed', e);
       }

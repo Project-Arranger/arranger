@@ -22,6 +22,8 @@ export default function TrackRow({ trackId, Icon, label, onClick }) {
   const seekBeat = useMusicStore((s) => s.seekBeat);
   const clearStep = useMusicStore((s) => s.clearStep);
   const clearTrack = useMusicStore((s) => s.clearTrack);
+  const volume = useMusicStore((s) => s.volumes[trackId] || 0);
+  const setTrackVolume = useMusicStore((s) => s.setTrackVolume);
 
   const [internalDrag, setInternalDrag] = useState(null);
   const internalDragRef = useRef(null);
@@ -159,16 +161,33 @@ export default function TrackRow({ trackId, Icon, label, onClick }) {
           </div>
         ))}
       </div>
-
-      {/* Clear button at far right */}
-      <button
-        className="track-clear-btn"
-        title={`清空 ${label} 轨道`}
-        onClick={(e) => {
-          e.stopPropagation();
-          clearTrack(trackId);
-        }}
-      >✕</button>
+      <div className="track-controls-right">
+        {/* Volume Slider */}
+        <input
+          type="range"
+          className="track-vol-slider"
+          min="-24"
+          max="6"
+          step="1"
+          value={volume}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            setTrackVolume(trackId, v);
+            import('../audio/AudioEngine').then(m => m.default.setTrackVolume(trackId, v));
+          }}
+          title={`${label} Volume`}
+        />
+        {/* Clear button at far right */}
+        <button
+          className="track-clear-btn"
+          title={`清空 ${label} 轨道`}
+          onClick={(e) => {
+            e.stopPropagation();
+            clearTrack(trackId);
+          }}
+        >✕</button>
+      </div>
 
       {/* Local delete zones removed — using global-arrangement-delete-zone */}
     </div>

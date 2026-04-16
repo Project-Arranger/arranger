@@ -100,6 +100,14 @@ const useMusicStore = create((set, get) => ({
   stepsPerBar: STEPS_PER_BAR,
   tracks: TRACKS,
 
+  // -------- 音量状态 (单位: 分贝 dB) --------
+  volumes: {
+    chord: 0,
+    bass: 0,
+    perc: 0,
+    lead: 0,
+  },
+
   // -------- Actions: Transport --------
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
@@ -108,6 +116,15 @@ const useMusicStore = create((set, get) => ({
   setBpm: (bpm) => {
     const clamped = Math.max(40, Math.min(300, bpm));
     set({ bpm: clamped });
+  },
+
+  setTrackVolume: (trackId, volume) => {
+    set((state) => ({
+      volumes: {
+        ...state.volumes,
+        [trackId]: volume,
+      },
+    }));
   },
 
   setRootKey: (key) => set({ rootKey: key }),
