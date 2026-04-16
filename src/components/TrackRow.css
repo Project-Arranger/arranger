@@ -57,6 +57,35 @@
   text-transform: uppercase;
 }
 
+.track-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 8px;
+  padding: 0;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.track-clear-btn:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.track-clear-btn:active {
+  transform: scale(0.88);
+}
+
 .track-row-grid {
   flex: 1;
   display: flex;

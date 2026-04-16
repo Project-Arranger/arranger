@@ -22,7 +22,6 @@ class AudioEngine {
     this._isInitialized = false;
     this._currentGlobalStep = 0;
     this._epiano = null;
-    this._padChorus = null;
     this._padReverb = null;
     this._bass = null;
     this._reverb = null;
@@ -45,42 +44,51 @@ class AudioEngine {
     const { bpm } = useMusicStore.getState();
     Tone.getTransport().bpm.value = bpm;
 
-    // ---- 创建 Chord Pad 音色（柔和 FM Pad + Chorus + Reverb）----
-    // 单独给 Pad 分配更深的 Reverb，与鼓/Bass 保持空间隔离
+    // ---- 创建 Chord Sampler（用户录制的 A4~G4 真实采样）----
     this._padReverb = new Tone.Reverb({
-      decay: 4.0,
-      wet: 0.45,
+      decay: 3.5,
+      wet: 0.4,
     }).toDestination();
 
-    // 轻微 Chorus，赋予 Pad 厚度而不占频段
-    this._padChorus = new Tone.Chorus(2.5, 2.0, 0.25).start();
-    this._padChorus.connect(this._padReverb);
-
-    // FM 调制量极低（0.15）+ 正弦波调制 → 近似纯正弦，柔和无毛刺
-    this._epiano = new Tone.PolySynth(Tone.FMSynth, {
-      maxPolyphony: 12,
-      options: {
-        harmonicity: 1.0,         // 八度谐波关系，温暖不刺耳
-        modulationIndex: 0.15,    // 极低 FM 指数 → 接近纯 Sine
-        oscillator: { type: 'sine' },
-        envelope: {
-          attack: 0.15,           // 慢起音，Pad 感
-          decay: 0.8,
-          sustain: 0.75,          // 高 Sustain，和声持续填充空间
-          release: 3.0,           // 长释放，自然消散
+    const chordBaseUrl = `${import.meta.env.BASE_URL}samples/chords/`;
+    this._epiano = await new Promise((resolve, reject) => {
+      const s = new Tone.Sampler({
+        urls: {
+          A4: 'A4.wav',
+          B4: 'B4.wav',
+          C4: 'C4.wav',
+          D4: 'D4.wav',
+          E4: 'E4.wav',
+          F4: 'F4.wav',
+          G4: 'G4.wav',
         },
-        modulation: { type: 'sine' },  // 正弦调制，无方波毛刺
-        modulationEnvelope: {
-          attack: 0.2,
-          decay: 0.8,
-          sustain: 0.2,
-          release: 1.5,
+        baseUrl: chordBaseUrl,
+        release: 2.0,
+        onload: () => resolve(s),
+        onerror: (err) => {
+          console.warn('[AudioEngine] Chord sampler load failed, falling back to synth', err);
+          resolve(null);
         },
-      },
+      });
+      s.connect(this._padReverb);
     });
 
-    this._epiano.volume.value = -12; // 比之前更轻，不抢 Lead/Bass 频段
-    this._epiano.connect(this._padChorus);
+    if (!this._epiano) {
+      // Fallback: 若采样加载失败，用软 FM Pad 保底
+      this._epiano = new Tone.PolySynth(Tone.FMSynth, {
+        maxPolyphony: 12,
+        options: {
+          harmonicity: 1.0, modulationIndex: 0.15,
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.15, decay: 0.8, sustain: 0.75, release: 3.0 },
+          modulation: { type: 'sine' },
+          modulationEnvelope: { attack: 0.2, decay: 0.8, sustain: 0.2, release: 1.5 },
+        },
+      });
+      this._epiano.connect(this._padReverb);
+    }
+
+    this._epiano.volume.value = -10;
 
     // ---- 创建 Bass 音色（MonoSynth + LowPass）----
     this._bassFilter = new Tone.Filter({
@@ -391,10 +399,6 @@ class AudioEngine {
       this._bassFilter.dispose();
       this._bassFilter = null;
     }
-    if (this._padChorus) {
-      this._padChorus.dispose();
-      this._padChorus = null;
-    }
     if (this._padReverb) {
       this._padReverb.dispose();
       this._padReverb = null;
@@ -441,21 +445,22 @@ class AudioEngine {
 
       // 重新在离线 Context 内构建音源
       const reverb = new Tone.Reverb({ decay: 2.0, wet: 0.28 }).toDestination();
-      const padChorus = new Tone.Chorus(2.5, 2.0, 0.25).start();
-      const padReverb = new Tone.Reverb({ decay: 4.0, wet: 0.45 }).toDestination();
-      const epiano = new Tone.PolySynth(Tone.FMSynth, {
-        maxPolyphony: 12,
-        options: {
-          harmonicity: 1.0, modulationIndex: 0.15,
-          oscillator: { type: 'sine' },
-          envelope: { attack: 0.15, decay: 0.8, sustain: 0.75, release: 3.0 },
-          modulation: { type: 'sine' },
-          modulationEnvelope: { attack: 0.2, decay: 0.8, sustain: 0.2, release: 1.5 }
-        }
+      const padReverb = new Tone.Reverb({ decay: 3.5, wet: 0.4 }).toDestination();
+      const percBaseUrlOffline = `${import.meta.env.BASE_URL}samples/chords/`;
+      const epiano = await new Promise((resolve) => {
+        const s = new Tone.Sampler({
+          urls: {
+            A4: 'A4.wav', B4: 'B4.wav', C4: 'C4.wav',
+            D4: 'D4.wav', E4: 'E4.wav', F4: 'F4.wav', G4: 'G4.wav',
+          },
+          baseUrl: percBaseUrlOffline,
+          release: 2.0,
+          onload: () => resolve(s),
+          onerror: () => resolve(null),
+        });
+        s.connect(padReverb);
       });
-      epiano.volume.value = -12;
-      padChorus.connect(padReverb);
-      epiano.connect(padChorus);
+      if (epiano) epiano.volume.value = -10;
 
       const bassFilter = new Tone.Filter({ type: 'lowpass', frequency: 400, rolloff: -24 }).toDestination();
       const bass = new Tone.MonoSynth({

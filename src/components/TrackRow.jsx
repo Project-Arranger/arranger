@@ -21,6 +21,7 @@ export default function TrackRow({ trackId, Icon, label, onClick }) {
   const seekBar = useMusicStore((s) => s.seekBar);
   const seekBeat = useMusicStore((s) => s.seekBeat);
   const clearStep = useMusicStore((s) => s.clearStep);
+  const clearTrack = useMusicStore((s) => s.clearTrack);
 
   const [internalDrag, setInternalDrag] = useState(null);
   const internalDragRef = useRef(null);
@@ -158,6 +159,16 @@ export default function TrackRow({ trackId, Icon, label, onClick }) {
           </div>
         ))}
       </div>
+
+      {/* Clear button at far right */}
+      <button
+        className="track-clear-btn"
+        title={`清空 ${label} 轨道`}
+        onClick={(e) => {
+          e.stopPropagation();
+          clearTrack(trackId);
+        }}
+      >✕</button>
 
       {/* Local delete zones removed — using global-arrangement-delete-zone */}
     </div>

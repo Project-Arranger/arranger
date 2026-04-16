@@ -40,19 +40,10 @@ export default function LeadMatrix() {
   const [ripples, setRipples] = useState([]);
   // Track held keys using a ref (no re-render needed)
   const heldKeysRef = useRef(new Set());
-  // Step-sequencer cursor for writing when paused
-  const stepCursorRef = useRef(0);
-
-  // Reset step cursor when switching bars
-  useEffect(() => {
-    stepCursorRef.current = 0;
-  }, [selectedBar]);
 
   /**
    * 键盘 1-7 快捷键：对应 C4–B4
-   * 写入逻辑：
-   * - 播放中: Live Record (写到播放头所在位置)
-   * - 暂停中: Step Sequencer (写入当前选中 bar 并自动步进)
+   * 仅发声预览，不写入网格
    */
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -64,19 +55,6 @@ export default function LeadMatrix() {
       
       heldKeysRef.current.add(e.key);
       audioEngine.playLeadPreview(note);
-
-      // Write Logic
-      const storeState = useMusicStore.getState();
-      if (storeState.isPlaying) {
-        // Live record to current playhead position
-        const eighthIndex = Math.floor(storeState.currentStep / 2);
-        storeState.setLeadNote(storeState.currentBar, eighthIndex, note);
-      } else {
-        // Step sequence to the current highlighted bar
-        storeState.setLeadNote(storeState.selectedBar, stepCursorRef.current, note);
-        // Advance cursor
-        stepCursorRef.current = (stepCursorRef.current + 1) % BASS_COLUMNS;
-      }
     };
 
     const handleKeyUp = (e) => {

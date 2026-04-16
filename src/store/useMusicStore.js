@@ -239,6 +239,25 @@ const useMusicStore = create((set, get) => ({
     });
   },
 
+  /**
+   * 清空整条轨道所有小节的数据
+   */
+  clearTrack: (trackId) => {
+    const { matrix, totalBars, stepsPerBar } = get();
+    if (!matrix[trackId]) return;
+
+    const emptyTrack = Array.from({ length: totalBars }, () =>
+      Array.from({ length: stepsPerBar }, () => null)
+    );
+
+    set({
+      matrix: {
+        ...matrix,
+        [trackId]: emptyTrack,
+      },
+    });
+  },
+
   // -------- Actions: Context Area --------
   setActiveContextTrack: (trackId) => set({ activeContextTrack: trackId }),
   setSelectedBar: (barIndex) => set({ selectedBar: barIndex }),
