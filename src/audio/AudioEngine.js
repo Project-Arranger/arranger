@@ -88,56 +88,89 @@ class AudioEngine {
     }
     this._epiano.volume.value = -10 + (volumes.chord || 0);
 
-    // ---- 创建 Bass 音色（MonoSynth + LowPass）----
+    // ---- 创建 Bass Sampler（用户录制的采样 C1~G1 + A0~B0）----
     this._bassFilter = new Tone.Filter({
       type: 'lowpass',
       frequency: 400,
       rolloff: -24,
     }).toDestination();
 
-    this._bass = new Tone.MonoSynth({
-      oscillator: { type: 'triangle' },
-      envelope: {
-        attack: 0.005,
-        decay: 0.2,
-        sustain: 0.2,
-        release: 0.1,
-      },
-      filterEnvelope: {
-        attack: 0.005,
-        decay: 0.15,
-        sustain: 0.1,
-        release: 0.1,
-        baseFrequency: 80,
-        octaves: 3,
-      },
+    const bassBaseUrl = `${import.meta.env.BASE_URL}samples/bass/`;
+    this._bass = await new Promise((resolve, reject) => {
+      const s = new Tone.Sampler({
+        urls: {
+          C1: 'Bass_C1.wav',
+          D1: 'Bass_D1.wav',
+          E1: 'Bass_E1.wav',
+          F1: 'Bass_F1.wav',
+          G1: 'Bass_G1.wav',
+          A0: 'Bass_A0.wav',
+          B0: 'Bass_B0.wav',
+        },
+        baseUrl: bassBaseUrl,
+        release: 0.3,
+        onload: () => resolve(s),
+        onerror: (err) => {
+          console.warn('[AudioEngine] Bass sampler load failed, falling back to synth', err);
+          resolve(null);
+        },
+      });
+      s.connect(this._bassFilter);
     });
 
+    if (!this._bass) {
+      // Fallback: 若采样加载失败，用合成器保底
+      this._bass = new Tone.MonoSynth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.005, decay: 0.2, sustain: 0.2, release: 0.1 },
+        filterEnvelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.1, baseFrequency: 80, octaves: 3 },
+      });
+      this._bass.connect(this._bassFilter);
+    }
     this._bass.volume.value = -4 + (volumes.bass || 0);
-    this._bass.connect(this._bassFilter);
 
-    // ---- 创建 Lead 音色（柔和 FM，接入共享 Reverb）----
+    // ---- 创建 Lead Sampler（用户录制的采样 C3~B3）----
     this._reverb = new Tone.Reverb({
       decay: 2.0,
       wet: 0.28,
     }).toDestination();
 
-    this._leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
-      maxPolyphony: 4,
-      options: {
-        harmonicity: 2.5,
-        modulationIndex: 1.2,
-        oscillator: { type: 'sine' },
-        envelope: {
-          attack: 0.01,
-          decay: 0.4,
-          sustain: 0.2,
-          release: 0.8,
+    const leadBaseUrl = `${import.meta.env.BASE_URL}samples/lead/`;
+    this._leadEpiano = await new Promise((resolve, reject) => {
+      const s = new Tone.Sampler({
+        urls: {
+          C3: 'Lead%20C3.wav',
+          D3: 'Lead%20D3.wav',
+          E3: 'Lead%20E3.wav',
+          F3: 'Lead%20F3.wav',
+          G3: 'Lead%20G3.wav',
+          A3: 'Lead%20A3.wav',
+          B3: 'Lead%20B3.wav',
         },
-      },
+        baseUrl: leadBaseUrl,
+        release: 1.0,
+        onload: () => resolve(s),
+        onerror: (err) => {
+          console.warn('[AudioEngine] Lead sampler load failed, falling back to synth', err);
+          resolve(null);
+        },
+      });
+      s.connect(this._reverb);
     });
+
+    if (!this._leadEpiano) {
+      // Fallback: 若采样加载失败，用 FM 合成器保底
+      this._leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
+        maxPolyphony: 4,
+        options: {
+          harmonicity: 2.5, modulationIndex: 1.2,
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.01, decay: 0.4, sustain: 0.2, release: 0.8 },
+        },
+      });
+      this._leadEpiano.connect(this._reverb);
+    }
     this._leadEpiano.volume.value = -6 + (volumes.lead || 0);
-    this._leadEpiano.connect(this._reverb);
 
     // ---- 创建 Percussion 音色 (808 Sampler) ----
     // 必须与 Vite `base`（GitHub Pages 项目站为 /repo-name/）一致，否则采样 404 会导致 init 失败、全站无声
@@ -490,25 +523,37 @@ class AudioEngine {
       if (epiano) epiano.volume.value = -10 + (volumes.chord || 0);
 
       const bassFilter = new Tone.Filter({ type: 'lowpass', frequency: 400, rolloff: -24 }).toDestination();
-      const bass = new Tone.MonoSynth({
-        oscillator: { type: 'triangle' },
-        envelope: { attack: 0.005, decay: 0.2, sustain: 0.2, release: 0.1 },
-        filterEnvelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.1, baseFrequency: 80, octaves: 3 }
+      const bassBaseUrlOffline = `${import.meta.env.BASE_URL}samples/bass/`;
+      const bass = await new Promise((resolve) => {
+        const s = new Tone.Sampler({
+          urls: {
+            C1: 'Bass_C1.wav', D1: 'Bass_D1.wav', E1: 'Bass_E1.wav',
+            F1: 'Bass_F1.wav', G1: 'Bass_G1.wav', A0: 'Bass_A0.wav', B0: 'Bass_B0.wav',
+          },
+          baseUrl: bassBaseUrlOffline,
+          release: 0.3,
+          onload: () => resolve(s),
+          onerror: () => resolve(null),
+        });
+        s.connect(bassFilter);
       });
-      bass.volume.value = -4 + (volumes.bass || 0);
-      bass.connect(bassFilter);
+      if (bass) bass.volume.value = -4 + (volumes.bass || 0);
 
-      const leadEpiano = new Tone.PolySynth(Tone.FMSynth, {
-        maxPolyphony: 4,
-        voice: Tone.FMSynth,
-        options: {
-          harmonicity: 2.5, modulationIndex: 1.2,
-          oscillator: { type: 'sine' },
-          envelope: { attack: 0.01, decay: 0.4, sustain: 0.2, release: 0.8 }
-        }
+      const leadBaseUrlOffline = `${import.meta.env.BASE_URL}samples/lead/`;
+      const leadEpiano = await new Promise((resolve) => {
+        const s = new Tone.Sampler({
+          urls: {
+            C3: 'Lead%20C3.wav', D3: 'Lead%20D3.wav', E3: 'Lead%20E3.wav',
+            F3: 'Lead%20F3.wav', G3: 'Lead%20G3.wav', A3: 'Lead%20A3.wav', B3: 'Lead%20B3.wav',
+          },
+          baseUrl: leadBaseUrlOffline,
+          release: 1.0,
+          onload: () => resolve(s),
+          onerror: () => resolve(null),
+        });
+        s.connect(reverb);
       });
-      leadEpiano.volume.value = -6 + (volumes.lead || 0);
-      leadEpiano.connect(reverb);
+      if (leadEpiano) leadEpiano.volume.value = -6 + (volumes.lead || 0);
 
       // 加载打击乐采样
       const percBaseUrl = `${import.meta.env.BASE_URL}samples/808/`;

@@ -1,23 +1,19 @@
 /**
- * Bass 音符定义 — C2 到 B2 的半音阶
+ * Bass 音符定义 — 使用自定义采样音域
  * 
- * 从高到低排列（B2 在顶部，C2 在底部，标准 piano roll 布局）
+ * 可用采样: C1 D1 E1 F1 G1 A0 B0
+ * 从高到低排列（G1 在顶部，A0 在底部，标准 piano roll 布局）
  * inScale: 是否属于 C 大调音阶（C D E F G A B）
  */
 
 const BASS_NOTES = [
-  { note: 'B2',  label: 'B',  inScale: true  },
-  { note: 'A#2', label: 'A#', inScale: false },
-  { note: 'A2',  label: 'A',  inScale: true  },
-  { note: 'G#2', label: 'G#', inScale: false },
-  { note: 'G2',  label: 'G',  inScale: true  },
-  { note: 'F#2', label: 'F#', inScale: false },
-  { note: 'F2',  label: 'F',  inScale: true  },
-  { note: 'E2',  label: 'E',  inScale: true  },
-  { note: 'D#2', label: 'D#', inScale: false },
-  { note: 'D2',  label: 'D',  inScale: true  },
-  { note: 'C#2', label: 'C#', inScale: false },
-  { note: 'C2',  label: 'C',  inScale: true  },
+  { note: 'G1',  label: 'G',  inScale: true  },
+  { note: 'F1',  label: 'F',  inScale: true  },
+  { note: 'E1',  label: 'E',  inScale: true  },
+  { note: 'D1',  label: 'D',  inScale: true  },
+  { note: 'C1',  label: 'C',  inScale: true  },
+  { note: 'B0',  label: 'B',  inScale: true  },
+  { note: 'A0',  label: 'A',  inScale: true  },
 ];
 
 /** Bass 矩阵横轴: 8 个八分音符位，每个对应 16n 步进网格中的偶数位 */

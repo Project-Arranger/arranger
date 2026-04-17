@@ -2,32 +2,32 @@ import { create } from 'zustand';
 import { CHORD_LIBRARY } from '../data/chords';
 import { eighthToStep } from '../data/bassNotes';
 
-/** 和弦 ID → Bass 根音映射（跨越所有内置和弦）*/
+/** 和弦 ID → Bass 根音映射（使用采样音域 C1 D1 E1 F1 G1 A0 B0）*/
 const CHORD_TO_BASS_ROOT = {
-  'C':       'C2',
-  'Am':      'A2',
-  'F':       'F2',
-  'G':       'G2',
-  'Cmaj7':   'C2',
-  'Cmaj9':   'C2',
-  'Cadd9':   'C2',
-  'Am7':     'A2',
-  'Am9':     'A2',
-  'Am(add9)':'A2',
-  'Fmaj7':   'F2',
-  'F6':      'F2',
-  'Fadd9':   'F2',
-  'G7':      'G2',
-  'G9':      'G2',
-  'Gsus4':   'G2',
-  'Em/B':    'B2',
-  'F#m7b5':  'F#2',
-  'G/B':     'B2',
-  'E7':      'E2',
-  'Fm':      'F2',
-  'C/E':     'E2',
-  'Abdim':   'G#2',
-  'D/F#':    'F#2',
+  'C':       'C1',
+  'Am':      'A0',
+  'F':       'F1',
+  'G':       'G1',
+  'Cmaj7':   'C1',
+  'Cmaj9':   'C1',
+  'Cadd9':   'C1',
+  'Am7':     'A0',
+  'Am9':     'A0',
+  'Am(add9)':'A0',
+  'Fmaj7':   'F1',
+  'F6':      'F1',
+  'Fadd9':   'F1',
+  'G7':      'G1',
+  'G9':      'G1',
+  'Gsus4':   'G1',
+  'Em/B':    'B0',
+  'F#m7b5':  'F1',
+  'G/B':     'B0',
+  'E7':      'E1',
+  'Fm':      'F1',
+  'C/E':     'E1',
+  'Abdim':   'G1',
+  'D/F#':    'F1',
 };
 
 /**
@@ -396,7 +396,7 @@ const useMusicStore = create((set, get) => ({
    * 切换 bass 矩阵中某个音符的开/关
    * @param {number} barIndex - 0~7
    * @param {number} eighthIndex - 0~7（八分音符位）
-   * @param {string} note - 'C2' ~ 'B2'
+   * @param {string} note - 'C1' ~ 'G1' / 'A0' ~ 'B0'
    */
   toggleBassNote: (barIndex, eighthIndex, note) => {
     const { matrix } = get();
@@ -521,7 +521,7 @@ const useMusicStore = create((set, get) => ({
    * 切换 lead 矩阵中某个音符的开/关
    * @param {number} barIndex - 0~7
    * @param {number} eighthIndex - 0~7（八分音符位）
-   * @param {string} note - 'C4' ~ 'B4'
+   * @param {string} note - 'C3' ~ 'B3'
    */
   toggleLeadNote: (barIndex, eighthIndex, note) => {
     const { matrix } = get();

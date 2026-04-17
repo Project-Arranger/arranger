@@ -16,19 +16,19 @@ import './BassMatrix.css';
  *   - 点亮格使用冰蓝发光
  */
 const CHORD_TO_BASS_GUIDE = {
-  'C': 'C2',
-  'Am': 'A2',
-  'F': 'F2',
-  'G': 'G2',
+  'C': 'C1',
+  'Am': 'A0',
+  'F': 'F1',
+  'G': 'G1',
   // Transitions
-  'Em/B': 'B2',
-  'G7': 'G2',
-  'G/B': 'B2',
-  'E7': 'E2',
-  'Fm': 'F2',
-  'C/E': 'E2',
-  'Abdim': 'Ab2',
-  'D/F#': 'Gb2',
+  'Em/B': 'B0',
+  'G7': 'G1',
+  'G/B': 'B0',
+  'E7': 'E1',
+  'Fm': 'F1',
+  'C/E': 'E1',
+  'Abdim': 'G1',
+  'D/F#': 'F1',
 };
 
 export default function BassMatrix() {

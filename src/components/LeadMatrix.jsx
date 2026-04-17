@@ -1,31 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useMusicStore from '../store/useMusicStore';
-import { BASS_NOTES, BASS_COLUMNS, eighthToStep } from '../data/bassNotes';
+import { BASS_COLUMNS, eighthToStep } from '../data/bassNotes';
+import { LEAD_NOTES, KEY_TO_LEAD_NOTE } from '../data/leadNotes';
 import audioEngine from '../audio/AudioEngine';
 import './BassMatrix.css'; // Reuse Bass styling
 
 /**
  * LeadMatrix — Lead 旋律编辑器
- * 规格: 12 行 x 8 列
+ * 规格: 7 行 x 8 列（C3 ~ B3 自然音阶）
  */
-
-// Mapping C-B but in Octave 4 for lead
-const LEAD_NOTES = BASS_NOTES.map(n => ({
-    ...n,
-    note: n.note.replace('2', '4'),
-    label: n.label // Keep same labels C, C#, etc.
-}));
-
-/** 键盘 1-7 → C D E F G A B (Octave 4) */
-const KEY_TO_NOTE = {
-  '1': 'C4',
-  '2': 'D4',
-  '3': 'E4',
-  '4': 'F4',
-  '5': 'G4',
-  '6': 'A4',
-  '7': 'B4',
-};
 
 export default function LeadMatrix() {
   const selectedBar = useMusicStore((s) => s.selectedBar);
@@ -42,14 +25,14 @@ export default function LeadMatrix() {
   const heldKeysRef = useRef(new Set());
 
   /**
-   * 键盘 1-7 快捷键：对应 C4–B4
+   * 键盘 1-7 快捷键：对应 C3–B3
    * 仅发声预览，不写入网格
    */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const note = KEY_TO_NOTE[e.key];
+      const note = KEY_TO_LEAD_NOTE[e.key];
       if (!note) return;
       if (heldKeysRef.current.has(e.key)) return; // prevent key-repeat
       
