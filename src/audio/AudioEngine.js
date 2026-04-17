@@ -131,8 +131,8 @@ class AudioEngine {
 
     // ---- 创建 Lead Sampler（用户录制的采样 C3~B3）----
     this._reverb = new Tone.Reverb({
-      decay: 2.0,
-      wet: 0.28,
+      decay: 4.5,
+      wet: 0.65,
     }).toDestination();
 
     const leadBaseUrl = `${import.meta.env.BASE_URL}samples/lead/`;
@@ -170,7 +170,7 @@ class AudioEngine {
       });
       this._leadEpiano.connect(this._reverb);
     }
-    this._leadEpiano.volume.value = -6 + (volumes.lead || 0);
+    this._leadEpiano.volume.value = 4 + (volumes.lead || 0);
 
     // ---- 创建 Percussion 音色 (808 Sampler) ----
     // 必须与 Vite `base`（GitHub Pages 项目站为 /repo-name/）一致，否则采样 404 会导致 init 失败、全站无声
@@ -359,10 +359,10 @@ class AudioEngine {
 
     // 跳转 Transport 并同步更新 Sequence 内部指针
     Tone.getTransport().seconds = targetSeconds;
-    
+
     // 同步 Zustand store 的 UI 状态
     useMusicStore.getState().setPosition(bar, step);
-    
+
     console.log(`[AudioEngine] ⏩ Seek to ${bar + 1}:${step + 1} (${globalStep} steps)`);
   }
 
@@ -412,13 +412,13 @@ class AudioEngine {
 
   setTrackVolume(trackId, volumeDb) {
     if (!this._isInitialized) return;
-    
+
     // Define base mix offsets so the UI slider '0' sounds balanced
     const BASE_OFFSETS = {
       chord: -10,
       bass: -4,
       perc: -2,
-      lead: -6,
+      lead: 4,
     };
 
     const targetVol = BASE_OFFSETS[trackId] + volumeDb;
@@ -484,13 +484,13 @@ class AudioEngine {
     if (!this._isInitialized) {
       await this.init();
     }
-    
+
     // 强制暂停当前播放，防止干扰
     this.pause();
 
     const store = useMusicStore.getState();
     const { bpm, matrix, volumes } = store;
-    
+
     // 计算总时长：8小节 = 32拍。
     const secondsPerBeat = 60 / bpm;
     const songDuration = TOTAL_BARS * 4 * secondsPerBeat;
@@ -504,7 +504,7 @@ class AudioEngine {
       transport.bpm.value = bpm;
 
       // 重新在离线 Context 内构建音源
-      const reverb = new Tone.Reverb({ decay: 2.0, wet: 0.28 }).toDestination();
+      const reverb = new Tone.Reverb({ decay: 4.5, wet: 0.65 }).toDestination();
       const padReverb = new Tone.Reverb({ decay: 3.5, wet: 0.4 }).toDestination();
       const percBaseUrlOffline = `${import.meta.env.BASE_URL}samples/chords/`;
       const epiano = await new Promise((resolve) => {
@@ -553,7 +553,7 @@ class AudioEngine {
         });
         s.connect(reverb);
       });
-      if (leadEpiano) leadEpiano.volume.value = -6 + (volumes.lead || 0);
+      if (leadEpiano) leadEpiano.volume.value = 0 + (volumes.lead || 0);
 
       // 加载打击乐采样
       const percBaseUrl = `${import.meta.env.BASE_URL}samples/808/`;
@@ -592,7 +592,7 @@ class AudioEngine {
         // PERC
         const percCell = matrix.perc?.[bar]?.[step];
         if (percCell && percCell.instruments && sampler) {
-          const m = {'kick':'C1', 'snare':'D1', 'hihat':'E1', 'tom':'F1', 'clap':'G1'};
+          const m = { 'kick': 'C1', 'snare': 'D1', 'hihat': 'E1', 'tom': 'F1', 'clap': 'G1' };
           percCell.instruments.forEach(inst => sampler.triggerAttack(m[inst], time));
         }
 
@@ -618,7 +618,7 @@ function audioBufferToWav(buffer, opt) {
   const format = opt.float32 ? 3 : 1;
   const bitDepth = format === 3 ? 32 : 16;
   let result;
-  
+
   if (numChannels === 2) {
     result = interleave(buffer.getChannelData(0), buffer.getChannelData(1));
   } else {
@@ -644,13 +644,13 @@ function encodeWAV(samples, numChannels, sampleRate, format, bitDepth) {
   const blockAlign = numChannels * bytesPerSample;
   const buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
   const view = new DataView(buffer);
-  
+
   function writeString(view, offset, string) {
     for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
+      view.setUint8(offset + i, string.charCodeAt(i));
     }
   }
-  
+
   writeString(view, 0, 'RIFF');
   view.setUint32(4, 36 + samples.length * bytesPerSample, true);
   writeString(view, 8, 'WAVE');
@@ -664,7 +664,7 @@ function encodeWAV(samples, numChannels, sampleRate, format, bitDepth) {
   view.setUint16(34, bitDepth, true);
   writeString(view, 36, 'data');
   view.setUint32(40, samples.length * bytesPerSample, true);
-  
+
   if (format === 1) { // PCM (16-bit float to int)
     let offset = 44;
     for (let i = 0; i < samples.length; i++, offset += 2) {
@@ -677,7 +677,7 @@ function encodeWAV(samples, numChannels, sampleRate, format, bitDepth) {
       view.setFloat32(offset, samples[i], true);
     }
   }
-  
+
   return new Blob([view], { type: 'audio/wav' });
 }
 const audioEngine = new AudioEngine();
