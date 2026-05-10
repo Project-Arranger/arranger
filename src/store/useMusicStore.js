@@ -399,7 +399,7 @@ const useMusicStore = create((set, get) => ({
   // -------- 预留硬件接口（README 5.3）--------
   onHardwareMessage: (type, data) => {
     console.log(`[HardwareMessage] type=${type}`, data);
-    // 未来在此处理物理按键映射
+    // v0.22 hardware events should be translated to AppCommand before reaching store actions.
   },
 }));
 
