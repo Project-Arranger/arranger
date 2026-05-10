@@ -92,6 +92,7 @@ export default function PercMatrix() {
         {/* 一键生成基础律动 */}
         <button
           id="perc-auto-fill-btn"
+          data-tutorial-target="perc-groove"
           className={`perc-auto-fill-btn ${fillFlash ? 'flash' : ''}`}
           onClick={handleAutoFill}
           onTouchStart={handleAutoFill}
@@ -163,6 +164,15 @@ export default function PercMatrix() {
                     }}
                     data-instrument={id}
                     data-col={colIdx}
+                    data-tutorial-target={
+                      id === 'kick' && colIdx === 0
+                        ? 'perc-kick-step-0'
+                        : id === 'snare' && colIdx === 4
+                          ? 'perc-snare-step-4'
+                          : id === 'hihat'
+                            ? 'perc-hihat'
+                            : undefined
+                    }
                   >
                     {ripples.map(r => r.eighthIndex === colIdx && r.instrumentId === id && (
                       <span key={r.id} className="cell-ripple" />

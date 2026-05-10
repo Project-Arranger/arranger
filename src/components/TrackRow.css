@@ -3,8 +3,8 @@
 .track-row {
   display: flex;
   align-items: stretch;
-  background: #1A1A1A;
-  border-radius: 12px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: visible;
@@ -36,8 +36,8 @@
 
 @media (max-width: 768px) {
   .track-label {
-    width: 45px;
-    min-width: 45px;
+    width: var(--track-sidebar-width);
+    min-width: var(--track-sidebar-width);
   }
 }
 
@@ -81,7 +81,7 @@
   width: 10px;
   height: 14px;
   border-radius: 2px;
-  background: #A0D8EF;
+  background: var(--color-accent);
   cursor: pointer;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }

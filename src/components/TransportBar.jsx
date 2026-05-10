@@ -101,6 +101,7 @@ export default function TransportBar() {
       <div className="transport-left">
         <button
           id="btn-play"
+          data-tutorial-target="transport-play"
           className={`transport-btn transport-btn-play ${isPlaying ? 'active' : ''}`}
           onTouchStart={handlePlayPause}
           onClick={handlePlayPause}

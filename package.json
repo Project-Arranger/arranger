@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test": "node tests/shell_ui_contract.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
