@@ -397,6 +397,14 @@ type SavedProject = {
 - Bass 先自动生成根音，不做完整教学。
 - Export 暂时占位。
 
+v0.22 locked defaults 已记录在 `docs/V022_PRODUCT_RULES.md`：
+
+- Chord 使用 8 个逻辑键。
+- Percussion 底层 16 step，教学层按 8 个八分位置表达。
+- MVP 终点是 Lead 即兴演奏完成页。
+- Bass 首版只做自动根音，不进入独立教学。
+- Export 首版为占位能力，不作为验收主路径。
+
 ### Phase 1: 架构脚手架
 
 预计：2-3 天
