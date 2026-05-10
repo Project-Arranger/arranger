@@ -16,7 +16,7 @@
 
 ## Summary
 
-- 
+-
 
 ## Verification
 
@@ -33,8 +33,8 @@
 
 ## Known Risks
 
-- 
+-
 
 ## Follow-Up Tasks
 
-- 
+-

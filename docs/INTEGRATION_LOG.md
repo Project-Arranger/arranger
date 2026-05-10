@@ -35,7 +35,7 @@ Checklist:
 
 Notes:
 
-- 
+-
 
 ## 2026-05-11: Foundation
 
