@@ -47,6 +47,7 @@ export function showDragGhost({ label, color, glowColor, clientX, clientY }) {
   el.textContent = label;
   el.style.background = `color-mix(in srgb, ${color || '#7aecf0'} 30%, #1a1a1e)`;
   el.style.borderColor = `color-mix(in srgb, ${color || '#7aecf0'} 60%, transparent)`;
+  el.style.boxShadow = `0 4px 16px rgba(0,0,0,0.5), 0 0 22px ${glowColor || 'rgba(122,236,240,0.28)'}`;
   el.style.opacity = '1';
   el.style.transform = `translate3d(calc(${clientX}px - 50%), calc(${clientY}px - 50%), 0)`;
 }

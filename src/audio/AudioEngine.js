@@ -1,5 +1,6 @@
 import * as Tone from 'tone';
 import useMusicStore from '../store/useMusicStore';
+import { TOTAL_BARS, STEPS_PER_BAR } from '../domain/musicConstants';
 
 /**
  * AudioEngine - 基于 Tone.js 的全局音频引擎
@@ -12,8 +13,6 @@ import useMusicStore from '../store/useMusicStore';
  * 5. 提供 EPiano 音色，支持即时播放和弦
  */
 
-const TOTAL_BARS = 8;
-const STEPS_PER_BAR = 16;
 const TOTAL_STEPS = TOTAL_BARS * STEPS_PER_BAR; // 128
 
 class AudioEngine {
@@ -50,7 +49,7 @@ class AudioEngine {
     }).toDestination();
 
     const chordBaseUrl = `${import.meta.env.BASE_URL}samples/chords/`;
-    this._epiano = await new Promise((resolve, reject) => {
+    this._epiano = await new Promise((resolve) => {
       const s = new Tone.Sampler({
         urls: {
           A4: 'A4.wav',
@@ -96,7 +95,7 @@ class AudioEngine {
     }).toDestination();
 
     const bassBaseUrl = `${import.meta.env.BASE_URL}samples/bass/`;
-    this._bass = await new Promise((resolve, reject) => {
+    this._bass = await new Promise((resolve) => {
       const s = new Tone.Sampler({
         urls: {
           C1: 'Bass_C1.wav',
@@ -136,7 +135,7 @@ class AudioEngine {
     }).toDestination();
 
     const leadBaseUrl = `${import.meta.env.BASE_URL}samples/lead/`;
-    this._leadEpiano = await new Promise((resolve, reject) => {
+    this._leadEpiano = await new Promise((resolve) => {
       const s = new Tone.Sampler({
         urls: {
           C3: 'Lead%20C3.wav',

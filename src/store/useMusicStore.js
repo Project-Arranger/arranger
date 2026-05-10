@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { CHORD_LIBRARY } from '../data/chords';
 import { eighthToStep } from '../data/bassNotes';
+import { TOTAL_BARS, STEPS_PER_BAR, CHORD_SPAN, TRACK_IDS } from '../domain/musicConstants';
+import createTransportSlice from './slices/transportSlice';
+import createMatrixSlice from './slices/matrixSlice';
+import createContextSlice from './slices/contextSlice';
 
 /** 和弦 ID → Bass 根音映射（使用采样音域 C1 D1 E1 F1 G1 A0 B0）*/
 const CHORD_TO_BASS_ROOT = {
@@ -30,143 +34,12 @@ const CHORD_TO_BASS_ROOT = {
   'D/F#':    'F1',
 };
 
-/**
- * 生成 8 小节的矩阵数据结构
- * 每个 track 有 8 个 bar，每个 bar 有 16 个 step
- * 
- * 数据结构:
- * matrix[trackId][barIndex][stepIndex] = cellData
- * 
- * cellData 格式:
- *   - chord track: { chordId: 'C', notes: ['C4','E4','G4'], isHead: true/false } | null
- *   - bass track:  { note: 'C2', velocity: 100 } | null
- *   - perc track:  { instruments: ['kick', 'hihat'] } | null
- *   - lead track:  { note: 'C4', velocity: 100 } | null
- */
-
-const TOTAL_BARS = 8;
-const STEPS_PER_BAR = 16;
-/** 一个和弦块占据的 step 数（4 step = 1 拍） */
-const CHORD_SPAN = 4;
-
-const TRACKS = ['chord', 'bass', 'perc', 'lead'];
-
-function createEmptyMatrix() {
-  const matrix = {};
-  TRACKS.forEach((trackId) => {
-    matrix[trackId] = [];
-    for (let bar = 0; bar < TOTAL_BARS; bar++) {
-      matrix[trackId][bar] = [];
-      for (let step = 0; step < STEPS_PER_BAR; step++) {
-        matrix[trackId][bar][step] = null;
-      }
-    }
-  });
-  return matrix;
-}
+const TRACKS = TRACK_IDS;
 
 const useMusicStore = create((set, get) => ({
-  // -------- Transport 状态 --------
-  bpm: 120,
-  isPlaying: false,
-  rootKey: 'C',
-  scale: 'Ionian',
-
-  // 用户手动点击定位的小节（与 currentBar 引擎播放位置分离）
-  seekBar: 0,
-  seekBeat: 0, // 小节内的拍子 (0-3)
-
-  // 当前播放位置 (0-indexed)
-  currentBar: 0,
-  currentStep: 0,
-
-  // -------- Context Area 状态 --------
-  /** 当前显示详情编辑器的轨道 ('bass' | 'chord' | 'perc' | null) */
-  activeContextTrack: null,
-  /** 当前正在编辑的小节 index (0~7) */
-  selectedBar: 0,
-  /** 选中的 Chord 实例（为了变体呼出）: { barIndex, stepIndex, baseChordId } */
-  selectedChordBlock: null,
-
-  // -------- Playhead Scrubbing 状态 --------
-  /** 用户拖拽进度时的虚拟进度 [0.0 ~ 1.0]，如果为 null 则显示真实进度 */
-  dragProgress: null,
-
-  // -------- 矩阵数据 --------
-  matrix: createEmptyMatrix(),
-
-  // -------- 常量（暴露给组件用） --------
-  totalBars: TOTAL_BARS,
-  stepsPerBar: STEPS_PER_BAR,
-  tracks: TRACKS,
-
-  // -------- 音量状态 (单位: 分贝 dB) --------
-  volumes: {
-    chord: 0,
-    bass: 0,
-    perc: 0,
-    lead: 0,
-  },
-
-  // -------- Actions: Transport --------
-  play: () => set({ isPlaying: true }),
-  pause: () => set({ isPlaying: false }),
-  stop: () => set({ isPlaying: false, currentBar: 0, currentStep: 0 }),
-
-  setBpm: (bpm) => {
-    const clamped = Math.max(40, Math.min(300, bpm));
-    set({ bpm: clamped });
-  },
-
-  setTrackVolume: (trackId, volume) => {
-    set((state) => ({
-      volumes: {
-        ...state.volumes,
-        [trackId]: volume,
-      },
-    }));
-  },
-
-  setRootKey: (key) => set({ rootKey: key }),
-  setScale: (scale) => set({ scale: scale }),
-  setSeekBar: (barIndex) => set({ seekBar: barIndex }),
-  setSeekPosition: (barIndex, beatIndex) => set({ seekBar: barIndex, seekBeat: beatIndex }),
-
-  /**
-   * 更新当前播放位置（由 AudioEngine 调用）
-   */
-  setPosition: (bar, step) => set({ currentBar: bar, currentStep: step }),
-
-  /**
-   * 设置用户的拖拽视窗进度（挂起实际的引擎定位）
-   */
-  setDragProgress: (progress) => set({ dragProgress: progress }),
-
-  // -------- Actions: Matrix 编辑 --------
-
-  /**
-   * 设置某个 cell 的数据
-   * @param {string} trackId - 'chord' | 'bass' | 'perc' | 'lead'
-   * @param {number} barIndex - 0~7
-   * @param {number} stepIndex - 0~15
-   * @param {object|null} cellData - { note, velocity } 或 null（清除）
-   */
-  setCell: (trackId, barIndex, stepIndex, cellData) => {
-    const { matrix } = get();
-    // 深拷贝对应的 bar 以保持 immutable
-    const newBar = [...matrix[trackId][barIndex]];
-    newBar[stepIndex] = cellData;
-
-    const newTrack = [...matrix[trackId]];
-    newTrack[barIndex] = newBar;
-
-    set({
-      matrix: {
-        ...matrix,
-        [trackId]: newTrack,
-      },
-    });
-  },
+  ...createTransportSlice(set, get),
+  ...createMatrixSlice(set, get),
+  ...createContextSlice(set, get),
 
   // -------- Actions: Chord 轨道专用 --------
 
@@ -236,56 +109,6 @@ const useMusicStore = create((set, get) => ({
   },
 
   /**
-   * 移除任意轨道某个位置的数据
-   */
-  clearStep: (trackId, barIndex, stepIndex) => {
-    const { matrix } = get();
-    if (!matrix[trackId]) return;
-    
-    const newBar = [...matrix[trackId][barIndex]];
-    newBar[stepIndex] = null;
-
-    const newTrack = [...matrix[trackId]];
-    newTrack[barIndex] = newBar;
-
-    set({
-      matrix: {
-        ...matrix,
-        [trackId]: newTrack,
-      },
-    });
-  },
-
-  /**
-   * 清空整条轨道所有小节的数据
-   */
-  clearTrack: (trackId) => {
-    const { matrix, totalBars, stepsPerBar } = get();
-    if (!matrix[trackId]) return;
-
-    const emptyTrack = Array.from({ length: totalBars }, () =>
-      Array.from({ length: stepsPerBar }, () => null)
-    );
-
-    set({
-      matrix: {
-        ...matrix,
-        [trackId]: emptyTrack,
-      },
-    });
-  },
-
-  // -------- Actions: Context Area --------
-  setActiveContextTrack: (trackId) => set({ activeContextTrack: trackId }),
-  setSelectedBar: (barIndex) => set({ selectedBar: barIndex }),
-  setSelectedChordBlock: (blockData) => {
-    set({ selectedChordBlock: blockData });
-    if (blockData) {
-      set({ activeContextTrack: 'chord', selectedBar: blockData.barIndex });
-    }
-  },
-
-  /**
    * 替换当前选中的和弦积木块属性（用于变体切换）
    * @param {number} barIndex
    * @param {number} stepIndex - head 的 stepIndex
@@ -328,7 +151,7 @@ const useMusicStore = create((set, get) => ({
    * 前两拍保留原和弦，后两拍替换为过渡和弦
    */
   applyOrganizeTransition: (barIndex, baseChordId, tranChordId, tranNotes) => {
-    const { matrix, setChordBlock } = get();
+    const { setChordBlock } = get();
     // 强制写入第 1、2 拍为 baseChordId
     setChordBlock(barIndex, 0, baseChordId);
     setChordBlock(barIndex, 1, baseChordId);
@@ -549,11 +372,6 @@ const useMusicStore = create((set, get) => ({
   },
 
   /**
-   * 清空整个矩阵
-   */
-  clearMatrix: () => set({ matrix: createEmptyMatrix() }),
-
-  /**
    * 导出当前状态为 JSON（满足 README 5.3 数据序列化需求）
    */
   exportJSON: () => {
@@ -581,7 +399,7 @@ const useMusicStore = create((set, get) => ({
   // -------- 预留硬件接口（README 5.3）--------
   onHardwareMessage: (type, data) => {
     console.log(`[HardwareMessage] type=${type}`, data);
-    // 未来在此处理物理按键映射
+    // v0.22 hardware events should be translated to AppCommand before reaching store actions.
   },
 }));
 

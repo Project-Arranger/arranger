@@ -1,6 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { CHORD_LIBRARY, CHORD_VARIATIONS, ORGANIZE_TRANSITIONS } from '../data/chords';
-import audioEngine from '../audio/AudioEngine';
 import { showDragGhost, moveDragGhost, hideDragGhost } from '../utils/dragGhost';
 import './ChordEditor.css';
 
@@ -43,7 +42,7 @@ const TRANSITION_PATTERNS = [
 ];
 
 /** Reusable draggable chord block */
-function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', onDragStart, onDragEnd }) {
+function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base' }) {
   const handlePointerDown = useCallback((e) => {
     if (e.button !== 0 && e.type.includes('mouse')) return; // left click / touch only
     e.stopPropagation();
@@ -51,8 +50,6 @@ function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', 
 
     const startX = e.clientX;
     const startY = e.clientY;
-    let didMove = false;
-
     // Show ghost immediately via direct DOM (no React, no events)
     showDragGhost({ label, color, glowColor, clientX: startX, clientY: startY });
 
@@ -65,8 +62,6 @@ function DragBlock({ chordId, label, notes, color, glowColor, variant = 'base', 
 
     let rafId = null;
     const onPointerMove = (ev) => {
-      didMove = true;
-
       // Ghost: update directly, no RAF, no events
       moveDragGhost(ev.clientX, ev.clientY);
 
@@ -186,8 +181,6 @@ export default function ChordEditor() {
         <p className="ce-panel-title">增加戏剧感和张力</p>
         <div className="ce-transition-list">
           {TRANSITION_PATTERNS.map((tp) => {
-            const beforeChord = CHORD_LIBRARY[tp.before];
-            const afterChord = CHORD_LIBRARY[tp.after];
             return (
               <div key={tp.id} className="ce-transition-row">
                 {/* Static label showing context */}

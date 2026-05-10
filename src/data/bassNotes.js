@@ -1,3 +1,5 @@
+import { EIGHTH_STEPS_PER_BAR } from '../domain/musicConstants';
+
 /**
  * Bass 音符定义 — 使用自定义采样音域
  * 
@@ -17,7 +19,7 @@ const BASS_NOTES = [
 ];
 
 /** Bass 矩阵横轴: 8 个八分音符位，每个对应 16n 步进网格中的偶数位 */
-const BASS_COLUMNS = 8;
+const BASS_COLUMNS = EIGHTH_STEPS_PER_BAR;
 
 /** 八分音符 index → 16n step index 的映射（0→0, 1→2, 2→4, ...） */
 function eighthToStep(eighthIndex) {
