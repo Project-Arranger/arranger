@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { CHORD_LIBRARY, AVAILABLE_CHORDS } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
 import './ChordPalette.css';
@@ -56,7 +56,7 @@ export default function ChordPalette({ onDragStart, onDragEnd }) {
           const isDragging = draggingId === chordId;
 
           return (
-            <motion.div
+            <Motion.div
               key={chordId}
               drag
               dragSnapToOrigin
@@ -79,7 +79,7 @@ export default function ChordPalette({ onDragStart, onDragEnd }) {
               <span className="chord-block-notes">
                 {chord.notes.join(' ')}
               </span>
-            </motion.div>
+            </Motion.div>
           );
         })}
       </div>

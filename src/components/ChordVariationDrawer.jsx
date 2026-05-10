@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import useMusicStore from '../store/useMusicStore';
 import { CHORD_VARIATIONS, CHORD_LIBRARY, ORGANIZE_TRANSITIONS } from '../data/chords';
 import audioEngine from '../audio/AudioEngine';
@@ -46,10 +46,8 @@ export default function ChordVariationDrawer() {
     setSelectedChordBlock(null);
   };
 
-  const currentBarString = `Bar ${barIndex + 1}`;
-
   return (
-    <motion.div
+    <Motion.div
       className="chord-variation-drawer"
       initial={{ y: '100%' }}
       animate={{ y: 0 }}
@@ -99,6 +97,6 @@ export default function ChordVariationDrawer() {
           );
         })}
       </div>
-    </motion.div>
+    </Motion.div>
   );
 }

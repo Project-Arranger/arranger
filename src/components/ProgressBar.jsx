@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import useMusicStore from '../store/useMusicStore';
 import audioEngine from '../audio/AudioEngine';
 import './ProgressBar.css';
@@ -102,14 +102,14 @@ export default function ProgressBar() {
         onTouchStart={onTouchStart}
       >
         <div className="progress-segments">
-          <motion.div 
+          <Motion.div
               className="global-needle"
               animate={{ left: `${displayProgressPercent}%` }}
               transition={{ ease: 'linear', duration: dragProgress !== null ? 0 : stepDuration }}
           >
             <div className="global-needle-head" />
             <div className="global-needle-line" />
-          </motion.div>
+          </Motion.div>
           
           {Array.from({ length: totalBars }, (_, barIdx) => {
             const isCurrent = barIdx === currentBar;

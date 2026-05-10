@@ -328,7 +328,7 @@ const useMusicStore = create((set, get) => ({
    * 前两拍保留原和弦，后两拍替换为过渡和弦
    */
   applyOrganizeTransition: (barIndex, baseChordId, tranChordId, tranNotes) => {
-    const { matrix, setChordBlock } = get();
+    const { setChordBlock } = get();
     // 强制写入第 1、2 拍为 baseChordId
     setChordBlock(barIndex, 0, baseChordId);
     setChordBlock(barIndex, 1, baseChordId);

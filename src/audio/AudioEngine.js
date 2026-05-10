@@ -50,7 +50,7 @@ class AudioEngine {
     }).toDestination();
 
     const chordBaseUrl = `${import.meta.env.BASE_URL}samples/chords/`;
-    this._epiano = await new Promise((resolve, reject) => {
+    this._epiano = await new Promise((resolve) => {
       const s = new Tone.Sampler({
         urls: {
           A4: 'A4.wav',
@@ -96,7 +96,7 @@ class AudioEngine {
     }).toDestination();
 
     const bassBaseUrl = `${import.meta.env.BASE_URL}samples/bass/`;
-    this._bass = await new Promise((resolve, reject) => {
+    this._bass = await new Promise((resolve) => {
       const s = new Tone.Sampler({
         urls: {
           C1: 'Bass_C1.wav',
@@ -136,7 +136,7 @@ class AudioEngine {
     }).toDestination();
 
     const leadBaseUrl = `${import.meta.env.BASE_URL}samples/lead/`;
-    this._leadEpiano = await new Promise((resolve, reject) => {
+    this._leadEpiano = await new Promise((resolve) => {
       const s = new Tone.Sampler({
         urls: {
           C3: 'Lead%20C3.wav',
