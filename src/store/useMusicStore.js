@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { CHORD_LIBRARY } from '../data/chords';
 import { eighthToStep } from '../data/bassNotes';
+import {
+  TOTAL_BARS,
+  STEPS_PER_BAR,
+  CHORD_SPAN,
+  TRACK_IDS,
+  DEFAULT_BPM,
+  ROOT_KEY,
+  SCALE,
+} from '../domain/musicConstants';
 
 /** 和弦 ID → Bass 根音映射（使用采样音域 C1 D1 E1 F1 G1 A0 B0）*/
 const CHORD_TO_BASS_ROOT = {
@@ -44,12 +53,7 @@ const CHORD_TO_BASS_ROOT = {
  *   - lead track:  { note: 'C4', velocity: 100 } | null
  */
 
-const TOTAL_BARS = 8;
-const STEPS_PER_BAR = 16;
-/** 一个和弦块占据的 step 数（4 step = 1 拍） */
-const CHORD_SPAN = 4;
-
-const TRACKS = ['chord', 'bass', 'perc', 'lead'];
+const TRACKS = TRACK_IDS;
 
 function createEmptyMatrix() {
   const matrix = {};
@@ -67,10 +71,10 @@ function createEmptyMatrix() {
 
 const useMusicStore = create((set, get) => ({
   // -------- Transport 状态 --------
-  bpm: 120,
+  bpm: DEFAULT_BPM,
   isPlaying: false,
-  rootKey: 'C',
-  scale: 'Ionian',
+  rootKey: ROOT_KEY,
+  scale: SCALE,
 
   // 用户手动点击定位的小节（与 currentBar 引擎播放位置分离）
   seekBar: 0,

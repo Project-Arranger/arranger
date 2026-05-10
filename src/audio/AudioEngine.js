@@ -1,5 +1,6 @@
 import * as Tone from 'tone';
 import useMusicStore from '../store/useMusicStore';
+import { TOTAL_BARS, STEPS_PER_BAR } from '../domain/musicConstants';
 
 /**
  * AudioEngine - 基于 Tone.js 的全局音频引擎
@@ -12,8 +13,6 @@ import useMusicStore from '../store/useMusicStore';
  * 5. 提供 EPiano 音色，支持即时播放和弦
  */
 
-const TOTAL_BARS = 8;
-const STEPS_PER_BAR = 16;
 const TOTAL_STEPS = TOTAL_BARS * STEPS_PER_BAR; // 128
 
 class AudioEngine {
