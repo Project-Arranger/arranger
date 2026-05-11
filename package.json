@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node tests/main_ui_reference.test.js",
+    "test": "node tests/main_ui_reference.test.js && node tests/editor_tracks.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

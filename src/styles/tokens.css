@@ -44,10 +44,11 @@
   --font-body: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 
-  --track-sidebar-width: 256px;
+  --track-sidebar-width: clamp(214px, 17vw, 280px);
   --track-controls-width: 112px;
   --track-height: 64px;
-  --grid-min-width: 880px;
+  --editor-prebar-width: clamp(136px, 9vw, 144px);
+  --grid-min-width: clamp(880px, 72vw, 1040px);
   --sequencer-cell: 32px;
   --gutter-md: 16px;
 
@@ -61,8 +62,6 @@
 
 @media (max-width: 860px) {
   :root {
-    --track-sidebar-width: 156px;
     --track-controls-width: 88px;
-    --grid-min-width: 820px;
   }
 }

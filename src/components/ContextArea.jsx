@@ -4,6 +4,7 @@ import BassMatrix from './BassMatrix';
 import PercMatrix from './PercMatrix';
 import LeadMatrix from './LeadMatrix';
 import { ChordIcon, BassIcon, PercIcon, LeadIcon } from './Icons';
+import { getEditorTrackLabel } from '../domain/editorTracks';
 import './ContextArea.css';
 
 /**
@@ -15,10 +16,16 @@ import './ContextArea.css';
  */
 export default function ContextArea() {
   const activeContextTrack = useMusicStore((s) => s.activeContextTrack);
-  const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
+  const editorTrackStack = useMusicStore((s) => s.editorTrackStack);
+  const activeEditorTrackEntryId = useMusicStore((s) => s.activeEditorTrackEntryId);
 
-  const renderContent = () => {
-    switch (activeContextTrack) {
+  const activeEditorTrackEntry =
+    editorTrackStack.find(entry => entry.id === activeEditorTrackEntryId) ??
+    editorTrackStack[editorTrackStack.length - 1] ??
+    null;
+
+  const renderContent = (trackId) => {
+    switch (trackId) {
       case 'perc':
         return <PercMatrix />;
       case 'bass':
@@ -31,49 +38,37 @@ export default function ContextArea() {
     }
   };
 
+  const activeTrackId = activeEditorTrackEntry?.trackId ?? activeContextTrack;
+  const ActiveIcon = {
+    chord: ChordIcon,
+    bass: BassIcon,
+    perc: PercIcon,
+    lead: LeadIcon,
+  }[activeTrackId];
+
+  if (!activeEditorTrackEntry) {
+    return (
+      <div className="context-area" id="context-area" style={{ position: 'relative' }}>
+        <div className="empty-editor-state">
+          <span className="empty-editor-kicker">TRACK EDITOR</span>
+          <span>右侧音轨区为空。点击左侧轨道名右侧的 + 添加音轨。</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="context-area" id="context-area" style={{ position: 'relative' }}>
-      {/* Tab 切换条 */}
       <div className="context-tabs">
-        <button
-          className={`context-tab ${!activeContextTrack || activeContextTrack === 'chord' ? 'active' : ''}`}
-          onClick={() => setActiveContextTrack('chord')}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-             <ChordIcon active={!activeContextTrack || activeContextTrack === 'chord'} />
-             <span>CHORD</span>
-          </div>
-        </button>
-        <button
-          className={`context-tab ${activeContextTrack === 'bass' ? 'active' : ''}`}
-          onClick={() => setActiveContextTrack('bass')}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-             <BassIcon active={activeContextTrack === 'bass'} />
-             <span>BASS</span>
-          </div>
-        </button>
-        <button
-          className={`context-tab ${activeContextTrack === 'perc' ? 'active' : ''}`}
-          onClick={() => setActiveContextTrack('perc')}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-             <PercIcon active={activeContextTrack === 'perc'} />
-             <span>DRUMS</span>
-          </div>
-        </button>
-        <button
-          className={`context-tab ${activeContextTrack === 'lead' ? 'active' : ''}`}
-          onClick={() => setActiveContextTrack('lead')}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-             <LeadIcon active={activeContextTrack === 'lead'} />
-             <span>LEAD</span>
-          </div>
-        </button>
+        <div className="context-tab active">
+          <span className="context-tab-inner">
+            {ActiveIcon && <ActiveIcon active />}
+            <span>{getEditorTrackLabel(activeEditorTrackEntry)}</span>
+          </span>
+        </div>
       </div>
       {/* 动态内容 */}
-      {renderContent()}
+      {renderContent(activeEditorTrackEntry.trackId)}
     </div>
   );
 }
