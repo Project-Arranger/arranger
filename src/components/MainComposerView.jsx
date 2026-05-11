@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import useMusicStore from '../store/useMusicStore';
 import audioEngine from '../audio/AudioEngine';
 import TransportBar from './TransportBar';
@@ -21,7 +21,9 @@ export default function MainComposerView() {
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
   const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
-  const trackOverviewRef = useRef(null);
+  const totalBars = useMusicStore((s) => s.totalBars);
+  const seekBar = useMusicStore((s) => s.seekBar);
+  const seekBeat = useMusicStore((s) => s.seekBeat);
 
   useEffect(() => {
     const onDragStart = (e) => {
@@ -84,19 +86,48 @@ export default function MainComposerView() {
       <TransportBar />
 
       <div
-        className="track-overview"
-        id="track-overview"
-        ref={trackOverviewRef}
+        className="arrangement-section"
+        id="arrangement-section"
         onClick={handleOverviewClick}
-        style={{ position: 'relative' }}
       >
-        <ChordTrack
-          dragChordId={dragChordId}
-          onClick={() => handleTrackClick('chord')}
-        />
-        <TrackRow trackId="bass" Icon={BassIcon} label="BASS" onClick={() => handleTrackClick('bass')} />
-        <TrackRow trackId="perc" Icon={PercIcon} label="PERC" onClick={() => handleTrackClick('perc')} />
-        <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" onClick={() => handleTrackClick('lead')} />
+        <div className="timeline-ruler" aria-label="Arrangement timeline ruler">
+          <div className="timeline-sidebar">
+            <span>TRACKS</span>
+            <button type="button" className="timeline-edit-btn" aria-label="Edit tracks">✎</button>
+          </div>
+          <div className="ruler-strip">
+            {Array.from({ length: totalBars }, (_, barIdx) => (
+              <button
+                type="button"
+                key={barIdx}
+                className="ruler-bar"
+                data-bar={barIdx}
+                data-beat="0"
+              >
+                {barIdx + 1}
+              </button>
+            ))}
+          </div>
+          <div className="timeline-controls-spacer" />
+        </div>
+
+        <div
+          className="track-overview custom-scrollbar"
+          id="track-overview"
+          style={{
+            '--playhead-position': `${((seekBar + seekBeat / 4) / totalBars) * 100}%`,
+          }}
+        >
+          <div className="arrangement-playhead" />
+
+          <TrackRow trackId="perc" Icon={PercIcon} label="DRUMS" onClick={() => handleTrackClick('perc')} />
+          <TrackRow trackId="bass" Icon={BassIcon} label="BASS" onClick={() => handleTrackClick('bass')} />
+          <ChordTrack
+            dragChordId={dragChordId}
+            onClick={() => handleTrackClick('chord')}
+          />
+          <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" onClick={() => handleTrackClick('lead')} />
+        </div>
         
         {/* Unified Global Delete Zone */}
         {isDraggingAny && (

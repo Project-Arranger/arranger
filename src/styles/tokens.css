@@ -1,0 +1,68 @@
+:root {
+  --surface: #faf8ff;
+  --surface-dim: #dad9e2;
+  --surface-bright: #faf8ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f4f3fc;
+  --surface-container: #E5E7EB;
+  --surface-container-high: #e8e7f0;
+  --surface-container-highest: #e2e1ea;
+  --surface-active: #FFFFFF;
+  --surface-base: #F9F9FB;
+  --surface-variant: #e2e1ea;
+
+  --on-surface: #1a1b22;
+  --on-surface-variant: #444652;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --outline: #747684;
+  --outline-variant: #c4c5d4;
+
+  --primary: #3555b7;
+  --primary-container: #506ed2;
+  --primary-fixed: #dce1ff;
+  --primary-fixed-dim: #b6c4ff;
+  --on-primary: #ffffff;
+  --on-primary-fixed-variant: #193ea0;
+
+  --secondary-container: #95f7bb;
+  --secondary-fixed-dim: #7adaa1;
+  --on-secondary-container: #007346;
+  --on-secondary-fixed-variant: #005230;
+
+  --tertiary-fixed-dim: #ffb95e;
+  --on-tertiary-fixed-variant: #653e00;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  --accent-percussion-kick: #A5B4FC;
+  --accent-percussion-snare: #FCA5A5;
+  --accent-percussion-hihat: #FDE68A;
+  --dashboard-bg: #F3F4F6;
+  --play-state: #4ADE80;
+
+  --font-body: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --track-sidebar-width: 256px;
+  --track-controls-width: 112px;
+  --track-height: 64px;
+  --grid-min-width: 880px;
+  --sequencer-cell: 32px;
+  --gutter-md: 16px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-soft: 0 8px 24px rgba(31, 41, 55, 0.08);
+  --shadow-inset-well: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 860px) {
+  :root {
+    --track-sidebar-width: 156px;
+    --track-controls-width: 88px;
+    --grid-min-width: 820px;
+  }
+}

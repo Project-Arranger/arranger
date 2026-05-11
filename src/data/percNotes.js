@@ -4,14 +4,12 @@
  */
 
 const PERC_INSTRUMENTS = [
-  { id: 'hihat', label: 'Hi-hat', color: '#7aecf0' },
-  { id: 'clap',  label: 'Clap',   color: '#7aecf0' },
-  { id: 'snare', label: 'Snare',  color: '#7aecf0' },
-  { id: 'tom',   label: 'Tom',    color: '#7aecf0' },
-  { id: 'kick',  label: 'Kick',   color: '#7aecf0' },
+  { id: 'kick',  label: 'Kick',   color: '#A5B4FC' },
+  { id: 'snare', label: 'Snare',  color: '#FCA5A5' },
+  { id: 'hihat', label: 'Hi-Hat', color: '#FDE68A' },
 ];
 
-/** Perc 矩阵横轴: 8 个八分音符位，映射到 16n 步进网格中的偶数位 */
-const PERC_COLUMNS = 8;
+/** Perc 矩阵横轴: 16 个十六分音符位，对应一个 4/4 小节 */
+const PERC_COLUMNS = 16;
 
 export { PERC_INSTRUMENTS, PERC_COLUMNS };

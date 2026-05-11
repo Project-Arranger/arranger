@@ -59,7 +59,7 @@ export default function ContextArea() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
              <PercIcon active={activeContextTrack === 'perc'} />
-             <span>PERC</span>
+             <span>DRUMS</span>
           </div>
         </button>
         <button

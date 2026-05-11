@@ -1,208 +1,217 @@
 /* ===== TransportBar ===== */
 
 .transport-bar {
+  flex: 0 0 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(122, 236, 240, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 0 var(--gutter-md);
+  background: var(--surface-dim);
+  border-bottom: 1px solid var(--outline-variant);
   gap: 16px;
-  flex-wrap: wrap; /* Allowed for mobile */
+  color: var(--on-surface);
 }
 
-@media (max-width: 600px) {
-  .transport-bar {
-    padding: 8px 12px;
-    gap: 8px;
-    justify-content: center;
-  }
-  .transport-left {
-    order: 2;
-  }
-  .transport-center {
-    order: 1;
-    width: 100%;
-    margin-bottom: 4px;
-  }
-  .transport-right {
-    order: 3;
-  }
-}
-
-/* ---- Transport Buttons ---- */
 .transport-left {
   display: flex;
-  gap: 10px;
-}
-
-.transport-btn {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 80px;
-  height: 44px; /* Slightly shorter */
-  padding: 8px 14px;
-  border: 1px solid rgba(160, 216, 239, 0.25);
-  border-radius: 12px;
-  background: rgba(160, 216, 239, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #A0D8EF;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
+  gap: 10px;
+  min-width: 0;
 }
 
-@media (max-width: 600px) {
-  .transport-btn {
-    min-width: 60px;
-    padding: 6px 10px;
-    font-size: 0.9rem;
-  }
-  .transport-btn-label {
-    display: none; /* Hide button text on narrow mobile */
-  }
+.project-brand {
+  min-width: 112px;
+  display: flex;
+  flex-direction: column;
 }
 
-.transport-btn:active {
-  transform: scale(0.94);
+.project-brand h1 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 28px;
+  letter-spacing: 0;
 }
 
-.transport-btn-label {
-  font-size: 0.65rem;
+.project-brand span {
+  margin-top: -2px;
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.15em;
-  opacity: 0.7;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.transport-btn-play {
-  color: #A0D8EF;
-  border-color: rgba(160, 216, 239, 0.4);
+.new-song-btn,
+.export-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.new-song-btn {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+}
+
+.new-song-btn:hover {
+  filter: brightness(0.98);
+}
+
+.transport-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--outline-variant);
+  margin: 0 2px;
+}
+
+.transport-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.transport-icon-btn,
+.settings-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-md);
   background: transparent;
+  color: var(--on-surface-variant);
+  cursor: pointer;
 }
 
-.transport-btn-play.active {
-  background: rgba(160, 216, 239, 0.15);
-  box-shadow: inset 0 0 12px rgba(160, 216, 239, 0.3), 0 0 24px rgba(160, 216, 239, 0.4);
-  border-color: #A0D8EF;
+.transport-icon-btn:hover,
+.settings-btn:hover {
+  color: var(--primary);
+  background: var(--surface-container-high);
 }
 
-.transport-btn-stop {
-  color: #ff6b8a;
-  border-color: rgba(255, 107, 138, 0.4);
-  background: transparent;
+.transport-icon-btn:active,
+.new-song-btn:active,
+.export-btn:active,
+.settings-btn:active {
+  transform: scale(0.96);
 }
 
-.transport-btn-stop:active {
-  background: rgba(255, 107, 138, 0.15);
+.transport-icon-play {
+  background: var(--play-state);
+  color: white;
+  box-shadow: 0 8px 16px rgba(74, 222, 128, 0.22);
 }
 
-/* ---- Position Display ---- */
+.transport-icon-play.active {
+  filter: saturate(1.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--play-state) 28%, transparent), 0 8px 18px rgba(74, 222, 128, 0.26);
+}
+
 .transport-center {
   flex: 1;
   display: flex;
   justify-content: center;
+  min-width: 420px;
 }
 
-.transport-position {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-.position-bar {
-  font-size: 2.2rem;
-  font-weight: 500;
-  color: #A0D8EF;
-  text-shadow: 0 0 15px rgba(160, 216, 239, 0.6), 0 0 30px rgba(160, 216, 239, 0.3);
-  min-width: 2ch;
-  text-align: right;
-}
-
-@media (max-width: 600px) {
-  .position-bar, .position-step {
-      font-size: 1.6rem;
-  }
-}
-
-.position-separator {
-  font-size: 1.6rem;
-  color: rgba(160, 216, 239, 0.6);
-  margin: 0 4px;
-}
-
-.position-step {
-  font-size: 2.2rem;
-  font-weight: 300;
-  color: rgba(160, 216, 239, 0.9);
-  text-shadow: 0 0 10px rgba(160, 216, 239, 0.4);
-  min-width: 2ch;
-}
-
-/* ---- BPM ---- */
-.transport-right {
+.dashboard-display {
+  min-height: 48px;
   display: flex;
   align-items: center;
+  gap: 22px;
+  padding: 4px 24px;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 45%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface-container);
+  box-shadow: var(--shadow-inset-well);
 }
 
-.bpm-group {
+.dashboard-field {
+  min-width: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.dashboard-label {
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+}
+
+.dashboard-value,
+.bpm-input,
+.key-control {
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+
+.dashboard-separator {
+  width: 1px;
+  height: 32px;
+  background: var(--outline-variant);
+}
+
+.bpm-control,
+.key-control {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 0 10px; /* Overwrite transport-btn padding for input space */
 }
 
 .bpm-adjust-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 22px;
   background: transparent;
   border: none;
-  border-radius: 6px;
-  color: #A0D8EF;
-  font-size: 1.1rem;
-  font-weight: 400;
+  border-radius: var(--radius-sm);
+  color: var(--on-surface-variant);
+  font-size: 15px;
+  font-weight: 800;
   cursor: pointer;
-  opacity: 0.6;
-  transition: all 0.15s ease;
-  touch-action: manipulate;
 }
 
 .bpm-adjust-btn:hover {
-  opacity: 1;
-  background: rgba(160, 216, 239, 0.15);
-}
-
-.bpm-adjust-btn:active {
-  background: rgba(160, 216, 239, 0.3);
-  transform: scale(0.9);
+  color: var(--primary);
+  background: var(--surface-container-highest);
 }
 
 .bpm-input {
-  width: 50px;
-  padding: 4px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  width: 48px;
+  padding: 0;
   text-align: center;
   background: transparent;
   border: none;
-  color: #A0D8EF;
   outline: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* Hide native number spin buttons to prevent text clip */
 .bpm-input::-webkit-outer-spin-button,
 .bpm-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -212,77 +221,121 @@
   -moz-appearance: textfield;
 }
 
-.transport-right {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Further reduced gap for 4 elements */
-}
-
-.transport-btn-key, .transport-btn-scale {
-  min-width: 85px;
-  background: rgba(160, 216, 239, 0.02);
-  gap: 4px;
-}
-
-.transport-btn-scale {
-  min-width: 130px; /* Scale names are longer */
-}
-
 .key-select {
   background: transparent;
   border: none;
-  color: #A0D8EF;
-  font-size: 1.1rem;
-  font-weight: 700;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--primary);
+  font: inherit;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  padding: 0 4px;
+  padding: 0;
   outline: none;
   text-align: center;
 }
 
-/* Ensure options look okay (OS dependent but background helps) */
 .key-select option {
-  background: #1A1A1A;
-  color: #A0D8EF;
+  background: white;
+  color: var(--text-primary);
 }
 
-.key-select-arrow {
-  opacity: 0.5;
-  margin-left: -5px; /* Adjust for larger font and better alignment */
-  pointer-events: none;
+.transport-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.transport-btn-export {
-  color: #d1b4ff;       /* light purple */
-  border-color: transparent;
-  padding: 8px 12px;
-  background: rgba(209, 180, 255, 0.08);
+.export-btn {
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
-.transport-btn-export:hover {
-  background: rgba(209, 180, 255, 0.15);
+.export-btn:hover {
+  filter: brightness(1.04);
 }
 
-.transport-btn-export:active {
-  background: rgba(209, 180, 255, 0.25);
-  transform: scale(0.96);
-}
-
-.transport-btn-export.exporting {
+.export-btn.exporting {
   pointer-events: none;
   opacity: 0.8;
-  color: #ffb4b4;
 }
 
-/* Spinner Animation */
 .spinner {
-  animation: spin 1.2s linear infinite;
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: white;
+  animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1120px) {
+  .new-song-btn span,
+  .export-btn span,
+  .transport-divider {
+    display: none;
+  }
+
+  .new-song-btn,
+  .export-btn {
+    width: 36px;
+    padding: 0;
+  }
+
+  .transport-center {
+    min-width: 360px;
+  }
+
+  .dashboard-display {
+    gap: 12px;
+    padding: 4px 14px;
+  }
+}
+
+@media (max-width: 780px) {
+  .transport-bar {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .project-brand {
+    min-width: 74px;
+  }
+
+  .project-brand h1 {
+    font-size: 18px;
+  }
+
+  .project-brand span {
+    display: none;
+  }
+
+  .transport-center {
+    min-width: 0;
+  }
+
+  .dashboard-label {
+    display: none;
+  }
+
+  .dashboard-display {
+    min-height: 38px;
+    gap: 8px;
+    padding: 3px 8px;
+  }
+
+  .dashboard-value,
+  .bpm-input,
+  .key-control {
+    font-size: 14px;
+  }
+
+  .dashboard-separator {
+    height: 22px;
   }
 }

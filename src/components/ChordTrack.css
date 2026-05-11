@@ -328,3 +328,164 @@
 .chord-delete-icon {
   font-size: 0.9rem;
 }
+
+/* ===== Soft DAW v0.22 overrides ===== */
+
+.chord-track {
+  height: var(--track-height);
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  border-radius: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  box-shadow: none;
+}
+
+.chord-track:hover {
+  background: color-mix(in srgb, var(--surface-container-high) 55%, transparent);
+}
+
+.chord-track.active-track {
+  background: var(--surface-active);
+  box-shadow: none;
+}
+
+.chord-track.active-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: var(--primary);
+  z-index: 2;
+}
+
+.chord-track .track-label {
+  width: var(--track-sidebar-width);
+  min-width: var(--track-sidebar-width);
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 16px;
+  background: transparent;
+  border-right: 1px solid var(--outline-variant);
+}
+
+.chord-track .track-label-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  border-radius: var(--radius-md);
+  color: var(--on-tertiary-fixed-variant);
+  background: var(--tertiary-fixed-dim);
+}
+
+.chord-track .track-label-text {
+  color: var(--on-surface);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.chord-track.active-track .track-label-text {
+  color: var(--primary);
+}
+
+.chord-track-grid {
+  flex: 1;
+  min-width: var(--grid-min-width);
+  display: flex;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.chord-bar {
+  flex: 1;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--outline-variant) 44%, transparent);
+  background: transparent;
+}
+
+.chord-bar.current-bar {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  box-shadow: none;
+  animation: none;
+  background: color-mix(in srgb, var(--primary-fixed) 28%, transparent);
+}
+
+.chord-slot {
+  min-height: calc(var(--track-height) - 14px);
+  margin: 7px 3px;
+  border-radius: var(--radius-md);
+  background: transparent;
+}
+
+.chord-slot.empty {
+  background: color-mix(in srgb, var(--surface-container) 36%, transparent);
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 32%, transparent);
+}
+
+.chord-slot.empty:hover {
+  background: var(--surface-container-high);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.chord-slot.seek-beat {
+  border-left: 2px solid var(--primary);
+  box-shadow: -1px 0 8px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.chord-slot.highlight {
+  background: color-mix(in srgb, var(--primary-fixed) 54%, transparent);
+  border: 1px solid var(--primary-fixed-dim);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.chord-slot.selected {
+  box-shadow: inset 0 0 0 2px var(--primary), 0 8px 18px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.chord-slot.selected::after {
+  border-color: var(--primary);
+  animation: none;
+}
+
+.chord-slot.filled {
+  background: color-mix(in srgb, var(--chord-color) 42%, white);
+  border: 1px solid color-mix(in srgb, var(--chord-color) 56%, var(--outline-variant));
+  box-shadow: 0 5px 12px rgba(31, 41, 55, 0.12);
+}
+
+.chord-slot.filled:hover {
+  background: color-mix(in srgb, var(--chord-color) 50%, white);
+  border-color: color-mix(in srgb, var(--chord-color) 70%, var(--primary));
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--chord-color) 22%, transparent);
+}
+
+.chord-slot-label {
+  color: var(--on-surface);
+  text-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.chord-slot.playing.filled {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent), 0 8px 18px color-mix(in srgb, var(--chord-color) 20%, transparent);
+}
+
+.chord-drag-ghost {
+  background: color-mix(in srgb, var(--chord-color, var(--primary)) 38%, white);
+  border: 1px solid color-mix(in srgb, var(--chord-color, var(--primary)) 60%, white);
+  box-shadow: 0 10px 24px rgba(31, 41, 55, 0.2);
+  color: var(--on-surface);
+}
