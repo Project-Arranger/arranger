@@ -67,13 +67,18 @@
 
 .ruler-strip {
   flex: 1;
-  display: flex;
-  min-width: var(--grid-min-width);
+  display: grid;
+  grid-template-columns: var(--editor-prebar-width) repeat(8, minmax(0, 1fr));
+  min-width: calc(var(--editor-prebar-width) + var(--grid-min-width));
   overflow: hidden;
 }
 
+.editor-track-prebar-ruler {
+  border-right: 1px solid color-mix(in srgb, var(--outline-variant) 56%, transparent);
+  background: color-mix(in srgb, var(--surface-container-high) 42%, transparent);
+}
+
 .ruler-bar {
-  flex: 1;
   display: flex;
   align-items: end;
   justify-content: flex-start;
@@ -88,7 +93,7 @@
   cursor: pointer;
 }
 
-.ruler-bar:first-child {
+.editor-track-prebar-ruler + .ruler-bar {
   border-left: 0;
 }
 
@@ -97,25 +102,17 @@
   background: color-mix(in srgb, var(--surface-container-high) 70%, transparent);
 }
 
-.timeline-controls-spacer {
-  width: var(--track-controls-width);
-  min-width: var(--track-controls-width);
-  border-left: 1px solid var(--outline-variant);
-}
-
-/* Track overview area — 4 fixed-height rows with a shared playhead */
+/* Track overview area — source list on the left, dynamic arrangement lanes on the right */
 .track-overview {
   flex: 0 0 auto;
-  max-height: calc(var(--track-height) * 4);
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
+  height: var(--arrangement-height, calc(var(--track-height) * 5));
+  display: grid;
+  grid-template-columns: var(--track-sidebar-width) minmax(calc(var(--editor-prebar-width) + var(--grid-min-width)), 1fr);
+  overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   position: relative;
-  background:
-    linear-gradient(to right, transparent var(--track-sidebar-width), color-mix(in srgb, var(--outline) 13%, transparent) var(--track-sidebar-width), transparent calc(var(--track-sidebar-width) + 1px)),
-    var(--surface-dim);
+  background: var(--surface-dim);
 }
 
 .track-overview::before {
@@ -123,8 +120,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: var(--track-sidebar-width);
-  right: var(--track-controls-width);
+  left: calc(var(--track-sidebar-width) + var(--editor-prebar-width));
+  right: 0;
   pointer-events: none;
   background-image: linear-gradient(to right, color-mix(in srgb, var(--outline) 20%, transparent) 1px, transparent 1px);
   background-size: calc(100% / 8) 100%;
@@ -136,7 +133,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: calc(var(--track-sidebar-width) + (100% - var(--track-sidebar-width) - var(--track-controls-width)) * var(--playhead-position));
+  left: calc(var(--track-sidebar-width) + var(--editor-prebar-width) + (100% - var(--track-sidebar-width) - var(--editor-prebar-width)) * var(--playhead-position));
   width: 2px;
   background: var(--primary);
   box-shadow: 0 0 10px color-mix(in srgb, var(--primary) 35%, transparent);
@@ -154,6 +151,388 @@
   border-radius: 999px;
   background: var(--primary);
   box-shadow: var(--shadow-soft);
+}
+
+.track-source-list {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--surface-dim);
+  border-right: 1px solid var(--outline-variant);
+}
+
+.track-source-row {
+  height: var(--track-height);
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  background: transparent;
+  position: relative;
+}
+
+.track-source-row.active {
+  background: var(--surface-active);
+}
+
+.track-source-row.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: var(--primary);
+}
+
+.track-source-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px 0 20px;
+  border: 0;
+  background: transparent;
+  color: var(--on-surface);
+  cursor: pointer;
+  text-align: left;
+}
+
+.track-source-main:hover {
+  color: var(--primary);
+}
+
+.track-source-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  border-radius: var(--radius-lg);
+  color: var(--on-primary-fixed-variant);
+  background: var(--primary-fixed-dim);
+}
+
+.track-source-row-bass .track-source-icon {
+  color: var(--on-secondary-fixed-variant);
+  background: var(--secondary-fixed-dim);
+}
+
+.track-source-row-chord .track-source-icon {
+  color: var(--on-tertiary-fixed-variant);
+  background: var(--tertiary-fixed-dim);
+}
+
+.track-source-row-lead .track-source-icon {
+  color: var(--on-error-container);
+  background: var(--error-container);
+}
+
+.track-source-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.track-add-editor-btn {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  align-self: center;
+  margin-right: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 65%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--surface-container-lowest);
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.track-add-editor-btn:hover {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.source-add-track-row {
+  height: var(--track-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 16px;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--surface-container-low);
+  color: var(--on-surface);
+  box-shadow: 0 4px 10px rgba(31, 41, 55, 0.08);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.source-add-track-row span:first-child {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.source-add-track-row:hover {
+  color: var(--primary);
+  background: var(--surface-container-lowest);
+}
+
+.editor-track-lanes {
+  min-width: calc(var(--editor-prebar-width) + var(--grid-min-width));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.editor-track-lane {
+  height: var(--track-height);
+  display: grid;
+  grid-template-columns: var(--editor-prebar-width) minmax(var(--grid-min-width), 1fr);
+  padding: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  background: transparent;
+  text-align: left;
+}
+
+.editor-track-lane:hover {
+  background: color-mix(in srgb, var(--surface-container-high) 42%, transparent);
+}
+
+.editor-track-lane.active {
+  background: color-mix(in srgb, var(--primary-fixed) 34%, transparent);
+}
+
+.editor-track-prebar {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  padding: 7px 7px;
+  border: 0;
+  border-right: 1px solid color-mix(in srgb, var(--outline-variant) 56%, transparent);
+  background: color-mix(in srgb, var(--surface-container-high) 36%, transparent);
+}
+
+.editor-track-prebar:hover {
+  background: color-mix(in srgb, var(--surface-container-high) 64%, transparent);
+}
+
+.editor-track-phrase {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 42%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--primary-fixed-dim) 65%, white);
+  color: var(--primary);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 16%, transparent);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.track-remove-editor-btn {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 68%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-container-lowest) 82%, transparent);
+  color: var(--on-surface-variant);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.track-remove-editor-btn:hover {
+  color: #ba1a1a;
+  border-color: color-mix(in srgb, #ba1a1a 42%, transparent);
+  background: color-mix(in srgb, var(--error-container) 62%, white);
+}
+
+.editor-track-bar-grid {
+  display: block;
+  min-width: var(--grid-min-width);
+  height: 100%;
+  overflow: hidden;
+}
+
+.editor-track-grid-surface {
+  height: 100%;
+  min-width: var(--grid-min-width);
+}
+
+.editor-track-grid-surface-filled {
+  background: color-mix(in srgb, var(--editor-grid-fill, var(--primary-fixed-dim)) 18%, var(--surface-container-lowest));
+}
+
+.editor-track-grid-surface-perc {
+  --editor-grid-fill: var(--accent-percussion-kick);
+}
+
+.editor-track-grid-surface-bass {
+  --editor-grid-fill: var(--secondary-fixed-dim);
+}
+
+.editor-track-grid-surface-chord {
+  --editor-grid-fill: var(--tertiary-fixed-dim);
+}
+
+.editor-track-grid-surface-lead {
+  --editor-grid-fill: var(--error-container);
+}
+
+.editor-track-grid-surface .track-row,
+.editor-track-grid-surface .chord-track {
+  height: 100%;
+  min-width: var(--grid-min-width);
+  border-bottom: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.editor-track-grid-surface .track-row:hover,
+.editor-track-grid-surface .chord-track:hover {
+  background: transparent;
+}
+
+.editor-track-grid-surface .track-label,
+.editor-track-grid-surface .track-controls-right {
+  display: none;
+}
+
+.editor-track-grid-surface .track-row-grid,
+.editor-track-grid-surface .chord-track-grid {
+  min-width: var(--grid-min-width);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.editor-track-grid-surface .track-row-bar,
+.editor-track-grid-surface .chord-bar {
+  height: 100%;
+  background: color-mix(in srgb, var(--editor-grid-fill, var(--primary-fixed-dim)) 12%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--outline-variant) 48%, transparent);
+  border-top: 0;
+  border-bottom: 0;
+  border-right: 0;
+}
+
+.editor-track-grid-surface .track-row-beat {
+  height: 100%;
+}
+
+.editor-track-grid-surface .track-row-step {
+  height: 100%;
+  min-height: 100%;
+  background: color-mix(in srgb, var(--editor-grid-fill, var(--primary-fixed-dim)) 16%, var(--surface-container-lowest));
+  border-right-color: color-mix(in srgb, var(--editor-grid-fill, var(--primary-fixed-dim)) 30%, var(--outline-variant));
+}
+
+.editor-track-grid-surface .track-row-step.filled {
+  background: color-mix(in srgb, var(--editor-grid-fill, var(--primary-fixed-dim)) 72%, white);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--editor-grid-fill, var(--primary-fixed-dim)) 54%, transparent);
+}
+
+.editor-track-grid-surface .chord-slot {
+  min-height: calc(var(--track-height) - 8px);
+  margin: 3px;
+}
+
+.editor-track-grid-surface .chord-slot.empty {
+  background: color-mix(in srgb, var(--editor-grid-fill, var(--tertiary-fixed-dim)) 18%, var(--surface-container-lowest));
+  border-color: color-mix(in srgb, var(--editor-grid-fill, var(--tertiary-fixed-dim)) 32%, transparent);
+}
+
+.editor-track-empty-state {
+  min-height: 100%;
+  min-width: calc(var(--editor-prebar-width) + var(--grid-min-width));
+  display: grid;
+  grid-template-columns: var(--editor-prebar-width) minmax(var(--grid-min-width), 1fr);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.editor-track-prebar-empty {
+  cursor: default;
+}
+
+.editor-track-prebar-empty:hover {
+  background: color-mix(in srgb, var(--surface-container-high) 36%, transparent);
+}
+
+.editor-track-empty-grid {
+  position: sticky;
+  left: var(--track-sidebar-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.split-resize-handle {
+  flex: 0 0 10px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid color-mix(in srgb, var(--outline-variant) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 70%, transparent);
+  background: var(--surface-container-high);
+  cursor: ns-resize;
+  touch-action: none;
+  position: relative;
+  z-index: 20;
+}
+
+.split-resize-handle span {
+  width: 42px;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--outline) 54%, transparent);
+}
+
+.split-resize-handle:hover,
+.split-resize-handle:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--primary-fixed) 54%, var(--surface-container-high));
 }
 
 /* Unified Global Delete Zone */

@@ -50,3 +50,31 @@
   background: var(--surface-container-lowest);
   text-shadow: none;
 }
+
+.context-tab-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.empty-editor-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.empty-editor-kicker {
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
