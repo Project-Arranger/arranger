@@ -286,34 +286,72 @@ const useMusicStore = create((set, get) => ({
   },
 
   /**
+   * 切换打击乐矩阵中某个十六分音符步进的音色开/关
+   * @param {number} barIndex - 0~7
+   * @param {number} stepIndex - 0~15
+   * @param {string} instrumentId
+   */
+  togglePercStep: (barIndex, stepIndex, instrumentId) => {
+    const { matrix } = get();
+    const newBar = [...matrix.perc[barIndex]];
+
+    const existingCell = newBar[stepIndex];
+    let instruments = existingCell ? [...existingCell.instruments] : [];
+
+    if (instruments.includes(instrumentId)) {
+      instruments = instruments.filter(id => id !== instrumentId);
+    } else {
+      instruments.push(instrumentId);
+    }
+
+    newBar[stepIndex] = instruments.length > 0 ? { instruments } : null;
+
+    const newTrack = [...matrix.perc];
+    newTrack[barIndex] = newBar;
+
+    set({
+      matrix: {
+        ...matrix,
+        perc: newTrack,
+      },
+    });
+  },
+
+  /**
    * 一键生成基础律动：在指定小节写入固定 groove 模式
-   *   第1位 (eighthIndex 0): Kick + HiHat
-   *   第3位 (eighthIndex 2): HiHat
-   *   第5位 (eighthIndex 4): Clap + Snare + HiHat
-   *   第7位 (eighthIndex 6): HiHat
+   *   每拍第一个 16 分音符: Hi-Hat
+   *   第 1 拍第一个 16 分音符: Kick
+   *   第 3 拍第一个 16 分音符: Snare
    * @param {number} barIndex - 0~7
    */
   autoFillPercGroove: (barIndex) => {
     const { matrix } = get();
-    const newBar = [...matrix.perc[barIndex]];
+    const newBar = Array.from({ length: STEPS_PER_BAR }, () => null);
 
-    const GROOVE = [
-      { eighthIndex: 0, instruments: ['kick', 'hihat'] },
-      { eighthIndex: 2, instruments: ['hihat'] },
-      { eighthIndex: 4, instruments: ['clap', 'snare', 'hihat'] },
-      { eighthIndex: 6, instruments: ['hihat'] },
-    ];
-
-    for (const { eighthIndex, instruments } of GROOVE) {
-      const stepIndex = eighthToStep(eighthIndex);
-      // Merge with existing instruments at that step (don't erase others)
-      const existing = newBar[stepIndex]?.instruments ?? [];
-      const merged = [...new Set([...existing, ...instruments])];
-      newBar[stepIndex] = { instruments: merged };
-    }
+    newBar[0] = { instruments: ['kick', 'hihat'] };
+    newBar[4] = { instruments: ['hihat'] };
+    newBar[8] = { instruments: ['snare', 'hihat'] };
+    newBar[12] = { instruments: ['hihat'] };
 
     const newTrack = [...matrix.perc];
     newTrack[barIndex] = newBar;
+    set({ matrix: { ...matrix, perc: newTrack } });
+  },
+
+  /**
+   * 为全部小节生成基础律动。
+   */
+  autoFillPercGrooveAll: () => {
+    const { matrix, totalBars } = get();
+    const newTrack = Array.from({ length: totalBars }, () => {
+      const bar = Array.from({ length: STEPS_PER_BAR }, () => null);
+      bar[0] = { instruments: ['kick', 'hihat'] };
+      bar[4] = { instruments: ['hihat'] };
+      bar[8] = { instruments: ['snare', 'hihat'] };
+      bar[12] = { instruments: ['hihat'] };
+      return bar;
+    });
+
     set({ matrix: { ...matrix, perc: newTrack } });
   },
 

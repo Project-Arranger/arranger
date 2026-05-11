@@ -1,46 +1,68 @@
 :root {
-  --color-bg-app: #0d0d0d;
-  --color-bg-elevated: #1a1a1a;
-  --color-bg-panel: rgba(0, 0, 0, 0.3);
-  --color-line-subtle: rgba(122, 236, 240, 0.08);
-  --color-line-strong: rgba(160, 216, 239, 0.25);
-  --color-text-primary: #f2f2f7;
-  --color-text-muted: rgba(242, 242, 247, 0.58);
-  --color-accent: #a0d8ef;
-  --color-accent-glow: rgba(160, 216, 239, 0.35);
-  --color-success: #5ee6a8;
-  --color-danger: #ef4444;
+  --surface: #faf8ff;
+  --surface-dim: #dad9e2;
+  --surface-bright: #faf8ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f4f3fc;
+  --surface-container: #E5E7EB;
+  --surface-container-high: #e8e7f0;
+  --surface-container-highest: #e2e1ea;
+  --surface-active: #FFFFFF;
+  --surface-base: #F9F9FB;
+  --surface-variant: #e2e1ea;
 
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
+  --on-surface: #1a1b22;
+  --on-surface-variant: #444652;
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --outline: #747684;
+  --outline-variant: #c4c5d4;
 
-  --radius-sm: 6px;
+  --primary: #3555b7;
+  --primary-container: #506ed2;
+  --primary-fixed: #dce1ff;
+  --primary-fixed-dim: #b6c4ff;
+  --on-primary: #ffffff;
+  --on-primary-fixed-variant: #193ea0;
+
+  --secondary-container: #95f7bb;
+  --secondary-fixed-dim: #7adaa1;
+  --on-secondary-container: #007346;
+  --on-secondary-fixed-variant: #005230;
+
+  --tertiary-fixed-dim: #ffb95e;
+  --on-tertiary-fixed-variant: #653e00;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  --accent-percussion-kick: #A5B4FC;
+  --accent-percussion-snare: #FCA5A5;
+  --accent-percussion-hihat: #FDE68A;
+  --dashboard-bg: #F3F4F6;
+  --play-state: #4ADE80;
+
+  --font-body: Manrope, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --track-sidebar-width: 256px;
+  --track-controls-width: 112px;
+  --track-height: 64px;
+  --grid-min-width: 880px;
+  --sequencer-cell: 32px;
+  --gutter-md: 16px;
+
+  --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-
-  --shadow-panel: 0 16px 48px rgba(0, 0, 0, 0.42);
-  --shadow-accent: 0 0 24px var(--color-accent-glow);
-
-  --z-track: 1;
-  --z-context: 100;
-  --z-tutorial-mask: 800;
-  --z-tutorial-panel: 820;
-
-  --track-sidebar-width: 60px;
-  --grid-min-width: 800px;
-  --touch-target-min: 44px;
-  --tutorial-panel-width: min(25vw, 360px);
-  --tutorial-panel-min-width: 280px;
+  --radius-xl: 16px;
+  --shadow-soft: 0 8px 24px rgba(31, 41, 55, 0.08);
+  --shadow-inset-well: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   :root {
-    --track-sidebar-width: 45px;
-    --grid-min-width: 750px;
-    --tutorial-panel-width: min(92vw, 360px);
-    --tutorial-panel-min-width: min(280px, 92vw);
+    --track-sidebar-width: 156px;
+    --track-controls-width: 88px;
+    --grid-min-width: 820px;
   }
 }

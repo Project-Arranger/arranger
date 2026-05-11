@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
+import { Download, Pause, Play, Plus, RotateCcw, Settings, Square } from 'lucide-react';
 import useMusicStore from '../store/useMusicStore';
 import audioEngine from '../audio/AudioEngine';
 import './TransportBar.css';
@@ -12,10 +13,10 @@ export default function TransportBar() {
   const globalBpm = useMusicStore((s) => s.bpm);
   const rootKey = useMusicStore((s) => s.rootKey);
   const setRootKey = useMusicStore((s) => s.setRootKey);
-  const scale = useMusicStore((s) => s.scale);
-  const setScale = useMusicStore((s) => s.setScale);
   const currentBar = useMusicStore((s) => s.currentBar);
   const currentStep = useMusicStore((s) => s.currentStep);
+  const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
+  const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
   const [isExporting, setIsExporting] = useState(false);
   const [localBpm, setLocalBpm] = useState(globalBpm.toString());
 
@@ -34,7 +35,15 @@ export default function TransportBar() {
 
   const handleStop = useCallback(() => {
     audioEngine.stop();
-  }, []);
+    setSeekPosition(0, 0);
+    setSelectedBar(0);
+  }, [setSeekPosition, setSelectedBar]);
+
+  const handleReturnToStart = useCallback(async () => {
+    setSeekPosition(0, 0);
+    setSelectedBar(0);
+    await audioEngine.seekToStep(0, 0);
+  }, [setSeekPosition, setSelectedBar]);
 
   const handleBpmChange = useCallback((e) => {
     setLocalBpm(e.target.value);
@@ -67,10 +76,6 @@ export default function TransportBar() {
     setRootKey(e.target.value);
   }, [setRootKey]);
 
-  const handleScaleChange = useCallback((e) => {
-    setScale(e.target.value);
-  }, [setScale]);
-
   const handleExport = useCallback(async () => {
     if (isExporting) return;
     setIsExporting(true);
@@ -99,124 +104,118 @@ export default function TransportBar() {
   return (
     <div className="transport-bar" id="transport-bar">
       <div className="transport-left">
-        <button
-          id="btn-play"
-          data-tutorial-target="transport-play"
-          className={`transport-btn transport-btn-play ${isPlaying ? 'active' : ''}`}
-          onTouchStart={handlePlayPause}
-          onClick={handlePlayPause}
-        >
-          {isPlaying ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="6" y="4" width="4" height="16"></rect>
-              <rect x="14" y="4" width="4" height="16"></rect>
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-          )}
-          <span className="transport-btn-label">{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+        <div className="project-brand">
+          <h1>Aria DAW</h1>
+          <span>Project Alpha</span>
+        </div>
+
+        <button type="button" className="new-song-btn">
+          <Plus size={18} strokeWidth={2.4} />
+          <span>New Song</span>
         </button>
 
-        <button
-          id="btn-stop"
-          className="transport-btn transport-btn-stop"
-          onTouchStart={handleStop}
-          onClick={handleStop}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="5" y="5" width="14" height="14" rx="2"></rect>
-          </svg>
-          <span className="transport-btn-label">STOP</span>
-        </button>
+        <div className="transport-divider" />
+
+        <div className="transport-controls">
+          <button
+            type="button"
+            className="transport-icon-btn"
+            aria-label="Return to first bar"
+            title="回到首小节"
+            onClick={handleReturnToStart}
+          >
+            <RotateCcw size={18} strokeWidth={2.4} />
+          </button>
+          <button
+            type="button"
+            id="btn-stop"
+            className="transport-icon-btn"
+            aria-label="Stop"
+            title="停止"
+            onClick={handleStop}
+          >
+            <Square size={15} fill="currentColor" strokeWidth={2.4} />
+          </button>
+          <button
+            type="button"
+            id="btn-play"
+            className={`transport-icon-btn transport-icon-play ${isPlaying ? 'active' : ''}`}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+            title={isPlaying ? '暂停' : '播放'}
+            onClick={handlePlayPause}
+          >
+            {isPlaying ? <Pause size={19} fill="currentColor" /> : <Play size={19} fill="currentColor" />}
+          </button>
+        </div>
       </div>
 
       <div className="transport-center">
-        <div className="transport-position">
-          <span className="position-bar">{currentBar + 1}</span>
-          <span className="position-separator">:</span>
-          <span className="position-step">{String(currentStep + 1).padStart(2, '0')}</span>
+        <div className="dashboard-display" aria-label="Song dashboard">
+          <div className="dashboard-field">
+            <span className="dashboard-label">POSITION</span>
+            <span className="dashboard-value">{currentBar + 1} / {Math.floor(currentStep / 4) + 1}</span>
+          </div>
+          <div className="dashboard-separator" />
+          <label className="dashboard-field dashboard-field-bpm">
+            <span className="dashboard-label">BPM</span>
+            <span className="bpm-control">
+              <button type="button" className="bpm-adjust-btn" onClick={(e) => adjustBpm(-5, e)}>-</button>
+              <input
+                id="bpm-input"
+                type="number"
+                min={40}
+                max={300}
+                value={localBpm}
+                onChange={handleBpmChange}
+                onBlur={commitBpm}
+                onKeyDown={handleBpmKeyDown}
+                className="bpm-input"
+              />
+              <button type="button" className="bpm-adjust-btn" onClick={(e) => adjustBpm(5, e)}>+</button>
+            </span>
+          </label>
+          <div className="dashboard-separator" />
+          <label className="dashboard-field dashboard-field-key">
+            <span className="dashboard-label">KEY</span>
+            <span className="key-control">
+              <span>1=</span>
+              <select
+                className="key-select"
+                value={rootKey}
+                onChange={handleKeyChange}
+                aria-label="Song key"
+              >
+                {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map(k => (
+                  <option key={k} value={k}>{k}</option>
+                ))}
+              </select>
+            </span>
+          </label>
+          <div className="dashboard-separator" />
+          <button type="button" className="dashboard-field dashboard-field-sig" title="Time signature">
+            <span className="dashboard-label">SIG</span>
+            <span className="dashboard-value">4/4</span>
+          </button>
         </div>
       </div>
 
       <div className="transport-right">
-        {/* Key Display (Select) */}
-        <div className="transport-btn transport-btn-key">
-          <span className="transport-btn-label">1=</span>
-          <select 
-            className="key-select" 
-            value={rootKey} 
-            onChange={handleKeyChange}
-          >
-            {['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map(k => (
-              <option key={k} value={k}>{k}</option>
-            ))}
-          </select>
-          <svg className="key-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </div>
-
-        {/* Scale Display (Select) */}
-        <div className="transport-btn transport-btn-scale">
-          <span className="transport-btn-label">SCALE</span>
-          <select 
-            className="key-select scale-select" 
-            value={scale} 
-            onChange={handleScaleChange}
-          >
-            {['Ionian', 'Dorian', 'Phrygian', 'Lydian', 'Mixolydian', 'Aeolian', 'Locrian'].map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-          <svg className="key-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </div>
-
-        <label className="bpm-group transport-btn" style={{ minWidth: '120px', cursor: 'text' }}>
-          <span className="transport-btn-label" style={{ marginRight: '0px' }}>BPM</span>
-          <button className="bpm-adjust-btn" onClick={(e) => adjustBpm(-5, e)}>−</button>
-          <input
-            id="bpm-input"
-            type="number"
-            min={40}
-            max={300}
-            value={localBpm}
-            onChange={handleBpmChange}
-            onBlur={commitBpm}
-            onKeyDown={handleBpmKeyDown}
-            className="bpm-input"
-          />
-          <button className="bpm-adjust-btn" onClick={(e) => adjustBpm(5, e)}>+</button>
-        </label>
-        
         <button
-          className={`transport-btn transport-btn-export ${isExporting ? 'exporting' : ''}`}
+          type="button"
+          className={`export-btn ${isExporting ? 'exporting' : ''}`}
           onClick={handleExport}
           disabled={isExporting}
           title="Export to WAV"
         >
           {isExporting ? (
-            <svg className="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="2" x2="12" y2="6"></line>
-              <line x1="12" y1="18" x2="12" y2="22"></line>
-              <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-              <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-              <line x1="2" y1="12" x2="6" y2="12"></line>
-              <line x1="18" y1="12" x2="22" y2="12"></line>
-              <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-              <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-            </svg>
+            <span className="spinner" aria-hidden="true" />
           ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
+            <Download size={17} strokeWidth={2.4} />
           )}
-          <span className="transport-btn-label">{isExporting ? 'WAIT' : 'WAV'}</span>
+          <span>{isExporting ? 'Exporting' : 'Export'}</span>
+        </button>
+        <button type="button" className="settings-btn" aria-label="Settings" title="Settings">
+          <Settings size={19} strokeWidth={2.2} />
         </button>
       </div>
     </div>

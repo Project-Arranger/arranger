@@ -1,6 +1,6 @@
 function createContextSlice(set) {
   return {
-    activeContextTrack: null,
+    activeContextTrack: 'perc',
     selectedBar: 0,
     selectedChordBlock: null,
 

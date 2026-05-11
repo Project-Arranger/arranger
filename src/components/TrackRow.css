@@ -3,8 +3,8 @@
 .track-row {
   display: flex;
   align-items: stretch;
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
+  background: #1A1A1A;
+  border-radius: 12px;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: visible;
@@ -36,8 +36,8 @@
 
 @media (max-width: 768px) {
   .track-label {
-    width: var(--track-sidebar-width);
-    min-width: var(--track-sidebar-width);
+    width: 45px;
+    min-width: 45px;
   }
 }
 
@@ -81,7 +81,7 @@
   width: 10px;
   height: 14px;
   border-radius: 2px;
-  background: var(--color-accent);
+  background: #A0D8EF;
   cursor: pointer;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
 }
@@ -228,4 +228,194 @@
 @keyframes track-delete-pop {
   from { transform: translateY(10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== Soft DAW v0.22 overrides ===== */
+
+.track-row {
+  height: var(--track-height);
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  box-shadow: none;
+}
+
+.track-row[style*="cursor: pointer"]:hover {
+  background: color-mix(in srgb, var(--surface-container-high) 55%, transparent);
+}
+
+.track-row.active-track {
+  background: var(--surface-active);
+  box-shadow: none;
+}
+
+.track-row.active-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: var(--primary);
+  z-index: 2;
+}
+
+.track-label {
+  width: var(--track-sidebar-width);
+  min-width: var(--track-sidebar-width);
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 16px;
+  background: transparent;
+  border-right: 1px solid var(--outline-variant);
+}
+
+.track-label-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  border-radius: var(--radius-md);
+  color: var(--on-primary-fixed-variant);
+  background: var(--primary-fixed-dim);
+  opacity: 1;
+}
+
+.track-row-bass .track-label-icon {
+  color: var(--on-secondary-fixed-variant);
+  background: var(--secondary-fixed-dim);
+}
+
+.track-row-perc .track-label-icon {
+  color: var(--on-primary-fixed-variant);
+  background: var(--primary-fixed-dim);
+}
+
+.track-row-lead .track-label-icon {
+  color: var(--on-error-container);
+  background: var(--error-container);
+}
+
+.track-label-text {
+  color: var(--on-surface);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.active-track .track-label-text {
+  color: var(--primary);
+}
+
+.track-row-grid {
+  flex: 1;
+  min-width: var(--grid-min-width);
+  display: flex;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.track-row-bar {
+  flex: 1;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--outline-variant) 44%, transparent);
+  background: transparent;
+}
+
+.track-row-bar.current {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background: color-mix(in srgb, var(--primary-fixed) 28%, transparent);
+}
+
+.track-row-beat {
+  flex: 1;
+}
+
+.track-row-beat.seek-beat {
+  border-left: 2px solid var(--primary);
+  box-shadow: -1px 0 8px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.track-row-step {
+  min-height: var(--track-height);
+  border-right: 1px dashed color-mix(in srgb, var(--outline-variant) 28%, transparent);
+}
+
+.track-row-step.beat-start {
+  border-left: 1px solid color-mix(in srgb, var(--outline-variant) 45%, transparent);
+}
+
+.track-row-step.active {
+  background: color-mix(in srgb, var(--primary-fixed) 55%, transparent);
+  box-shadow: none;
+}
+
+.track-row-step.filled {
+  margin: 18px 2px;
+  min-height: auto;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 20%, transparent);
+  border: 0;
+}
+
+.track-row-bass .track-row-step.filled {
+  background: var(--secondary-fixed-dim);
+}
+
+.track-row-perc .track-row-step.filled {
+  background: var(--primary-fixed-dim);
+}
+
+.track-row-lead .track-row-step.filled {
+  background: var(--error-container);
+}
+
+.track-controls-right {
+  width: var(--track-controls-width);
+  min-width: var(--track-controls-width);
+  justify-content: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-left: 1px solid var(--outline-variant);
+  background: color-mix(in srgb, var(--surface-dim) 84%, white);
+}
+
+.track-vol-slider {
+  width: 58px;
+  height: 4px;
+  background: var(--surface-container-highest);
+}
+
+.track-vol-slider::-webkit-slider-thumb {
+  width: 10px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--primary);
+  box-shadow: 0 2px 6px rgba(31, 41, 55, 0.18);
+}
+
+.track-clear-btn {
+  width: 24px;
+  height: 24px;
+  border-color: color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  color: var(--on-surface-variant);
+  background: transparent;
+}
+
+.track-clear-btn:hover {
+  color: #ba1a1a;
+  border-color: color-mix(in srgb, #ba1a1a 42%, transparent);
+  background: color-mix(in srgb, var(--error-container) 50%, transparent);
 }

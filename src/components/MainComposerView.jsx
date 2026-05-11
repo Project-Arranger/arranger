@@ -1,13 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import useMusicStore from '../store/useMusicStore';
 import audioEngine from '../audio/AudioEngine';
 import TransportBar from './TransportBar';
 import ChordTrack from './ChordTrack';
 import TrackRow from './TrackRow';
 import ContextArea from './ContextArea';
-import TutorialOverlay from './TutorialOverlay';
 import { BassIcon, PercIcon, LeadIcon } from './Icons';
-import { TUTORIAL_STEPS } from '../tutorial/tutorialSteps';
 import './MainComposerView.css';
 
 /**
@@ -20,14 +18,12 @@ export default function MainComposerView() {
   const [isDraggingAny, setIsDraggingAny] = useState(false);
   const [dragChordId, setDragChordId] = useState(null);
   const [dragOverDelete, setDragOverDelete] = useState(false);
-  const [isTutorialVisible, setIsTutorialVisible] = useState(true);
-  const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
-  const [tutorialTargetRect, setTutorialTargetRect] = useState(null);
   const setActiveContextTrack = useMusicStore((s) => s.setActiveContextTrack);
   const setSelectedBar = useMusicStore((s) => s.setSelectedBar);
   const setSeekPosition = useMusicStore((s) => s.setSeekPosition);
-  const trackOverviewRef = useRef(null);
-  const currentTutorialStep = isTutorialVisible ? TUTORIAL_STEPS[tutorialStepIndex] : null;
+  const totalBars = useMusicStore((s) => s.totalBars);
+  const seekBar = useMusicStore((s) => s.seekBar);
+  const seekBeat = useMusicStore((s) => s.seekBeat);
 
   useEffect(() => {
     const onDragStart = (e) => {
@@ -58,31 +54,6 @@ export default function MainComposerView() {
     };
   }, []);
 
-  useEffect(() => {
-    const targetSelector = currentTutorialStep?.target?.selector;
-    let frameId = null;
-
-    const updateTargetRect = () => {
-      if (!targetSelector) {
-        setTutorialTargetRect(null);
-        return;
-      }
-
-      const target = document.querySelector(targetSelector);
-      setTutorialTargetRect(target ? target.getBoundingClientRect() : null);
-    };
-
-    frameId = requestAnimationFrame(updateTargetRect);
-    window.addEventListener('resize', updateTargetRect);
-    window.addEventListener('scroll', updateTargetRect, true);
-
-    return () => {
-      if (frameId) cancelAnimationFrame(frameId);
-      window.removeEventListener('resize', updateTargetRect);
-      window.removeEventListener('scroll', updateTargetRect, true);
-    };
-  }, [currentTutorialStep?.target?.selector]);
-
   const handleTrackClick = useCallback(
     (trackId) => setActiveContextTrack(trackId),
     [setActiveContextTrack]
@@ -110,38 +81,53 @@ export default function MainComposerView() {
     audioEngine.seekToStep(barIndex, beatIndex * 4);
   }, [setSeekPosition, setSelectedBar]);
 
-  const handleTutorialNext = useCallback(() => {
-    setTutorialStepIndex((index) => Math.min(index + 1, TUTORIAL_STEPS.length - 1));
-  }, []);
-
-  const handleTutorialSkip = useCallback(() => {
-    setIsTutorialVisible(false);
-  }, []);
-
-  const handleTutorialRestart = useCallback(() => {
-    setTutorialStepIndex(0);
-    setIsTutorialVisible(true);
-  }, []);
-
   return (
     <div className="main-composer" id="main-composer-view">
       <TransportBar />
 
       <div
-        className="track-overview"
-        id="track-overview"
-        data-tutorial-target="track-overview"
-        ref={trackOverviewRef}
+        className="arrangement-section"
+        id="arrangement-section"
         onClick={handleOverviewClick}
-        style={{ position: 'relative' }}
       >
-        <ChordTrack
-          dragChordId={dragChordId}
-          onClick={() => handleTrackClick('chord')}
-        />
-        <TrackRow trackId="bass" Icon={BassIcon} label="BASS" onClick={() => handleTrackClick('bass')} />
-        <TrackRow trackId="perc" Icon={PercIcon} label="PERC" onClick={() => handleTrackClick('perc')} />
-        <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" onClick={() => handleTrackClick('lead')} />
+        <div className="timeline-ruler" aria-label="Arrangement timeline ruler">
+          <div className="timeline-sidebar">
+            <span>TRACKS</span>
+            <button type="button" className="timeline-edit-btn" aria-label="Edit tracks">✎</button>
+          </div>
+          <div className="ruler-strip">
+            {Array.from({ length: totalBars }, (_, barIdx) => (
+              <button
+                type="button"
+                key={barIdx}
+                className="ruler-bar"
+                data-bar={barIdx}
+                data-beat="0"
+              >
+                {barIdx + 1}
+              </button>
+            ))}
+          </div>
+          <div className="timeline-controls-spacer" />
+        </div>
+
+        <div
+          className="track-overview custom-scrollbar"
+          id="track-overview"
+          style={{
+            '--playhead-position': `${((seekBar + seekBeat / 4) / totalBars) * 100}%`,
+          }}
+        >
+          <div className="arrangement-playhead" />
+
+          <TrackRow trackId="perc" Icon={PercIcon} label="DRUMS" onClick={() => handleTrackClick('perc')} />
+          <TrackRow trackId="bass" Icon={BassIcon} label="BASS" onClick={() => handleTrackClick('bass')} />
+          <ChordTrack
+            dragChordId={dragChordId}
+            onClick={() => handleTrackClick('chord')}
+          />
+          <TrackRow trackId="lead" Icon={LeadIcon} label="LEAD" onClick={() => handleTrackClick('lead')} />
+        </div>
         
         {/* Unified Global Delete Zone */}
         {isDraggingAny && (
@@ -156,14 +142,6 @@ export default function MainComposerView() {
       </div>
 
       <ContextArea />
-      <TutorialOverlay
-        step={currentTutorialStep}
-        targetRect={tutorialTargetRect}
-        onNext={handleTutorialNext}
-        onSkip={handleTutorialSkip}
-        onRestart={handleTutorialRestart}
-        isLastStep={tutorialStepIndex === TUTORIAL_STEPS.length - 1}
-      />
       {/* Ghost is rendered by dragGhost.js directly on document.body — no React involved */}
     </div>
   );

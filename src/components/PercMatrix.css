@@ -4,30 +4,253 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 20px 20px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.65) 100%);
-  border-top: 1px solid rgba(122, 236, 240, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  overflow-y: hidden; /* Prevent parent from vertically scrolling */
-  overflow-x: auto; /* For mobile */
+  min-height: 0;
+  background: var(--surface-container-low);
+  border-top: 1px solid var(--outline-variant);
+  box-shadow: 0 -4px 12px rgba(31, 41, 55, 0.05);
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ---- Bar Selector (reused aesthetics from Bass) ---- */
+.perc-toolbar {
+  height: 48px;
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-variant) 55%, transparent);
+  background: color-mix(in srgb, var(--surface-dim) 50%, transparent);
+}
+
+.perc-toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.perc-title-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--primary-fixed);
+}
+
+.perc-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ---- One-click groove buttons ---- */
+.perc-auto-fill-btn {
+  height: 28px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  color: var(--on-primary);
+  background: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.perc-auto-fill-btn:hover {
+  filter: brightness(1.04);
+}
+
+.perc-auto-fill-global-btn {
+  color: var(--primary);
+  background: var(--primary-fixed);
+  box-shadow: none;
+}
+
+.perc-auto-fill-btn.flash {
+  color: var(--on-secondary-container);
+  background: var(--secondary-container);
+  animation: perc-fill-flash 0.9s ease-out;
+}
+
+/* ---- Grid ---- */
+.perc-grid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  overflow: auto;
+}
+
+.perc-stepper-shell {
+  width: min(100%, 1040px);
+  display: grid;
+  grid-template-columns: 128px 40px minmax(520px, 1fr) 40px;
+  align-items: center;
+  gap: 12px;
+}
+
+.perc-inst-label-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.perc-inst-label {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.perc-inst-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: color-mix(in srgb, var(--inst-color) 72%, var(--on-surface));
+  background: color-mix(in srgb, var(--inst-color) 25%, transparent);
+}
+
+.perc-nav-btn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-size: 19px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.perc-nav-btn:hover:not(:disabled) {
+  background: var(--surface-container-high);
+  color: var(--primary);
+}
+
+.perc-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.perc-sequencer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 520px;
+  overflow-x: auto;
+}
+
+.perc-grid-header,
+.perc-row {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(24px, 1fr));
+  gap: 4px;
+}
+
+.perc-col-header {
+  min-width: 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.perc-col-header.active {
+  color: var(--primary);
+}
+
+.perc-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.perc-cell {
+  aspect-ratio: 1;
+  min-width: 24px;
+  min-height: 24px;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 55%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--surface-container);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.perc-cell:nth-child(4n + 1) {
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--outline) 20%, transparent);
+}
+
+.perc-cell:hover {
+  background: var(--surface-variant);
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--outline-variant));
+}
+
+.perc-cell.lit {
+  background: color-mix(in srgb, var(--inst-color) 72%, white);
+  border-color: color-mix(in srgb, var(--inst-color) 80%, var(--outline-variant));
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--inst-color) 24%, transparent);
+}
+
+.perc-cell.lit::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--inst-color) 72%, white);
+  filter: brightness(1.08);
+  pointer-events: none;
+}
+
+.perc-cell.cursor {
+  outline: 2px solid color-mix(in srgb, var(--primary) 50%, transparent);
+  outline-offset: 1px;
+}
+
+.perc-cell.lit-cursor {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 36%, transparent), 0 4px 12px color-mix(in srgb, var(--inst-color) 30%, transparent);
+}
+
 .perc-bar-selector {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 
 .perc-bar-label {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: #444;
-  min-width: 32px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
 .perc-bar-tabs {
@@ -36,234 +259,64 @@
 }
 
 .perc-bar-tab {
-  width: 30px;
+  width: 28px;
   height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: #555;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--surface-container-lowest);
+  color: var(--on-surface-variant);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.15s ease;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .perc-bar-tab.active {
-  color: #A0D8EF;
-  background: rgba(160, 216, 239, 0.1);
-  border-color: transparent;
-  box-shadow: 0 0 8px rgba(160, 216, 239, 0.2);
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
 }
 
 .perc-bar-tab.playing {
-  box-shadow: 0 0 12px rgba(160, 216, 239, 0.35);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--play-state) 32%, transparent);
 }
 
-/* ---- Grid ---- */
-.perc-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: var(--grid-min-width); /* Standardized min-width */
-  height: 100%; /* Fill remaining height */
-  min-height: 0;
-}
-
-.perc-rows-container {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-bottom: 20px;
-  /* Hide inner scrollbar to keep it clean */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.perc-rows-container::-webkit-scrollbar {
-  display: none;
-}
-
-.perc-grid-header {
-  display: flex;
-  gap: 0;
-  margin-bottom: 2px;
-}
-
-.perc-inst-label-spacer {
-  width: 80px;
-  min-width: 80px;
-}
-
-.perc-col-header {
-  flex: 1;
-  text-align: center;
-  font-size: 0.5rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: #333;
-  padding: 2px 0;
-  transition: color 0.15s;
-}
-
-.perc-col-header.active {
-  color: #A0D8EF;
-  text-shadow: 0 0 6px rgba(160, 216, 239, 0.5);
-}
-
-.perc-row {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-  background: rgba(0, 0, 0, 0.15);
-}
-
-/* Even rows slightly different to guide eyes */
-.perc-row:nth-child(even) {
-  background: rgba(122, 236, 240, 0.015);
-}
-
-.perc-inst-label {
-  width: 80px;
-  min-width: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  padding-left: 12px;
-  font-size: 0.55rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: #666;
-}
-
-.perc-cell {
-  flex: 1;
-  height: 36px;
-  border-right: 1px solid rgba(255, 255, 255, 0.02);
-  cursor: pointer;
-  position: relative;
-  transition: background 0.12s ease;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.perc-cell:nth-child(2n+2) {
-  border-right-color: rgba(255, 255, 255, 0.02);
-}
-
-.perc-cell:nth-child(4n+2)::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.perc-cell:hover {
-  background: rgba(122, 236, 240, 0.04);
-}
-
-.perc-cell:active {
-  background: rgba(122, 236, 240, 0.08);
-}
-
-.perc-cell.lit {
-  background: rgba(160, 216, 239, 0.22);
-  box-shadow: inset 0 0 12px rgba(160, 216, 239, 0.2),
-              0 0 8px rgba(160, 216, 239, 0.4);
-  border: none;
-}
-
-.perc-cell.lit::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 4px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(160, 216, 239, 0.45) 0%,
-    rgba(160, 216, 239, 0.15) 60%,
-    transparent 100%
-  );
-  pointer-events: none;
-}
-
-.perc-cell.cursor {
-  background: rgba(160, 216, 239, 0.05);
-}
-
-.perc-cell.cursor::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-left: 1.5px solid rgba(160, 216, 239, 0.3);
-  pointer-events: none;
-}
-
-.perc-cell.lit-cursor {
-  background: rgba(160, 216, 239, 0.35);
-  box-shadow: inset 0 0 16px rgba(160, 216, 239, 0.3),
-              0 0 14px rgba(160, 216, 239, 0.45);
-}
-
-.perc-cell.lit-cursor::before {
-  background: radial-gradient(
-    ellipse at center,
-    rgba(160, 216, 239, 0.6) 0%,
-    rgba(160, 216, 239, 0.25) 60%,
-    transparent 100%
-  );
-}
-
-/* ---- One-click groove button ---- */
-.perc-auto-fill-btn {
-  margin-left: auto;
-  height: 26px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #A0D8EF;
-  background: rgba(160, 216, 239, 0.06);
-  border: 1px solid rgba(160, 216, 239, 0.18);
-  border-radius: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.perc-auto-fill-btn:hover {
-  background: rgba(160, 216, 239, 0.12);
-  border-color: rgba(160, 216, 239, 0.35);
-  box-shadow: 0 0 10px rgba(160, 216, 239, 0.15);
-}
-
-.perc-auto-fill-btn:active {
-  transform: scale(0.96);
-}
-
-.perc-auto-fill-btn.flash {
-  color: #7EFFC5;
-  background: rgba(126, 255, 197, 0.1);
-  border-color: rgba(126, 255, 197, 0.35);
-  box-shadow: 0 0 14px rgba(126, 255, 197, 0.25);
-  animation: perc-fill-flash 0.9s ease-out;
+.perc-page-indicator {
+  color: var(--on-surface-variant);
+  background: var(--surface-container);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 @keyframes perc-fill-flash {
-  0%   { box-shadow: 0 0 0px rgba(126, 255, 197, 0); }
-  30%  { box-shadow: 0 0 20px rgba(126, 255, 197, 0.5); }
-  100% { box-shadow: 0 0 10px rgba(126, 255, 197, 0.2); }
+  0% { box-shadow: 0 0 0 rgba(0, 115, 70, 0); }
+  30% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--secondary-container) 45%, transparent); }
+  100% { box-shadow: 0 0 0 rgba(0, 115, 70, 0); }
+}
+
+@media (max-width: 760px) {
+  .perc-toolbar {
+    align-items: flex-start;
+    height: auto;
+    flex: 0 0 auto;
+    flex-direction: column;
+    padding: 10px 12px;
+  }
+
+  .perc-toolbar-actions {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .perc-grid {
+    align-items: flex-start;
+    padding: 16px 12px;
+  }
+
+  .perc-stepper-shell {
+    grid-template-columns: 104px 30px minmax(520px, 1fr) 30px;
+  }
 }
